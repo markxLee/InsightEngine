@@ -41,15 +41,15 @@
 
 ### Epic 0.2: Cài đặt môi trường (`cai-dat`)
 
-- [ ] **US-0.2.1** — Dependency check script
-  - Status: IN_PROGRESS
+- [x] **US-0.2.1** — Dependency check script
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-0.2.1
   - Blocked By: None
 
 - [ ] **US-0.2.2** — Setup skill (`cai-dat`)
   - Status: PLANNED
-  - Blocked By: US-0.2.1
+  - Blocked By: ~~US-0.2.1~~ ✅
 
 ### Epic 0.3: Pipeline Chính (`tong-hop`)
 
@@ -187,15 +187,15 @@
 
 ### Epic 0.2: Cài đặt môi trường (`cai-dat`)
 
-- [ ] **US-0.2.1** — Script kiểm tra dependencies
-  - Trạng thái: IN_PROGRESS
+- [x] **US-0.2.1** — Script kiểm tra dependencies
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-0.2.1
   - Bị chặn bởi: None
 
 - [ ] **US-0.2.2** — Skill cài đặt (`cai-dat`)
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-0.2.1
+  - Bị chặn bởi: ~~US-0.2.1~~ ✅
 
 ### Epic 0.3: Pipeline Chính (`tong-hop`)
 
