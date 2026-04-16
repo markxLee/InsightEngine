@@ -259,8 +259,8 @@
   - Blocked By: ~~US-4.1.3~~ ✅
   - Refs: a-z-copilot-flow/skills/pptx/scripts/
 
-- [ ] **US-4.3.2** — tao-html scripts/ directory
-  - Status: IN_PROGRESS
+- [x] **US-4.3.2** — tao-html scripts/ directory
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-4.3.2
   - Blocked By: ~~US-4.2.1~~ ✅
@@ -268,7 +268,7 @@
 - [ ] **US-4.3.3** — Script architecture for remaining output skills
   - Status: PLANNED
   - Assignee: —
-  - Blocked By: ~~US-4.3.1~~ ✅, US-4.3.2
+  - Blocked By: ~~US-4.3.1~~ ✅, ~~US-4.3.2~~ ✅
   - Refs: a-z-copilot-flow/skills/gen-image
 
 ### Epic 4.4: Nâng cấp Content Depth
@@ -555,8 +555,8 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
   - Bị chặn bởi: ~~US-4.1.3~~ ✅
   - Tham khảo: a-z-copilot-flow/skills/pptx/scripts/
 
-- [ ] **US-4.3.2** — scripts/ cho tao-html
-  - Trạng thái: IN_PROGRESS
+- [x] **US-4.3.2** — scripts/ cho tao-html
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-4.3.2
   - Bị chặn bởi: ~~US-4.2.1~~ ✅
@@ -564,7 +564,7 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
 - [ ] **US-4.3.3** — Script architecture cho tao-word, tao-excel, tao-pdf
   - Trạng thái: PLANNED
   - Assignee: —
-  - Bị chặn bởi: ~~US-4.3.1~~ ✅, US-4.3.2
+  - Bị chặn bởi: ~~US-4.3.1~~ ✅, ~~US-4.3.2~~ ✅
 
 ### Epic 4.4: Nâng cấp Content Depth
 

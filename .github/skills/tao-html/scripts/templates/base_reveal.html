@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="{{ author }}">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{{ cdn_base }}/dist/reveal.css">
+  <link rel="stylesheet" href="{{ cdn_base }}/dist/theme/{{ style.reveal_theme }}.css">
+  <link rel="stylesheet" href="{{ cdn_base }}/plugin/highlight/monokai.css">
+  <style>
+    .reveal {
+      font-family: {{ style.font_body }};
+      color: {{ style.text_color }};
+    }
+    .reveal h1, .reveal h2, .reveal h3 {
+      font-family: {{ style.font_heading }};
+      color: {{ style.heading_color }};
+      text-transform: none;
+    }
+    .reveal a { color: {{ style.accent_color }}; text-decoration: none; }
+    .reveal a:hover { color: {{ style.link_hover | default(style.accent_color) }}; text-decoration: underline; }
+    .reveal blockquote {
+      border-left: 4px solid {{ style.accent_color }};
+      padding: 0.5em 1em;
+      font-style: italic;
+      background: {{ style.blockquote_bg | default('rgba(0,0,0,0.03)') }};
+      border-radius: 4px;
+    }
+    .reveal table {
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+    .reveal table th {
+      background: {{ style.table_header_bg | default(style.accent_color) }};
+      color: #fff;
+      padding: 0.5em 1em;
+    }
+    .reveal table td {
+      border: 1px solid rgba(128,128,128,0.25);
+      padding: 0.5em 1em;
+    }
+    .reveal table tr:nth-child(even) td {
+      background: {{ style.table_stripe_bg | default('rgba(0,0,0,0.03)') }};
+    }
+    .reveal ul, .reveal ol {
+      text-align: left;
+      display: block;
+      margin-left: 1em;
+    }
+    .reveal li {
+      margin-bottom: 0.4em;
+      line-height: 1.5;
+    }
+    .reveal pre {
+      width: 90%;
+      font-size: 0.65em;
+      background: {{ style.code_bg | default('#f7fafc') }};
+      border-radius: 6px;
+    }
+    .reveal code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    .reveal .slide-number {
+      color: {{ style.text_color }};
+      font-size: 0.6em;
+    }
+    {{ global_bg_css }}
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      {{ slides_html }}
+    </div>
+  </div>
+  <script src="{{ cdn_base }}/dist/reveal.js"></script>
+  <script src="{{ cdn_base }}/plugin/notes/notes.js"></script>
+  <script src="{{ cdn_base }}/plugin/highlight/highlight.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      transition: 'slide',
+      backgroundColor: '{{ bg_color }}',
+      {{ parallax_cfg }}
+      plugins: [RevealNotes, RevealHighlight]
+    });
+  </script>
+</body>
+</html>
