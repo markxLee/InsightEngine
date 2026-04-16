@@ -282,8 +282,8 @@
   - Branch: feature/insight-engine-us-4.4.1
   - Blocked By: ~~US-1.2.1~~ ✅, ~~US-3.2.1~~ ✅
 
-- [ ] **US-4.4.2** — Content enrichment from multiple sources
-  - Status: IN_PROGRESS
+- [x] **US-4.4.2** — Content enrichment from multiple sources
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-4.4.2
   - Blocked By: ~~US-2.1.1~~ ✅, ~~US-4.4.1~~ ✅
@@ -583,8 +583,8 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
   - Branch: feature/insight-engine-us-4.4.1
   - Bị chặn bởi: ~~US-1.2.1~~ ✅, ~~US-3.2.1~~ ✅
 
-- [ ] **US-4.4.2** — Tự động làm giàu nội dung từ web
-  - Trạng thái: IN_PROGRESS
+- [x] **US-4.4.2** — Tự động làm giàu nội dung từ web
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-4.4.2
   - Bị chặn bởi: ~~US-2.1.1~~ ✅, ~~US-4.4.1~~ ✅

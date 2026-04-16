@@ -165,6 +165,11 @@ EXECUTION:
     skill: .github/skills/bien-soan/SKILL.md
     input: Extracted content from thu-thap
     output: Synthesized/translated content
+    options:
+      enrich: true              # default — auto-enrich thin content via web search
+      # enrich: false           # disable — "không tìm thêm", "no enrichment"
+      # enrich: "aggressive"    # always search, even if content seems sufficient
+      include_notes: false      # true when output is presentation (speaker notes)
     report: "✅ Biên soạn hoàn tất — {sections} phần, {total_words} từ"
     
   step_3_output:

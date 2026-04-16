@@ -536,9 +536,137 @@ SPEAKER_NOTES:
 
 ---
 
+## Content Enrichment (US-4.4.2)
+
+Automatically enriches thin source content by requesting additional context from thu-thap web search.
+
+### Thin Content Detection
+
+```yaml
+THIN_CONTENT_DETECTION:
+  threshold:
+    # Content is considered "thin" when:
+    per_section:
+      - Section has < 100 words of source content
+      - Section has only 1 source reference (single perspective)
+      - Key topic keywords appear but have no supporting detail
+    overall:
+      - Total source content < 500 words for a multi-section document
+      - More than 50% of sections are thin
+
+  detection_timing:
+    # Runs during Step 1 (Analyze Sources) BEFORE synthesis begins
+    - Count words per topic/section
+    - Identify sections below threshold
+    - Generate enrichment queries for thin sections
+    
+  reporting:
+    interactive: |
+      ⚠️ Phát hiện nội dung mỏng ở {N} phần:
+      {list_of_thin_sections}
+      → Tự động tìm kiếm bổ sung qua thu-thap? (Có/Không)
+    pipeline: Auto-enrich without asking (transparent)
+```
+
+### Auto-Enrichment Workflow
+
+```yaml
+ENRICHMENT_WORKFLOW:
+  1_DETECT:
+    - During source analysis, count content depth per section
+    - Mark sections as THIN or SUFFICIENT
+    
+  2_GENERATE_QUERIES:
+    for_each_thin_section:
+      - Extract main topic keywords
+      - Formulate 1-2 search queries in the content's language
+      - Example: section "AI in Healthcare" with thin content →
+        queries: ["AI healthcare applications 2025", "artificial intelligence medical diagnosis"]
+    
+  3_REQUEST_ENRICHMENT:
+    method: |
+      Copilot triggers thu-thap skill internally:
+      - Use vscode-websearchforcopilot_webSearch for each query
+      - Fetch top 2-3 URLs per query via fetch_webpage
+      - Extract relevant content matching the section topic
+    
+  4_MERGE_ENRICHED_CONTENT:
+    - Append web-sourced content to section's source material
+    - Tag enriched content with source attribution: [Web: source_url]
+    - Proceed with normal synthesis using combined material
+    
+  5_ATTRIBUTE_SOURCES:
+    citation_format: |
+      Content from web enrichment is cited inline:
+      - "According to [Source Name](url), ..." 
+      - Or footnote: "... [^1]" with "[^1]: Source Name, URL"
+    transparency: |
+      In output metadata/footer:
+      "Một số nội dung được bổ sung tự động từ tìm kiếm web / 
+       Some content was automatically enriched from web search"
+```
+
+### User Control
+
+```yaml
+USER_CONTROL:
+  disable_enrichment:
+    flags:
+      - "--no-enrich" in pipeline
+      - "không tìm thêm", "no enrichment", "chỉ dùng nguồn có sẵn"
+      - "only use provided sources", "không bổ sung"
+    behavior: Skip enrichment, synthesize only from provided sources
+    
+  enable_enrichment:
+    default: true (auto-enrich when thin content detected)
+    explicit: "bổ sung thêm", "enrich", "tìm thêm thông tin"
+    
+  interactive_mode:
+    - Ask user before enriching: "Nội dung mỏng, tìm thêm?"
+    - Show what will be searched
+    - User can approve/reject/modify queries
+    
+  pipeline_mode:
+    - Auto-enrich without asking (transparent)
+    - Report enrichment in output metadata
+    - User can set no_enrich=true in tong-hop routing
+
+ENRICHMENT_LIMITS:
+  max_queries_per_section: 2
+  max_urls_per_query: 3
+  max_total_enrichment_sources: 10
+  timeout_per_search: 10s
+```
+
+### Pipeline Integration
+
+```yaml
+PIPELINE_INTEGRATION:
+  tong_hop_routing:
+    # tong-hop can control enrichment:
+    enrich: true          # default — auto-enrich thin content
+    enrich: false         # disable — use only provided sources
+    enrich: "aggressive"  # always search, even if content seems sufficient
+    
+  bien_soan_to_thu_thap:
+    # bien-soan requests enrichment from thu-thap via Copilot:
+    1. bien-soan identifies thin sections
+    2. Copilot runs thu-thap web search (vscode-websearchforcopilot_webSearch)
+    3. Copilot runs fetch_webpage on top results
+    4. Content returned to bien-soan for integration
+    
+  output_metadata:
+    # All enriched outputs include:
+    sources_original: [list of user-provided sources]
+    sources_enriched: [list of auto-fetched web sources]
+    enriched_sections: [list of section names that were enriched]
+```
+
+---
+
 ## What This Skill Does NOT Do
 
-- Does NOT read files — that's thu-thap's job
+- Does NOT read files directly — delegates to thu-thap
 - Does NOT generate formatted output files — that's tao-* skills' job
 - Does NOT install dependencies — redirects to /cai-dat
-- Does NOT search the web — that's thu-thap + US-2.1.1
+- Does NOT perform web search directly — delegates to thu-thap (via Copilot tools)
