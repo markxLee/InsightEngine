@@ -11,19 +11,26 @@ import json
 import sys
 from html import escape
 from pathlib import Path
+from typing import Optional
 
 REVEALJS_VERSION = "5.1.0"
 REVEALJS_CDN = f"https://cdn.jsdelivr.net/npm/reveal.js@{REVEALJS_VERSION}"
 
 STYLES = {
+    # ── Light variants ──────────────────────────────────────────────
     "corporate": {
         "reveal_theme": "white",
         "background": "#ffffff",
         "heading_color": "#1a365d",
         "text_color": "#2d3748",
         "accent_color": "#3182ce",
+        "link_hover": "#2b6cb0",
         "font_heading": "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
         "font_body": "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+        "table_header_bg": "#1a365d",
+        "table_stripe_bg": "rgba(49,130,206,0.06)",
+        "blockquote_bg": "rgba(49,130,206,0.05)",
+        "code_bg": "#f7fafc",
     },
     "academic": {
         "reveal_theme": "simple",
@@ -31,8 +38,13 @@ STYLES = {
         "heading_color": "#1a202c",
         "text_color": "#1a202c",
         "accent_color": "#744210",
+        "link_hover": "#5a3510",
         "font_heading": "Georgia, 'Times New Roman', serif",
         "font_body": "Georgia, 'Times New Roman', serif",
+        "table_header_bg": "#744210",
+        "table_stripe_bg": "rgba(116,66,16,0.05)",
+        "blockquote_bg": "rgba(116,66,16,0.04)",
+        "code_bg": "#f5f0eb",
     },
     "minimal": {
         "reveal_theme": "white",
@@ -40,17 +52,13 @@ STYLES = {
         "heading_color": "#111827",
         "text_color": "#374151",
         "accent_color": "#059669",
+        "link_hover": "#047857",
         "font_heading": "'Inter', 'Helvetica Neue', Arial, sans-serif",
         "font_body": "'Inter', 'Helvetica Neue', Arial, sans-serif",
-    },
-    "dark-modern": {
-        "reveal_theme": "night",
-        "background": "#0f172a",
-        "heading_color": "#6366f1",
-        "text_color": "#f1f5f9",
-        "accent_color": "#22d3ee",
-        "font_heading": "'Inter', 'SF Pro Display', sans-serif",
-        "font_body": "'Inter', 'SF Pro Text', sans-serif",
+        "table_header_bg": "#059669",
+        "table_stripe_bg": "rgba(5,150,105,0.05)",
+        "blockquote_bg": "rgba(5,150,105,0.04)",
+        "code_bg": "#f9fafb",
     },
     "creative": {
         "reveal_theme": "moon",
@@ -58,8 +66,70 @@ STYLES = {
         "heading_color": "#8b5cf6",
         "text_color": "#1e1b4b",
         "accent_color": "#f59e0b",
+        "link_hover": "#d97706",
         "font_heading": "'Poppins', 'Nunito', sans-serif",
         "font_body": "'Open Sans', 'Nunito', sans-serif",
+        "table_header_bg": "#8b5cf6",
+        "table_stripe_bg": "rgba(139,92,246,0.06)",
+        "blockquote_bg": "rgba(245,158,11,0.08)",
+        "code_bg": "#fef3c7",
+    },
+    "warm-earth": {
+        "reveal_theme": "simple",
+        "background": "#fdf8f3",
+        "heading_color": "#92400e",
+        "text_color": "#451a03",
+        "accent_color": "#b45309",
+        "link_hover": "#92400e",
+        "font_heading": "'Playfair Display', Georgia, serif",
+        "font_body": "'Source Sans Pro', 'Segoe UI', sans-serif",
+        "table_header_bg": "#92400e",
+        "table_stripe_bg": "rgba(180,83,9,0.05)",
+        "blockquote_bg": "rgba(180,83,9,0.06)",
+        "code_bg": "#fef3c7",
+    },
+    # ── Dark variants ───────────────────────────────────────────────
+    "dark-modern": {
+        "reveal_theme": "night",
+        "background": "#0f172a",
+        "heading_color": "#6366f1",
+        "text_color": "#f1f5f9",
+        "accent_color": "#22d3ee",
+        "link_hover": "#06b6d4",
+        "font_heading": "'Inter', 'SF Pro Display', sans-serif",
+        "font_body": "'Inter', 'SF Pro Text', sans-serif",
+        "table_header_bg": "#4338ca",
+        "table_stripe_bg": "rgba(99,102,241,0.1)",
+        "blockquote_bg": "rgba(99,102,241,0.08)",
+        "code_bg": "#1e293b",
+    },
+    "dark-neon": {
+        "reveal_theme": "night",
+        "background": "#0a0a0a",
+        "heading_color": "#00ffc8",
+        "text_color": "#e4e4e7",
+        "accent_color": "#ff3cac",
+        "link_hover": "#e11d9b",
+        "font_heading": "'JetBrains Mono', 'Fira Code', monospace",
+        "font_body": "'Inter', 'Helvetica Neue', sans-serif",
+        "table_header_bg": "#18181b",
+        "table_stripe_bg": "rgba(0,255,200,0.06)",
+        "blockquote_bg": "rgba(255,60,172,0.08)",
+        "code_bg": "#18181b",
+    },
+    "dark-elegant": {
+        "reveal_theme": "night",
+        "background": "#1a1a2e",
+        "heading_color": "#e0a458",
+        "text_color": "#d4d4d8",
+        "accent_color": "#e0a458",
+        "link_hover": "#c88b3a",
+        "font_heading": "'Playfair Display', Georgia, serif",
+        "font_body": "'Lato', 'Helvetica Neue', sans-serif",
+        "table_header_bg": "#16213e",
+        "table_stripe_bg": "rgba(224,164,88,0.08)",
+        "blockquote_bg": "rgba(224,164,88,0.06)",
+        "code_bg": "#16213e",
     },
 }
 
@@ -77,21 +147,69 @@ def embed_image_base64(image_path: str) -> str:
     return f"data:{mime};base64,{data}"
 
 
+def _bg_attrs(slide: dict) -> str:
+    """Build data-background-* attributes from slide's 'background' dict.
+
+    Supported background types (detected automatically):
+      - solid color:  {"color": "#1a365d"}
+      - gradient:     {"gradient": "linear-gradient(135deg, #667eea, #764ba2)"}
+      - image URL:    {"image": "https://example.com/bg.jpg"}
+      - local image:  {"image": "/path/to/bg.png"}
+      - video URL:    {"video": "https://example.com/bg.mp4"}
+
+    Optional keys: opacity (0-1), size (cover/contain), position, repeat.
+    """
+    bg = slide.get("background")
+    if not bg:
+        return ""
+    if isinstance(bg, str):
+        # shorthand: just a color or gradient string
+        if bg.startswith("linear-gradient") or bg.startswith("radial-gradient"):
+            return f' data-background-gradient="{escape(bg)}"'
+        return f' data-background-color="{escape(bg)}"'
+    attrs = []
+    if "color" in bg:
+        attrs.append(f'data-background-color="{escape(bg["color"])}"')
+    if "gradient" in bg:
+        attrs.append(f'data-background-gradient="{escape(bg["gradient"])}"')
+    if "image" in bg:
+        img = bg["image"]
+        if img.startswith(("http://", "https://")):
+            attrs.append(f'data-background-image="{escape(img)}"')
+        else:
+            b64 = embed_image_base64(img)
+            if b64:
+                attrs.append(f'data-background-image="{b64}"')
+    if "video" in bg:
+        attrs.append(f'data-background-video="{escape(bg["video"])}"')
+        attrs.append('data-background-video-muted')
+    if "opacity" in bg:
+        attrs.append(f'data-background-opacity="{bg["opacity"]}"')
+    if "size" in bg:
+        attrs.append(f'data-background-size="{escape(bg["size"])}"')
+    if "position" in bg:
+        attrs.append(f'data-background-position="{escape(bg["position"])}"')
+    if "repeat" in bg:
+        attrs.append(f'data-background-repeat="{escape(bg["repeat"])}"')
+    return (" " + " ".join(attrs)) if attrs else ""
+
+
 def render_slide(slide: dict) -> str:
     """Render a single slide dict to a <section> HTML block."""
     slide_type = slide.get("type", "content")
     notes = slide.get("notes", "")
     notes_html = f'<aside class="notes">{escape(notes)}</aside>' if notes else ""
+    bg = _bg_attrs(slide)
 
     if slide_type == "title":
         title = escape(slide.get("title", ""))
         subtitle = escape(slide.get("subtitle", ""))
         sub_html = f"<h3>{subtitle}</h3>" if subtitle else ""
-        return f'<section data-state="title-slide"><h1>{title}</h1>{sub_html}{notes_html}</section>'
+        return f'<section data-state="title-slide"{bg}><h1>{title}</h1>{sub_html}{notes_html}</section>'
 
     if slide_type == "section":
         title = escape(slide.get("title", ""))
-        return f'<section><h2>{title}</h2>{notes_html}</section>'
+        return f'<section{bg}><h2>{title}</h2>{notes_html}</section>'
 
     if slide_type == "content":
         title = escape(slide.get("title", ""))
@@ -103,7 +221,7 @@ def render_slide(slide: dict) -> str:
             body = f"<ul>{items}</ul>"
         elif text:
             body = f"<p>{escape(text)}</p>"
-        return f"<section><h3>{title}</h3>{body}{notes_html}</section>"
+        return f"<section{bg}><h3>{title}</h3>{body}{notes_html}</section>"
 
     if slide_type == "image":
         title = escape(slide.get("title", ""))
@@ -112,19 +230,19 @@ def render_slide(slide: dict) -> str:
         src = embed_image_base64(image_path) if image_path else ""
         img_tag = f'<img src="{src}" alt="{caption}" style="max-height:60vh;">' if src else f"<p><em>{caption}</em></p>"
         cap_html = f"<p><small>{caption}</small></p>" if caption else ""
-        return f"<section><h3>{title}</h3>{img_tag}{cap_html}{notes_html}</section>"
+        return f"<section{bg}><h3>{title}</h3>{img_tag}{cap_html}{notes_html}</section>"
 
     if slide_type == "quote":
         text = escape(slide.get("text", ""))
         author = escape(slide.get("author", ""))
         cite = f"<cite>— {author}</cite>" if author else ""
-        return f"<section><blockquote><p>{text}</p>{cite}</blockquote>{notes_html}</section>"
+        return f"<section{bg}><blockquote><p>{text}</p>{cite}</blockquote>{notes_html}</section>"
 
     if slide_type == "code":
         title = escape(slide.get("title", ""))
         lang = slide.get("language", "")
         code = escape(slide.get("code", ""))
-        return f'<section><h3>{title}</h3><pre><code data-trim data-noescape class="language-{lang}">{code}</code></pre>{notes_html}</section>'
+        return f'<section{bg}><h3>{title}</h3><pre><code data-trim data-noescape class="language-{lang}">{code}</code></pre>{notes_html}</section>'
 
     if slide_type == "table":
         title = escape(slide.get("title", ""))
@@ -136,24 +254,56 @@ def render_slide(slide: dict) -> str:
             tds = "".join(f"<td>{escape(str(c))}</td>" for c in row)
             tr_list.append(f"<tr>{tds}</tr>")
         tbody = "".join(tr_list)
-        return f"<section><h3>{title}</h3><table><thead><tr>{th}</tr></thead><tbody>{tbody}</tbody></table>{notes_html}</section>"
+        return f"<section{bg}><h3>{title}</h3><table><thead><tr>{th}</tr></thead><tbody>{tbody}</tbody></table>{notes_html}</section>"
 
     if slide_type == "closing":
         title = escape(slide.get("title", "Cảm ơn!"))
         subtitle = escape(slide.get("subtitle", ""))
         sub_html = f"<p>{subtitle}</p>" if subtitle else ""
-        return f'<section data-state="closing-slide"><h2>{title}</h2>{sub_html}{notes_html}</section>'
+        return f'<section data-state="closing-slide"{bg}><h2>{title}</h2>{sub_html}{notes_html}</section>'
 
     # Fallback: treat as content
     return render_slide({**slide, "type": "content"})
 
 
-def generate_html(data: dict, style_name: str) -> str:
-    """Generate complete reveal.js HTML from slide data and style."""
+def generate_html(data: dict, style_name: str, global_background: Optional[str] = None) -> str:
+    """Generate complete reveal.js HTML from slide data and style.
+
+    Args:
+        data: Slide data dict with 'title', 'author', 'slides' keys.
+        style_name: Name of the style from STYLES dict.
+        global_background: Optional global background override. Can be:
+            - color: "#1a365d"
+            - gradient: "linear-gradient(135deg, #667eea, #764ba2)"
+            - image URL: "https://example.com/bg.jpg"
+    """
     style = STYLES.get(style_name, STYLES["corporate"])
     title = escape(data.get("title", "Presentation"))
     author = escape(data.get("author", ""))
     slides = data.get("slides", [])
+
+    slides_html = "\n        ".join(render_slide(s) for s in slides)
+
+    # Determine effective background for Reveal.initialize
+    bg_color = style["background"]
+    parallax_cfg = ""
+    if global_background:
+        if global_background.startswith(("linear-gradient", "radial-gradient")):
+            bg_color = "transparent"
+            # Gradient applied via CSS on .reveal
+            parallax_cfg = ""
+        elif global_background.startswith(("http://", "https://")):
+            parallax_cfg = f"""
+      parallaxBackgroundImage: '{global_background}',
+      parallaxBackgroundSize: '2560px 1440px',"""
+        else:
+            bg_color = global_background
+
+    global_bg_css = ""
+    if global_background and global_background.startswith(("linear-gradient", "radial-gradient")):
+        global_bg_css = f"""
+      .reveal {{ background: {global_background}; }}
+      .reveal .slide-background {{ background: transparent !important; }}"""
 
     slides_html = "\n        ".join(render_slide(s) for s in slides)
 
@@ -167,28 +317,30 @@ def generate_html(data: dict, style_name: str) -> str:
         color: {style['heading_color']};
         text-transform: none;
       }}
-      .reveal a {{ color: {style['accent_color']}; }}
+      .reveal a {{ color: {style['accent_color']}; text-decoration: none; }}
+      .reveal a:hover {{ color: {style.get('link_hover', style['accent_color'])}; text-decoration: underline; }}
       .reveal blockquote {{
         border-left: 4px solid {style['accent_color']};
         padding: 0.5em 1em;
         font-style: italic;
-        background: rgba(0,0,0,0.03);
+        background: {style.get('blockquote_bg', 'rgba(0,0,0,0.03)')};
+        border-radius: 4px;
       }}
       .reveal table {{
         border-collapse: collapse;
         margin: 0 auto;
       }}
       .reveal table th {{
-        background: {style['accent_color']};
+        background: {style.get('table_header_bg', style['accent_color'])};
         color: #fff;
         padding: 0.5em 1em;
       }}
       .reveal table td {{
-        border: 1px solid #ddd;
+        border: 1px solid rgba(128,128,128,0.25);
         padding: 0.5em 1em;
       }}
       .reveal table tr:nth-child(even) td {{
-        background: rgba(0,0,0,0.03);
+        background: {style.get('table_stripe_bg', 'rgba(0,0,0,0.03)')};
       }}
       .reveal ul, .reveal ol {{
         text-align: left;
@@ -202,6 +354,11 @@ def generate_html(data: dict, style_name: str) -> str:
       .reveal pre {{
         width: 90%;
         font-size: 0.65em;
+        background: {style.get('code_bg', '#f7fafc')};
+        border-radius: 6px;
+      }}
+      .reveal code {{
+        font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
       }}
       .reveal .slide-number {{
         color: {style['text_color']};
@@ -219,7 +376,7 @@ def generate_html(data: dict, style_name: str) -> str:
   <link rel="stylesheet" href="{REVEALJS_CDN}/dist/reveal.css">
   <link rel="stylesheet" href="{REVEALJS_CDN}/dist/theme/{style['reveal_theme']}.css">
   <link rel="stylesheet" href="{REVEALJS_CDN}/plugin/highlight/monokai.css">
-  <style>{custom_css}
+  <style>{custom_css}{global_bg_css}
   </style>
 </head>
 <body>
@@ -236,6 +393,7 @@ def generate_html(data: dict, style_name: str) -> str:
       hash: true,
       slideNumber: true,
       transition: 'slide',
+      backgroundColor: '{bg_color}',{parallax_cfg}
       plugins: [RevealNotes, RevealHighlight]
     }});
   </script>
@@ -250,6 +408,8 @@ def main():
     parser.add_argument("--output", required=True, help="Output HTML file path")
     parser.add_argument("--style", choices=list(STYLES.keys()), default="corporate",
                         help="Presentation style (default: corporate)")
+    parser.add_argument("--background", default=None,
+                        help="Global background: color (#hex), gradient (linear-gradient(...)), or image URL")
     args = parser.parse_args()
 
     input_path = Path(args.input)
@@ -260,7 +420,7 @@ def main():
     with open(input_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    html = generate_html(data, args.style)
+    html = generate_html(data, args.style, args.background)
 
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
