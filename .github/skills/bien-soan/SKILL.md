@@ -332,6 +332,8 @@ CONFLICTS:
 
 ## Translation Mode (US-1.2.2)
 
+Full reference: `references/translation-mode.md`
+
 Translates structured content between Vietnamese and English while preserving document structure.
 
 ```yaml
@@ -340,97 +342,19 @@ TRIGGER:
   - "translate", "translate to Vietnamese", "translate to English"
   - "dịch sang", "/bien-soan translate"
 
-DETECT_INTENT:
-  1. Determine source language:
-     - Analyze input text character frequency
-     - Vietnamese indicators: diacritics (ă, â, đ, ê, ô, ơ, ư), common words (và, của, là, được)
-     - English indicators: common words (the, is, are, with, from)
-     - Mixed: treat as source language = dominant language
-  2. Determine target language:
-     - If user says "dịch sang tiếng Anh" or "translate to English" → target = English
-     - If user says "dịch sang tiếng Việt" or "translate to Vietnamese" → target = Vietnamese
-     - If ambiguous: ask user (interactive) or infer opposite of source (pipeline)
-```
+KEY_RULES:
+  - Detect source language automatically (diacritics = Vietnamese)
+  - Translate naturally — not word-by-word
+  - Preserve all Markdown structure (headings, tables, lists, code blocks)
+  - Technical terms: first use = "translated (original)", subsequent = translated only
+  - Code blocks, URLs, file paths: preserve as-is
+  - Bilingual mode ("song ngữ"): render both languages side-by-side
 
-### Translation Workflow
-
-```yaml
-STEPS:
-  1_PREPARE:
-    - Split content into translatable sections (by heading/paragraph)
-    - Identify non-translatable elements:
-      - Code blocks → preserve as-is
-      - URLs, file paths → preserve as-is
-      - Proper nouns / brand names → preserve or transliterate
-      - Technical terms → translate with original in parentheses first occurrence
-    - Preserve Markdown structure (headings, lists, tables, bold/italic)
-
-  2_TRANSLATE_SECTIONS:
-    for_each_section:
-      - Translate heading text (preserve heading level)
-      - Translate paragraph text naturally (not word-by-word)
-      - Translate table cell content (preserve table structure)
-      - Translate bullet point text (preserve list markers)
-      - Translate blockquote text (preserve > prefix)
-    
-    quality_rules:
-      - Use natural, fluent target language (not machine-translation style)
-      - Preserve meaning and tone of original
-      - Keep consistent terminology throughout document
-      - Technical terms: first occurrence = "translated_term (original_term)"
-      - Subsequent occurrences: just "translated_term"
-
-  3_PRESERVE_FORMATTING:
-    must_preserve:
-      - Heading hierarchy (H1, H2, H3 levels)
-      - Bold and italic markers
-      - Inline code
-      - Code blocks
-      - Tables with pipe separators
-      - Numbered and bulleted lists
-      - Links — translate link text, preserve URL
-      - Images — translate alt text, preserve path
-    
-  4_DELIVER:
-    to_pipeline: Return translated Markdown for output skill
-    to_user: |
-      ✅ Dịch thuật hoàn tất / Translation complete:
-      - Ngôn ngữ gốc / Source: {source_language}
-      - Ngôn ngữ đích / Target: {target_language}
-      - Số phần / Sections: {N}
-      - Độ dài / Length: ~{word_count} từ/words
-      
-      Bạn muốn chỉnh sửa gì không? / Any edits needed?
-```
-
-### Translation Quality Rules
-
-```yaml
-VIETNAMESE_TO_ENGLISH:
-  - Use American English spelling
-  - Expand Vietnamese abbreviations
-  - Adapt Vietnamese-specific idioms to equivalent English expressions
-  - Keep formal/informal tone matching the original
-  - Dates: Vietnamese DD/MM/YYYY → note if ambiguous
-
-ENGLISH_TO_VIETNAMESE:
-  - Use standard Vietnamese (phổ thông)
-  - Technical terms: keep English original in parentheses on first use
-  - Adapt English idioms to natural Vietnamese equivalents
-  - Use appropriate Vietnamese pronouns and honorifics
-  - Numbers and units: keep as-is (no conversion)
-
-BILINGUAL_MODE:
-  trigger: "song ngữ", "bilingual", "cả hai ngôn ngữ"
-  format: |
-    Each section rendered in both languages sequentially:
-    
-    ## Heading (English)
-    ## Tiêu đề (Tiếng Việt)
-    
-    English paragraph...
-    
-    Đoạn văn tiếng Việt...
+DELIVER:
+  to_user: |
+    ✅ Dịch thuật hoàn tất:
+    - Nguồn: {source_language} → Đích: {target_language}
+    - {N} phần, ~{word_count} từ
 ```
 
 ---

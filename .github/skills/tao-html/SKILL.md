@@ -68,101 +68,25 @@ PRE_FLIGHT:
 
 ## Template Styles
 
+Full color/font specs: `references/template-styles.md`
+
 ```yaml
 STYLES:
-  corporate:
-    description: Professional business style with blue accent
-    colors:
-      primary: "#1a365d"
-      secondary: "#2b6cb0"
-      background: "#ffffff"
-      text: "#2d3748"
-      accent: "#3182ce"
-    fonts:
-      heading: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
-      body: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
-    layout:
-      max_width: 900px
-      sidebar: false
-      header: Full-width blue gradient banner
-      
-  academic:
-    description: Clean serif style for research and papers
-    colors:
-      primary: "#1a202c"
-      secondary: "#4a5568"
-      background: "#fafafa"
-      text: "#1a202c"
-      accent: "#744210"
-    fonts:
-      heading: "Georgia, 'Times New Roman', serif"
-      body: "Georgia, 'Times New Roman', serif"
-    layout:
-      max_width: 750px
-      sidebar: false
-      header: Simple centered title with rule line
-      
-  minimal:
-    description: Ultra-clean whitespace-focused design
-    colors:
-      primary: "#111827"
-      secondary: "#6b7280"
-      background: "#ffffff"
-      text: "#374151"
-      accent: "#059669"
-    fonts:
-      heading: "'Inter', 'Helvetica Neue', Arial, sans-serif"
-      body: "'Inter', 'Helvetica Neue', Arial, sans-serif"
-    layout:
-      max_width: 680px
-      sidebar: false
-      header: Minimal top-left title
+  # Static HTML page styles (gen_static.py)
+  corporate:   "Professional blue — business reports, formal docs"
+  academic:    "Serif, off-white — research papers, journals"
+  minimal:     "Ultra-clean whitespace — modern, clean docs"
+  dark-modern: "Dark slate, neon accents — tech, startup"
+  creative:    "Vibrant gradients, playful — marketing, events"
 
-  dark-modern:
-    description: Dark background, neon accents, tech/startup vibe
-    colors:
-      primary: "#6366f1"
-      secondary: "#22d3ee"
-      background: "#0f172a"
-      text: "#f1f5f9"
-      accent: "#22d3ee"
-    fonts:
-      heading: "'Inter', 'SF Pro Display', sans-serif"
-      body: "'Inter', 'SF Pro Text', sans-serif"
-    layout:
-      max_width: 900px
-      sidebar: false
-      header: Full-width gradient banner (indigo → cyan)
-    css_extras: |
-      /* Glow effect on headings */
-      h1, h2 { text-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
-      /* Code blocks with dark theme */
-      pre { background: #1e293b; border-left: 3px solid #22d3ee; }
-      /* Cards with subtle border glow */
-      .card { border: 1px solid #334155; box-shadow: 0 0 15px rgba(99, 102, 241, 0.1); }
+  # reveal.js presentation styles (gen_reveal.py)
+  # Additional: warm-earth, dark-elegant, minimal-pres, dark-neon
+  # See Step 5 in Presentation Mode section for full template list
 
-  creative:
-    description: Vibrant gradients, playful shapes, event/marketing style
-    colors:
-      primary: "#8b5cf6"
-      secondary: "#f59e0b"
-      background: "#fffbeb"
-      text: "#1e1b4b"
-      accent: "#f59e0b"
-    fonts:
-      heading: "'Poppins', 'Nunito', sans-serif"
-      body: "'Open Sans', 'Nunito', sans-serif"
-    layout:
-      max_width: 960px
-      sidebar: false
-      header: Full-width gradient banner (purple → amber)
-    css_extras: |
-      /* Rounded shapes and playful feel */
-      .card, blockquote { border-radius: 16px; }
-      /* Gradient text for main heading */
-      h1 { background: linear-gradient(135deg, #8b5cf6, #f59e0b); -webkit-background-clip: text; color: transparent; }
-      /* Bold callout boxes */
-      .callout { background: linear-gradient(135deg, #ede9fe, #fef3c7); border-radius: 16px; padding: 1.5rem; }
+STYLE_SELECTION:
+  - User specifies: "style corporate", "dùng style academic"
+  - Auto-infer from context: formal → corporate, research → academic, tech → dark-modern
+  - Default: corporate
 ```
 
 ---
@@ -610,72 +534,20 @@ ERRORS:
 
 ## Speaker Notes & PDF Export (US-4.5.2)
 
-### Speaker Notes
-
-reveal.js presentations support speaker notes via `<aside class="notes">`.
-Notes are visible in Speaker View (press `S` during presentation).
+Full reference: `references/speaker-notes-pdf.md`
 
 ```yaml
 SPEAKER_NOTES:
-  json_format:
-    # Add "notes" key to any slide object:
-    {"type": "content", "title": "...", "bullets": [...], "notes": "Detailed talking points here"}
-    
-  viewing:
-    keyboard: Press "S" to open Speaker View (separate window)
-    shows: Current slide, next slide, elapsed time, speaker notes
-    
-  generation:
-    - bien-soan generates notes automatically when output is presentation
-    - Notes contain expanded talking points, transitions, key insights
-    - 2-4 sentences per slide, conversational tone
-    
-  example_json: |
-    {
-      "type": "content",
-      "title": "Q1 Revenue",
-      "bullets": ["Revenue up 15%", "Beat target by 5%"],
-      "notes": "Revenue grew 15% YoY. B2B segment was the strongest driver. Note that Q4 was already a record quarter."
-    }
-```
+  # Add "notes" key to any slide JSON object
+  # Press "S" in presentation to open Speaker View
+  # bien-soan auto-generates notes when tong-hop sets include_notes: true
+  example:
+    '{"type": "content", "title": "...", "bullets": [...], "notes": "Talking points..."}'
 
-### PDF Export
-
-Presentations can be exported to PDF via browser print (Ctrl+P / Cmd+P).
-
-```yaml
 PDF_EXPORT:
-  method: Browser print dialog (Ctrl+P / Cmd+P)
-  
-  print_css:
-    - Each slide becomes a separate page (page-break-after: always)
-    - Fragment animations resolved (all bullets visible)
-    - Navigation controls hidden (slide numbers, arrows, progress bar)
-    - Slides use full page width, proper spacing
-    
-  speaker_notes_in_pdf:
-    flag: --print-notes
-    behavior: |
-      When --print-notes is used:
-        - reveal.js showNotes = true
-        - @media print CSS shows notes below each slide
-        - Notes styled with border-top, italic, "Speaker Notes:" prefix
-    default: Notes hidden in PDF (--print-notes not set)
-    
-  cli_examples:
-    # Standard PDF (no notes)
-    python3 gen_reveal.py --input data.json --output slides.html --style corporate
-    # Then: Open in browser → Ctrl+P → Save as PDF
-    
-    # PDF with speaker notes visible
-    python3 gen_reveal.py --input data.json --output slides.html --style corporate --print-notes
-    # Then: Open in browser → Ctrl+P → Save as PDF (notes appear below each slide)
-    
-  layout_preservation:
-    - Slide backgrounds maintained in print
-    - Table and code block styling preserved
-    - Images rendered at proper size
-    - Typography and colors match screen version
+  # Open HTML in browser → Ctrl+P / Cmd+P → Save as PDF
+  with_notes: python3 gen_reveal.py --input data.json --output slides.html --print-notes
+  without_notes: python3 gen_reveal.py --input data.json --output slides.html
 ```
 
 ---

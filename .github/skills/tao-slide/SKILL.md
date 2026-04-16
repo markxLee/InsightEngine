@@ -201,10 +201,10 @@ SCRIPT_ARCHITECTURE:
     {
       "title": "Presentation Title",
       "slides": [
-        {"type": "title", "title": "...", "subtitle": "..."},
+        {"type": "title", "title": "...", "subtitle": "...", "notes": "Talking point for title slide"},
         {"type": "section", "title": "..."},
-        {"type": "content", "title": "...", "bullets": ["...", "..."]},
-        {"type": "two-column", "title": "...", "left": ["..."], "right": ["..."]},
+        {"type": "content", "title": "...", "bullets": ["...", "..."], "notes": "Expanded talking points here"},
+        {"type": "two-column", "title": "...", "left": ["..."], "right": ["..."], "notes": "..."},
         {"type": "image", "title": "...", "image_path": "...", "caption": "..."},
         {"type": "chart", "title": "...", "chart_image": "..."},
         {"type": "table", "title": "...", "headers": ["..."], "rows": [["..."]]},
@@ -212,6 +212,9 @@ SCRIPT_ARCHITECTURE:
         {"type": "closing", "title": "Cảm ơn!", "subtitle": "Questions?"}
       ]
     }
+    # "notes" is optional on any slide type → written as PowerPoint speaker notes
+    # View in PowerPoint: View → Notes or Alt+V N
+    # bien-soan generates notes automatically when tong-hop sets include_notes: true
 
 SCRIPT:
   location: .github/skills/tao-slide/scripts/
@@ -443,6 +446,38 @@ function createPresentation(content, style, outputPath) {
 const outputPath = process.argv[2] || "presentation.pptx";
 const style = process.argv[3] || "corporate";
 createPresentation(null, style, outputPath);
+```
+
+---
+
+## Speaker Notes Support
+
+PowerPoint speaker notes are supported via the `"notes"` field in slide JSON.
+
+```yaml
+SPEAKER_NOTES:
+  how_it_works:
+    - Add "notes" key to any slide object in the JSON data
+    - slide-utils.js calls slide.addNotes(s.notes) for each slide that has notes
+    - Notes appear in PowerPoint's Notes panel (View → Notes, or Alt+V N)
+    
+  generation:
+    - bien-soan generates notes when tong-hop sets include_notes: true
+    - Notes contain expanded talking points, 2-4 sentences per slide
+    - Conversational tone, not bullet points
+    
+  example:
+    '{"type": "content", "title": "Q1 Revenue", "bullets": ["Up 15%", "Beat target"], "notes": "Revenue grew 15% YoY. B2B was the strongest driver. Note Q4 was already a record quarter."}'
+    
+  viewing:
+    - PowerPoint desktop: View → Notes
+    - Presenter view: Slide Show → Presenter View (shows notes during presentation)
+    - Notes pane visible at bottom of normal view
+
+COPILOT_MUST:
+  - When tong-hop passes include_notes: true → ensure bien-soan generates notes per slide
+  - When user says "thêm ghi chú", "add speaker notes" → set include_notes: true and re-generate
+  - Notes field is optional — slides without "notes" key are unaffected
 ```
 
 ---

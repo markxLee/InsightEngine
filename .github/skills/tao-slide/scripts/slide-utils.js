@@ -99,6 +99,11 @@ function buildSlides(pres, data, style) {
       default:
         addContentSlide(slide, s, style, pres);
     }
+
+    // Speaker notes — pass any "notes" field from JSON to PPTX
+    if (s.notes) {
+      slide.addNotes(s.notes);
+    }
   }
   return count;
 }

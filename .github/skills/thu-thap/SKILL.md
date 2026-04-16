@@ -59,6 +59,36 @@ WEB_SEARCH:
 
 ---
 
+## Bundled Script
+
+```yaml
+CLI_SCRIPT:
+  path: scripts/extract_content.py
+  purpose: Batch extract local files to Markdown (markitdown + fallbacks)
+  usage: |
+    python3 scripts/extract_content.py file1.pdf file2.docx file3.xlsx
+    python3 scripts/extract_content.py --output combined.md file1.pdf file2.docx
+    python3 scripts/extract_content.py --list paths.txt  # paths file, one per line
+
+  output: Combined Markdown with "## Source: <path>" headers per file
+  fallbacks:
+    - markitdown → primary (all formats)
+    - python-docx → .docx fallback
+    - openpyxl → .xlsx fallback
+    - pdfplumber / pypdf → .pdf fallback
+    - python-pptx → .pptx fallback
+
+COPILOT_USE:
+  when: Batch reading 3+ local files OR markitdown may fail (scanned PDFs)
+  steps:
+    1. Run: python3 .github/skills/thu-thap/scripts/extract_content.py <files...>
+    2. Read combined Markdown from stdout
+    3. Pass to bien-soan for synthesis
+  fallback: If script unavailable, use read_file tool directly per file
+```
+
+---
+
 ## Step 1: Identify Sources
 
 ```yaml
