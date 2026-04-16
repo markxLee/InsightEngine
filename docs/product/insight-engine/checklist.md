@@ -73,15 +73,15 @@
 
 ### Epic 1.1: Thu thập nội dung (`thu-thap`)
 
-- [ ] **US-1.1.1** — Read local files via markitdown
-  - Status: IN_PROGRESS
+- [x] **US-1.1.1** — Read local files via markitdown
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-1.1.1
   - Blocked By: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.1.2** — Fetch URL content
   - Status: PLANNED
-  - Blocked By: US-1.1.1
+  - Blocked By: ~~US-1.1.1~~ ✅
 
 ### Epic 1.2: Biên soạn nội dung (`bien-soan`)
 
@@ -97,13 +97,13 @@
 
 - [ ] **US-1.3.1** — Word document output with 3 template styles
   - Status: PLANNED
-  - Blocked By: US-1.2.1, US-1.1.1
+  - Blocked By: US-1.2.1, ~~US-1.1.1~~ ✅
 
 ### Epic 1.4: Xuất PowerPoint (`tao-slide`)
 
 - [ ] **US-1.4.1** — PowerPoint output with 3 template styles
   - Status: PLANNED
-  - Blocked By: US-1.2.1, US-1.1.1
+  - Blocked By: US-1.2.1, ~~US-1.1.1~~ ✅
 
 ---
 
@@ -113,7 +113,7 @@
 
 - [ ] **US-2.1.1** — Web search integration in thu-thap
   - Status: PLANNED
-  - Blocked By: US-1.1.1
+  - Blocked By: ~~US-1.1.1~~ ✅
 
 ### Epic 2.2: Xuất Excel (`tao-excel`)
 
@@ -227,15 +227,15 @@
 
 ### Epic 1.1: Thu thập nội dung (`thu-thap`)
 
-- [ ] **US-1.1.1** — Đọc file local qua markitdown
-  - Trạng thái: IN_PROGRESS
+- [x] **US-1.1.1** — Đọc file local qua markitdown
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-1.1.1
   - Bị chặn bởi: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.1.2** — Fetch nội dung URL
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.1.1
+  - Bị chặn bởi: ~~US-1.1.1~~ ✅
 
 ### Epic 1.2: Biên soạn nội dung (`bien-soan`)
 
@@ -251,13 +251,13 @@
 
 - [ ] **US-1.3.1** — Xuất Word với 3 template style
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.2.1, US-1.1.1
+  - Bị chặn bởi: US-1.2.1, ~~US-1.1.1~~ ✅
 
 ### Epic 1.4: Xuất PowerPoint (`tao-slide`)
 
 - [ ] **US-1.4.1** — Xuất PowerPoint với 3 template style
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.2.1, US-1.1.1
+  - Bị chặn bởi: US-1.2.1, ~~US-1.1.1~~ ✅
 
 ---
 
@@ -267,7 +267,7 @@
 
 - [ ] **US-2.1.1** — Tích hợp web search vào thu-thap
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.1.1
+  - Bị chặn bởi: ~~US-1.1.1~~ ✅
 
 ### Epic 2.2: Xuất Excel (`tao-excel`)
 
