@@ -2,10 +2,10 @@
 name: tao-slide
 description: |
   Create professional PowerPoint (.pptx) presentations from synthesized content.
-  Supports 3 template styles: corporate, academic, minimal.
+  Supports 5 template styles: corporate, academic, minimal, dark-modern, creative.
   Uses pptxgenjs (Node.js). Triggers on "tạo slide", "làm thuyết trình",
   "create powerpoint", or "/tao-slide".
-argument-hint: "[content from bien-soan or direct text] [style: corporate|academic|minimal]"
+argument-hint: "[content from bien-soan or direct text] [style: corporate|academic|minimal|dark-modern|creative]"
 ---
 
 # Tạo Slide — PowerPoint Output Skill
@@ -49,7 +49,7 @@ PRE_FLIGHT:
   3. Determine style:
      - If user specified: use that style
      - If pipeline: use inferred style from tong-hop
-     - If neither: ask user to choose (corporate / academic / minimal)
+     - If neither: ask user to choose (corporate / academic / minimal / dark-modern / creative)
      
   4. Determine output path:
      - If user specified: use that path
@@ -137,8 +137,8 @@ SCRIPT:
 ```yaml
 STYLES:
   selection:
-    - User chooses: "corporate", "academic", or "minimal"
-    - Pipeline infers: formal/business → corporate, research → academic, simple → minimal
+    - User chooses: "corporate", "academic", "minimal", "dark-modern", or "creative"
+    - Pipeline infers: formal/business → corporate, research → academic, simple → minimal, tech/startup → dark-modern, marketing/event → creative
 
   corporate:
     description: Bold colors, geometric shapes, business-ready
@@ -193,6 +193,46 @@ STYLES:
       - Single accent line (thin, bottom)
       - Oversized numbers for data highlights
       - Fade-in image backgrounds (low opacity)
+
+  dark-modern:
+    description: Dark background, neon accents, tech/startup vibe
+    reference: references/style-dark-modern.md
+    fonts:
+      heading: Inter
+      body: Inter
+    colors:
+      primary: "6366F1"
+      accent: "22D3EE"
+      bg: "0F172A"
+      text_dark: "0F172A"
+      text_light: "F1F5F9"
+    visual_elements:
+      - Dark slate background (#0F172A)
+      - Gradient accent bars (indigo → cyan)
+      - Glow effects on key metrics (subtle drop shadow)
+      - Monospace font for code/data snippets
+      - Rounded corners on shapes (borderRadius)
+      - Thin neon accent lines as dividers
+
+  creative:
+    description: Vibrant gradients, playful shapes, event/marketing style
+    reference: references/style-creative.md
+    fonts:
+      heading: Poppins
+      body: Open Sans
+    colors:
+      primary: "8B5CF6"
+      accent: "F59E0B"
+      bg: "FFFBEB"
+      text_dark: "1E1B4B"
+      text_light: "FFFFFF"
+    visual_elements:
+      - Warm gradient backgrounds (amber → purple soft)
+      - Rounded blob shapes as decorative elements
+      - Oversized emoji or icon accents
+      - Asymmetric layouts (text left, visual right)
+      - Bold color blocks for callouts
+      - Playful section transitions (alternating bg colors)
 ```
 
 ---

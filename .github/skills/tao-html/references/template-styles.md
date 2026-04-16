@@ -35,3 +35,33 @@
 - **Font stack:** 'Inter', 'Helvetica Neue', Arial, sans-serif
 - **Header:** Top-left aligned, no banner
 - **Tables:** Borderless, subtle bottom borders only
+
+## Dark/Modern Style
+
+- **Max width:** 900px
+- **Primary:** #6366f1 (indigo)
+- **Secondary:** #22d3ee (cyan)
+- **Accent:** #22d3ee (neon cyan)
+- **Background:** #0f172a (dark slate)
+- **Text:** #f1f5f9 (light gray)
+- **Font stack:** 'Inter', 'SF Pro Display', sans-serif
+- **Header:** Full-width gradient banner (indigo → cyan)
+- **Tables:** Dark header (#1e293b), subtle border glow
+- **Code blocks:** Dark bg (#1e293b), cyan left border
+- **Headings:** Subtle text-shadow glow (indigo at 30% opacity)
+- **Cards:** Dark surface (#1e293b) with subtle border (#334155)
+
+## Creative Style
+
+- **Max width:** 960px
+- **Primary:** #8b5cf6 (purple)
+- **Secondary:** #f59e0b (amber)
+- **Accent:** #f59e0b (amber highlights)
+- **Background:** #fffbeb (warm off-white)
+- **Text:** #1e1b4b (deep indigo)
+- **Font stack:** 'Poppins', 'Nunito', sans-serif (headings); 'Open Sans', 'Nunito', sans-serif (body)
+- **Header:** Full-width gradient banner (purple → amber)
+- **Tables:** Rounded corners, purple header, warm alternating rows
+- **Headings:** Gradient text (purple → amber) for h1
+- **Callouts:** Gradient background (#ede9fe → #fef3c7), 16px border-radius
+- **Cards:** Large border-radius (16px), playful padding

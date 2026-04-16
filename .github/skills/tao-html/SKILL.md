@@ -3,9 +3,9 @@ name: tao-html
 description: |
   Create professional static HTML pages from synthesized content.
   Uses jinja2 templates with inline CSS (no external dependencies).
-  3 styles: corporate, academic, minimal. Single-file portable output.
+  5 styles: corporate, academic, minimal, dark-modern, creative. Single-file portable output.
   Use when user says "tạo trang web", "tạo html", or "/tao-html".
-argument-hint: "[content from bien-soan or direct text] [style: corporate|academic|minimal]"
+argument-hint: "[content from bien-soan or direct text] [style: corporate|academic|minimal|dark-modern|creative]"
 ---
 
 # Tạo HTML — Static HTML Page Output Skill
@@ -104,6 +104,52 @@ STYLES:
       max_width: 680px
       sidebar: false
       header: Minimal top-left title
+
+  dark-modern:
+    description: Dark background, neon accents, tech/startup vibe
+    colors:
+      primary: "#6366f1"
+      secondary: "#22d3ee"
+      background: "#0f172a"
+      text: "#f1f5f9"
+      accent: "#22d3ee"
+    fonts:
+      heading: "'Inter', 'SF Pro Display', sans-serif"
+      body: "'Inter', 'SF Pro Text', sans-serif"
+    layout:
+      max_width: 900px
+      sidebar: false
+      header: Full-width gradient banner (indigo → cyan)
+    css_extras: |
+      /* Glow effect on headings */
+      h1, h2 { text-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+      /* Code blocks with dark theme */
+      pre { background: #1e293b; border-left: 3px solid #22d3ee; }
+      /* Cards with subtle border glow */
+      .card { border: 1px solid #334155; box-shadow: 0 0 15px rgba(99, 102, 241, 0.1); }
+
+  creative:
+    description: Vibrant gradients, playful shapes, event/marketing style
+    colors:
+      primary: "#8b5cf6"
+      secondary: "#f59e0b"
+      background: "#fffbeb"
+      text: "#1e1b4b"
+      accent: "#f59e0b"
+    fonts:
+      heading: "'Poppins', 'Nunito', sans-serif"
+      body: "'Open Sans', 'Nunito', sans-serif"
+    layout:
+      max_width: 960px
+      sidebar: false
+      header: Full-width gradient banner (purple → amber)
+    css_extras: |
+      /* Rounded shapes and playful feel */
+      .card, blockquote { border-radius: 16px; }
+      /* Gradient text for main heading */
+      h1 { background: linear-gradient(135deg, #8b5cf6, #f59e0b); -webkit-background-clip: text; color: transparent; }
+      /* Bold callout boxes */
+      .callout { background: linear-gradient(135deg, #ede9fe, #fef3c7); border-radius: 16px; padding: 1.5rem; }
 ```
 
 ---
