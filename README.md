@@ -104,6 +104,10 @@ Bấm icon **Extensions** (thanh bên trái), tìm **"copilot"**, chọn **GitHu
 
 **Bước 4 — Dùng InsightEngine**
 
+> ⏱️ **Lần đầu tiên:** Bước `/cai-dat` sẽ cài các thư viện Python/Node.js cần thiết, mất khoảng **2–3 phút**. Chỉ cần làm một lần duy nhất.
+>
+> ⚡ **Những lần sau:** Start lại codespace là dùng được ngay — không cần cài lại, môi trường đã được lưu.
+
 Mở Copilot Chat (Ctrl+Alt+I hoặc icon chat trên thanh bên), rồi gõ:
 
 ```
