@@ -3,8 +3,8 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Scope:** Phase 0 → Phase 3 (all phases)  
-> **Total User Stories:** 21
+> **Scope:** Phase 0 → Phase 4 (all phases)  
+> **Total User Stories:** 36 (21 Phase 0-3 + 15 Phase 4)
 
 ---
 
@@ -12,8 +12,8 @@
 
 - **Product name:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3
-- **Total stories:** 21 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5)
+- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4
+- **Total stories:** 36 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15)
 - **ID format:** `US-<phase>.<epic>.<index>`
 
 ### Dependency Graph (Summary)
@@ -350,14 +350,176 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
 
 ---
 
+## Phase 4: Nâng cấp — Template Library, Presentation HTML & Script Architecture
+
+> **Nguồn gốc:** Phản hồi từ testing Phase 0-3 — output còn sơ sài, slide đơn giản, HTML thiếu tương tác.
+
+---
+
+### Epic 4.1: Template Library PPTX
+
+**US-4.1.1: Professional PPTX template collection**
+- Description: As a user, I want a library of 8-10 professional PPTX templates, so my presentations look polished and varied without manual design work.
+- Acceptance Criteria:
+  - AC1: 8-10 PPTX template scripts in `tao-slide/scripts/` — each produces a distinct visual style
+  - AC2: Templates include: title slide, content slide, two-column, image+text, chart slide, section divider, closing slide
+  - AC3: Each template has consistent color scheme, font pairing, spacing
+  - AC4: Template names are descriptive (e.g., `corporate-blue.js`, `dark-gradient.js`, `minimal-white.js`)
+  - AC5: All templates produce valid .pptx files via pptxgenjs
+- Blocked By: `US-1.4.1`, `US-3.3.1`
+- References: slidemembers.com, aippt.com, canva.com (visual inspiration)
+
+**US-4.1.2: Template preview and selection**
+- Description: As a user, I want to preview available templates before generation and select my preferred one, so I have control over the visual output.
+- Acceptance Criteria:
+  - AC1: `tao-slide` lists available templates with descriptions when user asks
+  - AC2: Preview images (PNG) exist in `tao-slide/references/previews/` for each template
+  - AC3: User can select template by name or let Copilot suggest based on context
+  - AC4: Default template auto-selected based on content type (formal → corporate, tech → dark-modern)
+- Blocked By: `US-4.1.1`
+
+**US-4.1.3: PPTX script architecture**
+- Description: As a developer, I want `tao-slide` to use executable scripts in `scripts/` for template rendering, so output is reliable and repeatable.
+- Acceptance Criteria:
+  - AC1: `tao-slide/scripts/` directory exists with Node.js CLI tools
+  - AC2: Each template is a standalone script accepting JSON data + outputting .pptx
+  - AC3: SKILL.md acts as router — determines template, prepares data, calls script
+  - AC4: Scripts accept CLI arguments (no hardcoded paths)
+  - AC5: Pattern follows a-z-copilot-flow/skills/pptx/scripts/ architecture
+- Blocked By: `US-4.1.1`
+- References: a-z-copilot-flow/skills/pptx (script architecture pattern)
+
+---
+
+### Epic 4.2: HTML Presentation Mode (reveal.js)
+
+**US-4.2.1: reveal.js integration for tao-html**
+- Description: As a user, I want HTML output to be an interactive presentation (not just a static page), so I can present directly in the browser with slide transitions.
+- Acceptance Criteria:
+  - AC1: `tao-html` can produce reveal.js-based presentations
+  - AC2: Content is organized into slides (sections)
+  - AC3: reveal.js loaded via CDN (no local install required)
+  - AC4: Output is a single .html file (portable, self-contained)
+  - AC5: Keyboard navigation works (arrows, space, ESC for overview)
+- Blocked By: `US-2.4.1`, `US-3.3.1`
+- References: revealjs.com, slides.com/templates
+
+**US-4.2.2: Transitions, animations, and visual effects**
+- Description: As a user, I want my HTML presentations to have smooth transitions and animations, so they feel professional and engaging.
+- Acceptance Criteria:
+  - AC1: At least 3 transition types available (slide, fade, zoom)
+  - AC2: Fragment animations for bullet points (appear one by one)
+  - AC3: Background images/gradients per slide
+  - AC4: Code syntax highlighting for technical slides
+  - AC5: User can specify transition style or use template default
+- Blocked By: `US-4.2.1`
+- References: revealjs.com (transitions), deckdeckgo.com (animation patterns)
+
+**US-4.2.3: HTML presentation themes and backgrounds**
+- Description: As a user, I want themed HTML presentations with professional backgrounds, so each presentation has a cohesive visual identity.
+- Acceptance Criteria:
+  - AC1: At least 5 reveal.js themes adapted for InsightEngine styles
+  - AC2: Custom background support: solid color, gradient, image, video (URL)
+  - AC3: Theme includes consistent typography, link colors, table styles
+  - AC4: Dark and light variants available
+- Blocked By: `US-4.2.1`
+- References: slides.com/templates, deckdeckgo.com (themes)
+
+---
+
+### Epic 4.3: Script Architecture cho Skills
+
+**US-4.3.1: tao-slide scripts/ directory**
+- Description: As a developer, I want the `tao-slide` skill to have a `scripts/` directory with modular Node.js CLI tools, so template rendering is programmatic and testable.
+- Acceptance Criteria:
+  - AC1: `tao-slide/scripts/` exists with at least 3 scripts
+  - AC2: `gen_slide.js` — main entry point accepting JSON data → .pptx
+  - AC3: `templates/` subfolder with template-specific configs
+  - AC4: `references/` has pptxgenjs API reference and design guidelines
+  - AC5: Scripts print output file path + size as last line
+- Blocked By: `US-4.1.3`
+- References: a-z-copilot-flow/skills/pptx/scripts/ (architecture pattern)
+
+**US-4.3.2: tao-html scripts/ directory**
+- Description: As a developer, I want the `tao-html` skill to have a `scripts/` directory with Python CLI tools for reveal.js generation, so HTML presentation output is reliable.
+- Acceptance Criteria:
+  - AC1: `tao-html/scripts/` exists with at least 2 scripts
+  - AC2: `gen_reveal.py` — main entry point accepting content JSON → .html
+  - AC3: `templates/` subfolder with jinja2 reveal.js templates
+  - AC4: `references/` has reveal.js API reference
+  - AC5: Scripts accept CLI arguments and print output path + size
+- Blocked By: `US-4.2.1`
+
+**US-4.3.3: Script architecture for remaining output skills**
+- Description: As a developer, I want all output skills (tao-word, tao-excel, tao-pdf) to follow the same scripts/ architecture pattern, so the codebase is consistent.
+- Acceptance Criteria:
+  - AC1: `tao-word/scripts/gen_docx.py` exists with CLI interface
+  - AC2: `tao-excel/scripts/gen_xlsx.py` exists with CLI interface
+  - AC3: `tao-pdf/scripts/gen_pdf.py` exists with CLI interface
+  - AC4: All scripts accept JSON input + output file path as arguments
+  - AC5: Pattern is consistent across all output skills
+- Blocked By: `US-4.3.1`, `US-4.3.2`
+- References: a-z-copilot-flow/skills/gen-image (multi-level script pattern)
+
+---
+
+### Epic 4.4: Nâng cấp Content Depth
+
+**US-4.4.1: bien-soan comprehensive mode**
+- Description: As a user, I want a "comprehensive" synthesis mode that produces richer, more detailed content, so my reports and presentations have sufficient depth.
+- Acceptance Criteria:
+  - AC1: `bien-soan` supports `--mode=comprehensive` flag (or equivalent)
+  - AC2: Comprehensive mode produces 3-5x more content than default mode
+  - AC3: Adds sub-sections, examples, data points, and context paragraphs
+  - AC4: Generates section summaries and key takeaways
+  - AC5: User can choose mode before synthesis begins
+- Blocked By: `US-1.2.1`, `US-3.2.1`
+
+**US-4.4.2: Content enrichment from multiple sources**
+- Description: As a user, I want the pipeline to automatically enrich content with additional context from web search when source material is thin, so outputs are always substantive.
+- Acceptance Criteria:
+  - AC1: `bien-soan` detects when source content is insufficient (< threshold)
+  - AC2: Automatically triggers `thu-thap` web search for additional context
+  - AC3: Enriched content is clearly attributed (source citations)
+  - AC4: User can disable auto-enrichment if desired
+  - AC5: Works transparently within the pipeline (no extra user action needed)
+- Blocked By: `US-2.1.1`, `US-4.4.1`
+
+---
+
+### Epic 4.5: Template Library HTML
+
+**US-4.5.1: HTML reveal.js template collection**
+- Description: As a user, I want 5-8 distinct HTML presentation templates based on reveal.js, so I have variety for different contexts (business, education, tech talks).
+- Acceptance Criteria:
+  - AC1: 5-8 template files in `tao-html/scripts/templates/`
+  - AC2: Templates include: corporate-formal, academic-research, tech-dark, creative-colorful, minimal-clean
+  - AC3: Each template defines color scheme, fonts, transitions, background style
+  - AC4: Templates are jinja2 files extending a base reveal.js structure
+  - AC5: All templates produce valid, self-contained .html files
+- Blocked By: `US-4.2.1`, `US-4.2.3`
+- References: slides.com/templates, deckdeckgo.com
+
+**US-4.5.2: Presenter notes and PDF export**
+- Description: As a user, I want my HTML presentations to include speaker notes and be exportable to PDF, so I can use them in professional settings.
+- Acceptance Criteria:
+  - AC1: Speaker notes support via reveal.js `<aside class="notes">`
+  - AC2: `bien-soan` can generate speaker notes from synthesis content
+  - AC3: PDF export via reveal.js print stylesheet (Ctrl+P)
+  - AC4: PDF maintains slide layout and styling
+- Blocked By: `US-4.5.1`
+- References: revealjs.com (speaker view, PDF export)
+
+---
+
 ---
 
 ## Tổng quan User Stories (Tiếng Việt)
 
 - **Tên sản phẩm:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Phạm vi:** Phase 0 → Phase 3
-- **Tổng số User Stories:** 21
+- **Phạm vi:** Phase 0 → Phase 4
+- **Tổng số User Stories:** 36 (21 Phase 0-3 + 15 Phase 4)
 
 ---
 
@@ -613,6 +775,156 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
   - AC2: Xác nhận trước step > 30 giây
   - AC3: Gợi ý style dựa trên context
 - Bị chặn bởi: `US-0.3.1`, `US-2.5.1`
+
+---
+
+## Phase 4: Nâng cấp — Template Library, Presentation HTML & Script Architecture
+
+> **Nguồn gốc:** Phản hồi từ testing Phase 0-3 — output còn sơ sài, slide đơn giản, HTML thiếu tương tác.
+
+---
+
+### Epic 4.1: Template Library PPTX
+
+**US-4.1.1: Thư viện template PPTX chuyên nghiệp**
+- Mô tả: Xây dựng 8-10 template PPTX chuyên nghiệp với scripts/ CLI.
+- Tiêu chí nghiệm thu:
+  - AC1: 8-10 template scripts trong `tao-slide/scripts/`
+  - AC2: Templates gồm: title, content, two-column, image+text, chart, section divider, closing
+  - AC3: Mỗi template có color scheme, font pairing, spacing nhất quán
+  - AC4: Tất cả template tạo file .pptx hợp lệ qua pptxgenjs
+- Bị chặn bởi: `US-1.4.1`, `US-3.3.1`
+- Tham khảo: slidemembers.com, aippt.com, canva.com
+
+**US-4.1.2: Preview và chọn template**
+- Mô tả: User có thể xem danh sách template và chọn trước khi generate.
+- Tiêu chí nghiệm thu:
+  - AC1: Liệt kê templates với mô tả
+  - AC2: Preview images (PNG) trong `tao-slide/references/previews/`
+  - AC3: Auto-select dựa trên content type
+- Bị chặn bởi: `US-4.1.1`
+
+**US-4.1.3: Kiến trúc script cho tao-slide**
+- Mô tả: `tao-slide` dùng scripts/ thực thi để render template — đáng tin cậy, lặp lại được.
+- Tiêu chí nghiệm thu:
+  - AC1: `tao-slide/scripts/` chứa Node.js CLI tools
+  - AC2: Mỗi template là script độc lập nhận JSON data → .pptx
+  - AC3: SKILL.md làm router — xác định template, chuẩn bị data, gọi script
+  - AC4: Scripts nhận CLI arguments, không hardcode path
+- Bị chặn bởi: `US-4.1.1`
+- Tham khảo: a-z-copilot-flow/skills/pptx/scripts/
+
+---
+
+### Epic 4.2: HTML Presentation Mode (reveal.js)
+
+**US-4.2.1: Tích hợp reveal.js cho tao-html**
+- Mô tả: HTML output là presentation tương tác, không phải trang tĩnh.
+- Tiêu chí nghiệm thu:
+  - AC1: `tao-html` tạo reveal.js presentations
+  - AC2: Content tổ chức thành slides
+  - AC3: reveal.js qua CDN (không cần cài local)
+  - AC4: Output là single .html file portable
+  - AC5: Keyboard navigation hoạt động
+- Bị chặn bởi: `US-2.4.1`, `US-3.3.1`
+- Tham khảo: revealjs.com, slides.com/templates
+
+**US-4.2.2: Hiệu ứng chuyển đổi và animation**
+- Mô tả: HTML presentations có transitions mượt mà và animations chuyên nghiệp.
+- Tiêu chí nghiệm thu:
+  - AC1: Ít nhất 3 loại transition (slide, fade, zoom)
+  - AC2: Fragment animations cho bullet points
+  - AC3: Background images/gradients mỗi slide
+  - AC4: Syntax highlighting cho technical slides
+- Bị chặn bởi: `US-4.2.1`
+- Tham khảo: revealjs.com, deckdeckgo.com
+
+**US-4.2.3: Themes và backgrounds cho HTML presentation**
+- Mô tả: HTML presentations có theme chuyên nghiệp với background ấn tượng.
+- Tiêu chí nghiệm thu:
+  - AC1: Ít nhất 5 reveal.js themes
+  - AC2: Custom background: solid, gradient, image, video
+  - AC3: Typography, link colors, table styles nhất quán
+  - AC4: Dark và light variants
+- Bị chặn bởi: `US-4.2.1`
+- Tham khảo: slides.com/templates, deckdeckgo.com
+
+---
+
+### Epic 4.3: Script Architecture cho Skills
+
+**US-4.3.1: scripts/ cho tao-slide**
+- Mô tả: `tao-slide` có `scripts/` với Node.js CLI tools modular.
+- Tiêu chí nghiệm thu:
+  - AC1: `tao-slide/scripts/` tồn tại với ít nhất 3 scripts
+  - AC2: `gen_slide.js` — entry point nhận JSON → .pptx
+  - AC3: `templates/` subfolder với configs cho từng template
+  - AC4: `references/` có pptxgenjs API reference
+- Bị chặn bởi: `US-4.1.3`
+- Tham khảo: a-z-copilot-flow/skills/pptx/scripts/
+
+**US-4.3.2: scripts/ cho tao-html**
+- Mô tả: `tao-html` có `scripts/` với Python CLI tools cho reveal.js generation.
+- Tiêu chí nghiệm thu:
+  - AC1: `tao-html/scripts/` tồn tại với ít nhất 2 scripts
+  - AC2: `gen_reveal.py` — entry point nhận content JSON → .html
+  - AC3: `templates/` subfolder với jinja2 reveal.js templates
+  - AC4: Scripts nhận CLI arguments, in output path + size
+- Bị chặn bởi: `US-4.2.1`
+
+**US-4.3.3: Script architecture cho tao-word, tao-excel, tao-pdf**
+- Mô tả: Tất cả output skills theo cùng pattern scripts/.
+- Tiêu chí nghiệm thu:
+  - AC1: `tao-word/scripts/gen_docx.py` với CLI
+  - AC2: `tao-excel/scripts/gen_xlsx.py` với CLI
+  - AC3: `tao-pdf/scripts/gen_pdf.py` với CLI
+  - AC4: Tất cả nhận JSON input + output path
+- Bị chặn bởi: `US-4.3.1`, `US-4.3.2`
+
+---
+
+### Epic 4.4: Nâng cấp Content Depth
+
+**US-4.4.1: bien-soan comprehensive mode**
+- Mô tả: Chế độ "comprehensive" tạo nội dung phong phú gấp 3-5 lần mặc định.
+- Tiêu chí nghiệm thu:
+  - AC1: Hỗ trợ `--mode=comprehensive`
+  - AC2: Nội dung phong phú gấp 3-5 lần default
+  - AC3: Thêm sub-sections, ví dụ, data points
+  - AC4: Tạo section summaries và key takeaways
+- Bị chặn bởi: `US-1.2.1`, `US-3.2.1`
+
+**US-4.4.2: Tự động làm giàu nội dung từ web**
+- Mô tả: Pipeline tự search web bổ sung khi source material quá mỏng.
+- Tiêu chí nghiệm thu:
+  - AC1: Phát hiện khi source content không đủ
+  - AC2: Tự trigger `thu-thap` web search
+  - AC3: Nội dung bổ sung có source citations
+  - AC4: User có thể tắt auto-enrichment
+- Bị chặn bởi: `US-2.1.1`, `US-4.4.1`
+
+---
+
+### Epic 4.5: Template Library HTML
+
+**US-4.5.1: Thư viện template HTML reveal.js**
+- Mô tả: 5-8 template HTML presentation dựa trên reveal.js.
+- Tiêu chí nghiệm thu:
+  - AC1: 5-8 template files trong `tao-html/scripts/templates/`
+  - AC2: Templates: corporate-formal, academic-research, tech-dark, creative-colorful, minimal-clean
+  - AC3: Mỗi template định nghĩa color scheme, fonts, transitions, background
+  - AC4: Tất cả tạo .html files hợp lệ, self-contained
+- Bị chặn bởi: `US-4.2.1`, `US-4.2.3`
+- Tham khảo: slides.com/templates, deckdeckgo.com
+
+**US-4.5.2: Presenter notes và PDF export**
+- Mô tả: HTML presentations có speaker notes và export được PDF.
+- Tiêu chí nghiệm thu:
+  - AC1: Speaker notes qua `<aside class="notes">`
+  - AC2: `bien-soan` tạo speaker notes từ synthesis content
+  - AC3: PDF export qua reveal.js print stylesheet
+- Bị chặn bởi: `US-4.5.1`
+- Tham khảo: revealjs.com (speaker view, PDF export)
 
 ---
 

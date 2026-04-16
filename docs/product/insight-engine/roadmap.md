@@ -76,6 +76,25 @@
 
 ---
 
+## Phase 4 — Nâng cấp: Template Library, Presentation HTML & Script Architecture
+
+**Goal:** Nâng cấp đáng kể chất lượng output — thư viện template phong phú cho PPTX, HTML presentation-grade dựa trên reveal.js, kiến trúc script thực thi cho mỗi skill, và nội dung tổng hợp sâu hơn.
+
+> **Nguồn gốc:** Phản hồi từ testing Phase 0-3 — output còn sơ sài, slide đơn giản, HTML thiếu tương tác.
+> **Tham khảo:** slidemembers.com, aippt.com, canva.com (PPTX templates); revealjs.com, slides.com/templates, deckdeckgo.com (HTML presentations); a-z-copilot-flow/skills/gen-image, skills/pptx (script architecture pattern)
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 4.1 — Template Library PPTX** | Xây dựng thư viện 8-10 template PPTX chuyên nghiệp với scripts/ CLI. Template preview/selection trước khi generate. |
+| **Epic 4.2 — HTML Presentation Mode (reveal.js)** | Tích hợp reveal.js cho `tao-html` — output là interactive presentation với slide transitions, animations, backgrounds. |
+| **Epic 4.3 — Script Architecture cho Skills** | Mỗi output skill có `scripts/` directory chứa CLI tools (Python/Node.js). SKILL.md làm router → scripts/ xử lý. |
+| **Epic 4.4 — Nâng cấp Content Depth** | Nâng cấp `bien-soan` — chế độ comprehensive tạo nội dung phong phú hơn, content enrichment từ nhiều nguồn. |
+| **Epic 4.5 — Template Library HTML** | Xây dựng 5-8 reveal.js-based HTML presentation templates. Hỗ trợ presenter notes, PDF export. |
+
+---
+
 ## Skill Map theo Phase
 
 ```
@@ -83,9 +102,10 @@ Phase 0:  cai-dat (MỚI)     tong-hop (skeleton)
 Phase 1:  thu-thap          bien-soan          tao-word     tao-slide
 Phase 2:  thu-thap (nâng)   tao-excel          tao-pdf      tao-html   tong-hop (chaining)
 Phase 3:  tao-hinh (MỚI)    bien-soan (nâng)   tao-slide (nâng)  tong-hop (nâng)
+Phase 4:  tao-slide (templates)  tao-html (reveal.js)  bien-soan (depth)  all skills (scripts/)
 ```
 
-**Tổng số skills:** 10 (9 đã thiết kế + 1 mới `cai-dat`)
+**Tổng số skills:** 10 (không thêm skill mới — nâng cấp skills hiện tại)
 
 ---
 
@@ -186,6 +206,20 @@ Phase 0 là bắt buộc — không có `cai-dat` và `tong-hop` thì các skill
 | **Epic 3.2 — Xử lý tài liệu lớn** | Chunking strategy cho corpus > 50,000 words |
 | **Epic 3.3 — Template mở rộng** | Thêm style dark/modern, creative |
 | **Epic 3.4 — UX Pipeline** | Progress feedback, xác nhận trước step nặng |
+
+---
+
+## Phase 4 — Nâng cấp: Template Library, Presentation HTML & Script Architecture
+
+**Mục tiêu:** Thư viện template phong phú cho PPTX, HTML presentation dựa trên reveal.js, script architecture, content depth.
+
+| Epic | Mô tả |
+|------|-------|
+| **Epic 4.1 — Template Library PPTX** | 8-10 template PPTX chuyên nghiệp, preview/selection |
+| **Epic 4.2 — HTML Presentation Mode** | Tích hợp reveal.js — transitions, animations, backgrounds |
+| **Epic 4.3 — Script Architecture** | Mỗi output skill có `scripts/` CLI tools |
+| **Epic 4.4 — Content Depth** | `bien-soan` comprehensive mode, content enrichment |
+| **Epic 4.5 — Template Library HTML** | 5-8 reveal.js presentation templates, presenter notes, PDF export |
 
 ---
 

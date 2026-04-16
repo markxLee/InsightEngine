@@ -71,9 +71,11 @@ InsightEngine transforms the fragmented "gather → synthesize → format" workf
 1. **One interface, many inputs**: Describe what you need in Vietnamese, point to URLs/files, or let the system search — all in one conversation
 2. **Intelligent synthesis**: Not just concatenation — the system understands, compares, and restructures content meaningfully
 3. **Multi-format output**: Same content can become a Word doc, Excel sheet, PowerPoint deck, PDF, or HTML page
-4. **Template library**: Professional pre-built templates across multiple styles — no design skills needed
-5. **Vietnamese-first**: Entire experience designed for Vietnamese speakers, with bilingual capability
-6. **Zero infrastructure**: Runs entirely within VS Code + Copilot — no servers, no API keys, no subscriptions beyond Copilot
+4. **Rich template library**: Professional pre-built templates across multiple styles — 8-10 PPTX templates (ref: slidemembers.com, aippt.com, canva.com), 5-8 HTML presentation templates (ref: revealjs.com, slides.com, deckdeckgo.com)
+5. **Presentation-grade HTML**: HTML output is not static pages but interactive presentations with slide transitions, animations, and background effects — powered by reveal.js
+6. **Script-powered skills**: Each output skill has executable scripts (Python/Node.js CLI tools) for reliable, repeatable output generation — not just Copilot instructions
+7. **Vietnamese-first**: Entire experience designed for Vietnamese speakers, with bilingual capability
+8. **Zero infrastructure**: Runs entirely within VS Code + Copilot — no servers, no API keys, no subscriptions beyond Copilot
 
 ### Tiếng Việt
 
@@ -82,9 +84,11 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 1. **Một giao diện, nhiều nguồn đầu vào**: Mô tả yêu cầu bằng tiếng Việt, trỏ đến URL/file, hoặc để hệ thống tự tìm kiếm
 2. **Tổng hợp thông minh**: Không chỉ ghép nối — hệ thống hiểu, so sánh, và tái cấu trúc nội dung
 3. **Đầu ra đa định dạng**: Cùng nội dung có thể thành Word, Excel, PowerPoint, PDF, hoặc HTML
-4. **Thư viện template**: Template chuyên nghiệp sẵn có theo nhiều phong cách
-5. **Ưu tiên tiếng Việt**: Toàn bộ trải nghiệm thiết kế cho người Việt
-6. **Không cần hạ tầng**: Chạy hoàn toàn trong VS Code + Copilot
+4. **Thư viện template phong phú**: Template chuyên nghiệp — 8-10 PPTX templates (tham khảo slidemembers, aippt, canva), 5-8 HTML presentation templates (tham khảo reveal.js, slides.com, deckdeckgo)
+5. **HTML dạng thuyết trình**: Output HTML không phải trang tĩnh mà là presentation tương tác với hiệu ứng chuyển slide, animation, background ấn tượng — dựa trên reveal.js
+6. **Skill có script thực thi**: Mỗi skill output có scripts/ CLI tools (Python/Node.js) để tạo output đáng tin cậy, có thể lặp lại
+7. **Ưu tiên tiếng Việt**: Toàn bộ trải nghiệm thiết kế cho người Việt
+8. **Không cần hạ tầng**: Chạy hoàn toàn trong VS Code + Copilot
 
 ---
 
@@ -120,14 +124,21 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 
 **Template system:**
 - Multiple pre-built templates per output format
-- Different styles: corporate, academic, minimal, creative, dark/modern
+- Different styles: corporate, academic, minimal, creative, dark/modern + specialized variants
+- PPTX: 8-10 professional templates (ref: slidemembers.com, aippt.com, canva.com)
+- HTML: 5-8 reveal.js-based presentation templates with slide transitions, animations, backgrounds (ref: revealjs.com, slides.com/templates, deckdeckgo.com)
 - User can select style or let the system choose based on context
+- Template preview/selection before generation
 
-**Skill architecture:**
+**Skill architecture (script-powered):**
 - All skill names and directories in Vietnamese
 - Skill triggers bilingual (Vietnamese + English)
 - Skill internal content in English (for Copilot performance)
-- Each skill ≤ 400 lines, with agents/references split out
+- SKILL.md acts as router — references sub-docs and scripts/ for details
+- Each skill has `scripts/` directory with executable CLI tools (Python/Node.js)
+- Multi-level scripts for different needs (e.g., gen_image.py vs gen_portrait_v5.py)
+- `references/` directory for prompt guides, API docs, template specs
+- Pattern follows: a-z-copilot-flow/skills/gen-image, skills/pptx
 - Pipeline skill has knowledge of all sub-skills
 
 ### Tiếng Việt
@@ -151,7 +162,15 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 - Word (.docx), Excel (.xlsx), PowerPoint (.pptx), PDF (.pdf), HTML, hình ảnh
 
 **Hệ thống template:**
-- Nhiều template sẵn có theo nhiều phong cách (corporate, academic, minimal, creative, dark/modern)
+- Nhiều template sẵn có theo nhiều phong cách (corporate, academic, minimal, creative, dark/modern + biến thể chuyên biệt)
+- PPTX: 8-10 template chuyên nghiệp (tham khảo: slidemembers, aippt, canva)
+- HTML: 5-8 presentation template dựa trên reveal.js với hiệu ứng chuyển slide, animation, background
+
+**Kiến trúc skill (có script thực thi):**
+- Mỗi skill có thư mục `scripts/` chứa CLI tools (Python/Node.js)
+- Multi-level scripts cho nhu cầu khác nhau
+- `references/` chứa hướng dẫn, API docs, template specs
+- Pattern theo: a-z-copilot-flow/skills/gen-image, skills/pptx
 
 ---
 
@@ -287,12 +306,19 @@ InsightEngine/
 - Triggers: Bilingual (Vietnamese primary, English secondary)
 - Agents/references: Split into `agents/` and `references/` subdirectories when needed
 
-**V1 decisions:**
-- Templates: 3 styles per format (corporate, academic, minimal)
+**V1 decisions (Phase 0-3):**
+- Templates: 3-5 styles per format (corporate, academic, minimal, dark/modern, creative)
 - Chaining outputs: Supported (e.g., Excel data → PPT charts)
 - Large documents: Chunking strategy with incremental synthesis
 
+**V2 decisions (Phase 4 — post-testing feedback):**
+- PPTX templates: 8-10 professional templates with scripts/ (ref: slidemembers.com, aippt.com, canva.com)
+- HTML presentation mode: reveal.js-based with transitions, animations, backgrounds (ref: revealjs.com, slides.com/templates, deckdeckgo.com)
+- Script-powered skills: Each output skill gets scripts/ with CLI tools (ref pattern: a-z-copilot-flow/skills/gen-image, skills/pptx)
+- Content depth: bien-soan produces richer, more detailed synthesis
+- Multi-level scripts: Different script versions for different complexity levels
+
 ---
 
-*This document was produced by Idea Analysis. No technical decisions have been made.*
+*This document was produced by Idea Analysis. Updated with Phase 4 scope based on testing feedback.*
 *Next step: Review this analysis before proceeding to tech stack and roadmap planning.*

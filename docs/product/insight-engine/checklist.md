@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 21  
+> **Total User Stories:** 36 (21 Phase 0-3 DONE + 15 Phase 4 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -203,9 +203,114 @@
 
 ---
 
+## Phase 4: Nâng cấp — Template Library, Presentation HTML & Script Architecture
+
+> **Nguồn gốc:** Phản hồi từ testing Phase 0-3. **15 stories PLANNED.**
+
+### Epic 4.1: Template Library PPTX
+
+- [ ] **US-4.1.1** — Professional PPTX template collection
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: ~~US-1.4.1~~ ✅, ~~US-3.3.1~~ ✅
+  - Refs: slidemembers.com, aippt.com, canva.com
+
+- [ ] **US-4.1.2** — Template preview and selection
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: US-4.1.1
+
+- [ ] **US-4.1.3** — PPTX script architecture
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: US-4.1.1
+  - Refs: a-z-copilot-flow/skills/pptx/scripts/
+
+### Epic 4.2: HTML Presentation Mode (reveal.js)
+
+- [ ] **US-4.2.1** — reveal.js integration for tao-html
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: ~~US-2.4.1~~ ✅, ~~US-3.3.1~~ ✅
+  - Refs: revealjs.com, slides.com/templates
+
+- [ ] **US-4.2.2** — Transitions, animations, and visual effects
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: US-4.2.1
+  - Refs: revealjs.com, deckdeckgo.com
+
+- [ ] **US-4.2.3** — HTML presentation themes and backgrounds
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: US-4.2.1
+  - Refs: slides.com/templates, deckdeckgo.com
+
+### Epic 4.3: Script Architecture cho Skills
+
+- [ ] **US-4.3.1** — tao-slide scripts/ directory
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: US-4.1.3
+  - Refs: a-z-copilot-flow/skills/pptx/scripts/
+
+- [ ] **US-4.3.2** — tao-html scripts/ directory
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: US-4.2.1
+
+- [ ] **US-4.3.3** — Script architecture for remaining output skills
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: US-4.3.1, US-4.3.2
+  - Refs: a-z-copilot-flow/skills/gen-image
+
+### Epic 4.4: Nâng cấp Content Depth
+
+- [ ] **US-4.4.1** — bien-soan comprehensive mode
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: ~~US-1.2.1~~ ✅, ~~US-3.2.1~~ ✅
+
+- [ ] **US-4.4.2** — Content enrichment from multiple sources
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: ~~US-2.1.1~~ ✅, US-4.4.1
+
+### Epic 4.5: Template Library HTML
+
+- [ ] **US-4.5.1** — HTML reveal.js template collection
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: US-4.2.1, US-4.2.3
+  - Refs: slides.com/templates, deckdeckgo.com
+
+- [ ] **US-4.5.2** — Presenter notes and PDF export
+  - Status: PLANNED
+  - Assignee: —
+  - Blocked By: US-4.5.1
+  - Refs: revealjs.com
+
 ---
 
-## Tổng quan Checklist sản phẩm (Tiếng Việt)
+### Execution Order (Recommended)
+
+```
+Wave 1 (parallel): US-0.1.1, US-0.2.1
+Wave 2:            US-0.2.2
+Wave 3:            US-0.3.1
+Wave 4:            US-0.3.2
+Wave 5 (parallel): US-1.1.1, US-1.2.1
+Wave 6 (parallel): US-1.1.2, US-1.2.2, US-2.1.1, US-2.2.1, US-2.3.1, US-2.4.1, US-3.2.1
+Wave 7 (parallel): US-1.3.1, US-1.4.1
+Wave 8 (parallel): US-2.5.1, US-3.1.1, US-3.3.1
+Wave 9 (parallel): US-3.1.2, US-3.4.1
+--- Phase 0-3 DONE (21/21) ---
+Wave 10 (parallel): US-4.1.1, US-4.2.1, US-4.4.1
+Wave 11 (parallel): US-4.1.2, US-4.1.3, US-4.2.2, US-4.2.3, US-4.4.2
+Wave 12 (parallel): US-4.3.1, US-4.3.2, US-4.5.1
+Wave 13 (parallel): US-4.3.3, US-4.5.2
+```
 
 - **Tên sản phẩm:** InsightEngine
 - **Product slug:** `insight-engine`
@@ -387,6 +492,95 @@
 
 ---
 
+## Phase 4: Nâng cấp — Template Library, Presentation HTML & Script Architecture
+
+> **Nguồn gốc:** Phản hồi từ testing Phase 0-3. **15 stories PLANNED.**
+
+### Epic 4.1: Template Library PPTX
+
+- [ ] **US-4.1.1** — Thư viện template PPTX chuyên nghiệp
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: ~~US-1.4.1~~ ✅, ~~US-3.3.1~~ ✅
+  - Tham khảo: slidemembers.com, aippt.com, canva.com
+
+- [ ] **US-4.1.2** — Preview và chọn template
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: US-4.1.1
+
+- [ ] **US-4.1.3** — Kiến trúc script cho tao-slide
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: US-4.1.1
+  - Tham khảo: a-z-copilot-flow/skills/pptx/scripts/
+
+### Epic 4.2: HTML Presentation Mode (reveal.js)
+
+- [ ] **US-4.2.1** — Tích hợp reveal.js cho tao-html
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: ~~US-2.4.1~~ ✅, ~~US-3.3.1~~ ✅
+  - Tham khảo: revealjs.com, slides.com/templates
+
+- [ ] **US-4.2.2** — Hiệu ứng chuyển đổi và animation
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: US-4.2.1
+  - Tham khảo: revealjs.com, deckdeckgo.com
+
+- [ ] **US-4.2.3** — Themes và backgrounds
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: US-4.2.1
+  - Tham khảo: slides.com/templates, deckdeckgo.com
+
+### Epic 4.3: Script Architecture cho Skills
+
+- [ ] **US-4.3.1** — scripts/ cho tao-slide
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: US-4.1.3
+  - Tham khảo: a-z-copilot-flow/skills/pptx/scripts/
+
+- [ ] **US-4.3.2** — scripts/ cho tao-html
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: US-4.2.1
+
+- [ ] **US-4.3.3** — Script architecture cho tao-word, tao-excel, tao-pdf
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: US-4.3.1, US-4.3.2
+
+### Epic 4.4: Nâng cấp Content Depth
+
+- [ ] **US-4.4.1** — bien-soan comprehensive mode
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅, ~~US-3.2.1~~ ✅
+
+- [ ] **US-4.4.2** — Tự động làm giàu nội dung từ web
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: ~~US-2.1.1~~ ✅, US-4.4.1
+
+### Epic 4.5: Template Library HTML
+
+- [ ] **US-4.5.1** — Thư viện template HTML reveal.js
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: US-4.2.1, US-4.2.3
+  - Tham khảo: slides.com/templates, deckdeckgo.com
+
+- [ ] **US-4.5.2** — Presenter notes và PDF export
+  - Trạng thái: PLANNED
+  - Assignee: —
+  - Bị chặn bởi: US-4.5.1
+  - Tham khảo: revealjs.com
+
+---
+
 ### Execution Order (Recommended)
 
 ```
@@ -399,6 +593,11 @@ Wave 6 (parallel): US-1.1.2, US-1.2.2, US-2.1.1, US-2.2.1, US-2.3.1, US-2.4.1, U
 Wave 7 (parallel): US-1.3.1, US-1.4.1
 Wave 8 (parallel): US-2.5.1, US-3.1.1, US-3.3.1
 Wave 9 (parallel): US-3.1.2, US-3.4.1
+--- Phase 0-3 DONE (21/21) ---
+Wave 10 (parallel): US-4.1.1, US-4.2.1, US-4.4.1
+Wave 11 (parallel): US-4.1.2, US-4.1.3, US-4.2.2, US-4.2.3, US-4.4.2
+Wave 12 (parallel): US-4.3.1, US-4.3.2, US-4.5.1
+Wave 13 (parallel): US-4.3.3, US-4.5.2
 ```
 
 ---
