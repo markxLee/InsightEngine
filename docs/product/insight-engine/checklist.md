@@ -283,8 +283,9 @@
   - Blocked By: ~~US-1.2.1~~ ✅, ~~US-3.2.1~~ ✅
 
 - [ ] **US-4.4.2** — Content enrichment from multiple sources
-  - Status: PLANNED
-  - Assignee: —
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-4.4.2
   - Blocked By: ~~US-2.1.1~~ ✅, ~~US-4.4.1~~ ✅
 
 ### Epic 4.5: Template Library HTML
@@ -583,8 +584,9 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
   - Bị chặn bởi: ~~US-1.2.1~~ ✅, ~~US-3.2.1~~ ✅
 
 - [ ] **US-4.4.2** — Tự động làm giàu nội dung từ web
-  - Trạng thái: PLANNED
-  - Assignee: —
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-4.4.2
   - Bị chặn bởi: ~~US-2.1.1~~ ✅, ~~US-4.4.1~~ ✅
 
 ### Epic 4.5: Template Library HTML
