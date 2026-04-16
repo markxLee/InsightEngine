@@ -297,8 +297,9 @@
   - Refs: slides.com/templates, deckdeckgo.com
 
 - [ ] **US-4.5.2** — Presenter notes and PDF export
-  - Status: PLANNED
-  - Assignee: —
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-4.5.2
   - Blocked By: ~~US-4.5.1~~ ✅
   - Refs: revealjs.com
 
@@ -596,8 +597,9 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
   - Tham khảo: slides.com/templates, deckdeckgo.com
 
 - [ ] **US-4.5.2** — Presenter notes và PDF export
-  - Trạng thái: PLANNED
-  - Assignee: —
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-4.5.2
   - Bị chặn bởi: ~~US-4.5.1~~ ✅
   - Tham khảo: revealjs.com
 
