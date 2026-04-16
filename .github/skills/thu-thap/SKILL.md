@@ -361,3 +361,33 @@ HYBRID_MODE:
     - Mark source origin in combined output: [File], [URL], [Web Search]
     - bien-soan can use origin to weight reliability
 ```
+
+---
+
+## Enrichment Callback (US-4.4.2)
+
+thu-thap can be called by bien-soan during synthesis when source content is thin.
+
+```yaml
+ENRICHMENT_CALLBACK:
+  trigger:
+    - bien-soan detects thin content in specific sections
+    - bien-soan generates search queries for those sections
+    - Copilot calls thu-thap web search on behalf of bien-soan
+    
+  workflow:
+    1. bien-soan passes enrichment queries (1-2 per thin section)
+    2. Copilot runs vscode-websearchforcopilot_webSearch per query
+    3. Copilot fetches top 2-3 URLs via fetch_webpage
+    4. Content returned to bien-soan with [Web: url] attribution
+    
+  constraints:
+    max_queries: 2 per section
+    max_urls_per_query: 3
+    max_total: 10 sources
+    
+  attribution:
+    - All enrichment content tagged: [Web Search: source_url]
+    - bien-soan tracks which sections were enriched
+    - Final output includes enrichment metadata
+```
