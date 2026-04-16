@@ -146,7 +146,9 @@
 ### Epic 2.4: Xuất HTML (`tao-html`)
 
 - [ ] **US-2.4.1** — Static HTML page output with 3 template styles
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-2.4.1
   - Blocked By: ~~US-1.2.1~~ ✅
 
 ### Epic 2.5: Chaining Output
@@ -316,7 +318,9 @@
 ### Epic 2.4: Xuất HTML (`tao-html`)
 
 - [ ] **US-2.4.1** — Xuất HTML tĩnh với 3 template style
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-2.4.1
   - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 ### Epic 2.5: Chaining Output
