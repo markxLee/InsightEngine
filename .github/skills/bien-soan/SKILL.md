@@ -296,6 +296,51 @@ BILINGUAL_MODE:
 
 ---
 
+## Large Document Chunking (US-3.2.1)
+
+Handles combined input exceeding Copilot context window by processing in chunks.
+
+```yaml
+THRESHOLD:
+  detect: Combined input > 50,000 words OR > 200,000 characters
+  action: Switch to chunking mode automatically
+
+CHUNKING_STRATEGY:
+  1_SPLIT:
+    method: Split by sections (headings) preferring natural boundaries
+    fallback: Split by paragraphs if sections are too large
+    chunk_size: ~10,000-15,000 words per chunk
+    overlap: 500 words overlap between chunks (for continuity)
+    
+  2_PROCESS_INCREMENTALLY:
+    for_each_chunk:
+      - Analyze key points and themes
+      - Generate chunk summary (500-1000 words)
+      - Extract data/facts/quotes
+      - Preserve source attribution
+    progress_report: |
+      Dang xu ly phan {current}/{total}...
+      
+  3_MERGE_SUMMARIES:
+    - Combine chunk summaries into master outline
+    - Identify cross-chunk themes and connections
+    - Resolve any cross-chunk contradictions
+    - Generate final coherent document from summaries
+    
+  4_QUALITY_CHECK:
+    - Verify all source chunks represented in output
+    - Check no major topics dropped between chunks
+    - Ensure consistent terminology across merged output
+    - Compare output length to expected range
+
+PIPELINE_MODE:
+  - Auto-detect and chunk without asking user
+  - Report chunking decision and progress
+  - Final output quality comparable to non-chunked processing
+```
+
+---
+
 ## What This Skill Does NOT Do
 
 - Does NOT read files — that's thu-thap's job
