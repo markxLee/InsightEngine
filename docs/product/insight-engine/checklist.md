@@ -86,7 +86,9 @@
 ### Epic 1.2: Biên soạn nội dung (`bien-soan`)
 
 - [ ] **US-1.2.1** — Multi-source content synthesis
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-1.2.1
   - Blocked By: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.2.2** — Basic translation Vietnamese ↔ English
@@ -240,7 +242,9 @@
 ### Epic 1.2: Biên soạn nội dung (`bien-soan`)
 
 - [ ] **US-1.2.1** — Tổng hợp nội dung đa nguồn
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-1.2.1
   - Bị chặn bởi: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.2.2** — Dịch thuật cơ bản Việt ↔ Anh
