@@ -85,27 +85,27 @@
 
 ### Epic 1.2: Biên soạn nội dung (`bien-soan`)
 
-- [ ] **US-1.2.1** — Multi-source content synthesis
-  - Status: IN_PROGRESS
+- [x] **US-1.2.1** — Multi-source content synthesis
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-1.2.1
   - Blocked By: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.2.2** — Basic translation Vietnamese ↔ English
   - Status: PLANNED
-  - Blocked By: US-1.2.1
+  - Blocked By: ~~US-1.2.1~~ ✅
 
 ### Epic 1.3: Xuất Word (`tao-word`)
 
 - [ ] **US-1.3.1** — Word document output with 3 template styles
   - Status: PLANNED
-  - Blocked By: US-1.2.1, ~~US-1.1.1~~ ✅
+  - Blocked By: ~~US-1.2.1~~ ✅, ~~US-1.1.1~~ ✅
 
 ### Epic 1.4: Xuất PowerPoint (`tao-slide`)
 
 - [ ] **US-1.4.1** — PowerPoint output with 3 template styles
   - Status: PLANNED
-  - Blocked By: US-1.2.1, ~~US-1.1.1~~ ✅
+  - Blocked By: ~~US-1.2.1~~ ✅, ~~US-1.1.1~~ ✅
 
 ---
 
@@ -121,19 +121,19 @@
 
 - [ ] **US-2.2.1** — Excel output with formulas and formatting
   - Status: PLANNED
-  - Blocked By: US-1.2.1
+  - Blocked By: ~~US-1.2.1~~ ✅
 
 ### Epic 2.3: Xuất PDF (`tao-pdf`)
 
 - [ ] **US-2.3.1** — PDF output from synthesized content
   - Status: PLANNED
-  - Blocked By: US-1.2.1
+  - Blocked By: ~~US-1.2.1~~ ✅
 
 ### Epic 2.4: Xuất HTML (`tao-html`)
 
 - [ ] **US-2.4.1** — Static HTML page output with 3 template styles
   - Status: PLANNED
-  - Blocked By: US-1.2.1
+  - Blocked By: ~~US-1.2.1~~ ✅
 
 ### Epic 2.5: Chaining Output
 
@@ -159,7 +159,7 @@
 
 - [ ] **US-3.2.1** — Large document chunking strategy
   - Status: PLANNED
-  - Blocked By: US-1.2.1
+  - Blocked By: ~~US-1.2.1~~ ✅
 
 ### Epic 3.3: Template Library mở rộng
 
@@ -241,27 +241,27 @@
 
 ### Epic 1.2: Biên soạn nội dung (`bien-soan`)
 
-- [ ] **US-1.2.1** — Tổng hợp nội dung đa nguồn
-  - Trạng thái: IN_PROGRESS
+- [x] **US-1.2.1** — Tổng hợp nội dung đa nguồn
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-1.2.1
   - Bị chặn bởi: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.2.2** — Dịch thuật cơ bản Việt ↔ Anh
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.2.1
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 ### Epic 1.3: Xuất Word (`tao-word`)
 
 - [ ] **US-1.3.1** — Xuất Word với 3 template style
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.2.1, ~~US-1.1.1~~ ✅
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅, ~~US-1.1.1~~ ✅
 
 ### Epic 1.4: Xuất PowerPoint (`tao-slide`)
 
 - [ ] **US-1.4.1** — Xuất PowerPoint với 3 template style
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.2.1, ~~US-1.1.1~~ ✅
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅, ~~US-1.1.1~~ ✅
 
 ---
 
@@ -277,19 +277,19 @@
 
 - [ ] **US-2.2.1** — Xuất Excel với công thức và formatting
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.2.1
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 ### Epic 2.3: Xuất PDF (`tao-pdf`)
 
 - [ ] **US-2.3.1** — Xuất PDF từ nội dung tổng hợp
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.2.1
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 ### Epic 2.4: Xuất HTML (`tao-html`)
 
 - [ ] **US-2.4.1** — Xuất HTML tĩnh với 3 template style
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.2.1
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 ### Epic 2.5: Chaining Output
 
@@ -315,7 +315,7 @@
 
 - [ ] **US-3.2.1** — Chunking strategy cho tài liệu lớn
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-1.2.1
+  - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 ### Epic 3.3: Template Library mở rộng
 
