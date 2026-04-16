@@ -1,0 +1,26 @@
+meta:
+  branch_slug: insight-engine-us-4.2.1
+  feature_name: "reveal.js integration for tao-html"
+  user_story_id: US-4.2.1
+  product_slug: insight-engine
+  checklist_path: docs/product/insight-engine/checklist.md
+  created_at: "2026-04-16T00:00:00Z"
+  last_updated: "2026-04-16T00:00:00Z"
+  updated_by: copilot
+session:
+  last_agent: copilot
+  last_device: macOS
+  last_checkpoint: "2026-04-16T00:00:00Z"
+handoff_context:
+  what_was_done: "Story locked, workflow initialized"
+  what_is_next: "Implement reveal.js integration"
+  key_decisions: []
+  files_changed: []
+  open_questions: []
+  warnings: []
+status:
+  current_phase: 0
+  phase_name: analysis
+  phase_status: not-started
+  last_action: "Story locked and state initialized"
+  next_action: "Implement reveal.js integration"

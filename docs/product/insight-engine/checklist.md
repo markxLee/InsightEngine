@@ -229,8 +229,9 @@
 ### Epic 4.2: HTML Presentation Mode (reveal.js)
 
 - [ ] **US-4.2.1** — reveal.js integration for tao-html
-  - Status: PLANNED
-  - Assignee: —
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-4.2.1
   - Blocked By: ~~US-2.4.1~~ ✅, ~~US-3.3.1~~ ✅
   - Refs: revealjs.com, slides.com/templates
 
@@ -518,8 +519,9 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
 ### Epic 4.2: HTML Presentation Mode (reveal.js)
 
 - [ ] **US-4.2.1** — Tích hợp reveal.js cho tao-html
-  - Trạng thái: PLANNED
-  - Assignee: —
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-4.2.1
   - Bị chặn bởi: ~~US-2.4.1~~ ✅, ~~US-3.3.1~~ ✅
   - Tham khảo: revealjs.com, slides.com/templates
 
