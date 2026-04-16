@@ -47,8 +47,8 @@
   - Branch: feature/insight-engine-us-0.2.1
   - Blocked By: None
 
-- [ ] **US-0.2.2** — Setup skill (`cai-dat`)
-  - Status: IN_PROGRESS
+- [x] **US-0.2.2** — Setup skill (`cai-dat`)
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-0.2.2
   - Blocked By: ~~US-0.2.1~~ ✅
@@ -57,7 +57,7 @@
 
 - [ ] **US-0.3.1** — Pipeline skill skeleton with intent routing
   - Status: PLANNED
-  - Blocked By: ~~US-0.1.1~~ ✅, US-0.2.2
+  - Blocked By: ~~US-0.1.1~~ ✅, ~~US-0.2.2~~ ✅
 
 - [ ] **US-0.3.2** — Setup check before each pipeline process
   - Status: PLANNED
@@ -195,8 +195,8 @@
   - Branch: feature/insight-engine-us-0.2.1
   - Bị chặn bởi: None
 
-- [ ] **US-0.2.2** — Skill cài đặt (`cai-dat`)
-  - Trạng thái: IN_PROGRESS
+- [x] **US-0.2.2** — Skill cài đặt (`cai-dat`)
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-0.2.2
   - Bị chặn bởi: ~~US-0.2.1~~ ✅
@@ -205,7 +205,7 @@
 
 - [ ] **US-0.3.1** — Pipeline skeleton với intent routing
   - Trạng thái: PLANNED
-  - Bị chặn bởi: ~~US-0.1.1~~ ✅, US-0.2.2
+  - Bị chặn bởi: ~~US-0.1.1~~ ✅, ~~US-0.2.2~~ ✅
 
 - [ ] **US-0.3.2** — Kiểm tra setup trước mỗi process
   - Trạng thái: PLANNED
