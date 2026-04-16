@@ -61,8 +61,8 @@
   - Branch: feature/insight-engine-us-0.3.1
   - Blocked By: ~~US-0.1.1~~ ✅, ~~US-0.2.2~~ ✅
 
-- [ ] **US-0.3.2** — Setup check before each pipeline process
-  - Status: IN_PROGRESS
+- [x] **US-0.3.2** — Setup check before each pipeline process
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-0.3.2
   - Blocked By: ~~US-0.3.1~~ ✅
@@ -75,7 +75,7 @@
 
 - [ ] **US-1.1.1** — Read local files via markitdown
   - Status: PLANNED
-  - Blocked By: US-0.3.2
+  - Blocked By: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.1.2** — Fetch URL content
   - Status: PLANNED
@@ -85,7 +85,7 @@
 
 - [ ] **US-1.2.1** — Multi-source content synthesis
   - Status: PLANNED
-  - Blocked By: US-0.3.2
+  - Blocked By: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.2.2** — Basic translation Vietnamese ↔ English
   - Status: PLANNED
@@ -213,8 +213,8 @@
   - Branch: feature/insight-engine-us-0.3.1
   - Bị chặn bởi: ~~US-0.1.1~~ ✅, ~~US-0.2.2~~ ✅
 
-- [ ] **US-0.3.2** — Kiểm tra setup trước mỗi process
-  - Trạng thái: IN_PROGRESS
+- [x] **US-0.3.2** — Kiểm tra setup trước mỗi process
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-0.3.2
   - Bị chặn bởi: ~~US-0.3.1~~ ✅
@@ -227,7 +227,7 @@
 
 - [ ] **US-1.1.1** — Đọc file local qua markitdown
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-0.3.2
+  - Bị chặn bởi: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.1.2** — Fetch nội dung URL
   - Trạng thái: PLANNED
@@ -237,7 +237,7 @@
 
 - [ ] **US-1.2.1** — Tổng hợp nội dung đa nguồn
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-0.3.2
+  - Bị chặn bởi: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.2.2** — Dịch thuật cơ bản Việt ↔ Anh
   - Trạng thái: PLANNED

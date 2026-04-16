@@ -11,6 +11,7 @@ Usage:
 
 import argparse
 import importlib
+import importlib.util
 import shutil
 import subprocess
 import sys
@@ -35,11 +36,7 @@ def check_node_version(min_major=18):
 
 
 def check_pip_package(name):
-    try:
-        importlib.import_module(name)
-        return True
-    except ImportError:
-        return False
+    return importlib.util.find_spec(name) is not None
 
 
 def check_node_package(name):
