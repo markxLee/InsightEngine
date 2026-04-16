@@ -16,6 +16,8 @@ from typing import Optional
 REVEALJS_VERSION = "5.1.0"
 REVEALJS_CDN = f"https://cdn.jsdelivr.net/npm/reveal.js@{REVEALJS_VERSION}"
 
+TRANSITIONS = ["none", "slide", "fade", "convex", "concave", "zoom"]
+
 STYLES = {
     # ── Light variants ──────────────────────────────────────────────
     "corporate": {
@@ -31,6 +33,7 @@ STYLES = {
         "table_stripe_bg": "rgba(49,130,206,0.06)",
         "blockquote_bg": "rgba(49,130,206,0.05)",
         "code_bg": "#f7fafc",
+        "default_transition": "slide",
     },
     "academic": {
         "reveal_theme": "simple",
@@ -45,6 +48,7 @@ STYLES = {
         "table_stripe_bg": "rgba(116,66,16,0.05)",
         "blockquote_bg": "rgba(116,66,16,0.04)",
         "code_bg": "#f5f0eb",
+        "default_transition": "fade",
     },
     "minimal": {
         "reveal_theme": "white",
@@ -59,6 +63,7 @@ STYLES = {
         "table_stripe_bg": "rgba(5,150,105,0.05)",
         "blockquote_bg": "rgba(5,150,105,0.04)",
         "code_bg": "#f9fafb",
+        "default_transition": "none",
     },
     "creative": {
         "reveal_theme": "moon",
@@ -73,6 +78,7 @@ STYLES = {
         "table_stripe_bg": "rgba(139,92,246,0.06)",
         "blockquote_bg": "rgba(245,158,11,0.08)",
         "code_bg": "#fef3c7",
+        "default_transition": "zoom",
     },
     "warm-earth": {
         "reveal_theme": "simple",
@@ -87,6 +93,7 @@ STYLES = {
         "table_stripe_bg": "rgba(180,83,9,0.05)",
         "blockquote_bg": "rgba(180,83,9,0.06)",
         "code_bg": "#fef3c7",
+        "default_transition": "convex",
     },
     # ── Dark variants ───────────────────────────────────────────────
     "dark-modern": {
@@ -102,6 +109,7 @@ STYLES = {
         "table_stripe_bg": "rgba(99,102,241,0.1)",
         "blockquote_bg": "rgba(99,102,241,0.08)",
         "code_bg": "#1e293b",
+        "default_transition": "fade",
     },
     "dark-neon": {
         "reveal_theme": "night",
@@ -116,6 +124,7 @@ STYLES = {
         "table_stripe_bg": "rgba(0,255,200,0.06)",
         "blockquote_bg": "rgba(255,60,172,0.08)",
         "code_bg": "#18181b",
+        "default_transition": "zoom",
     },
     "dark-elegant": {
         "reveal_theme": "night",
@@ -130,6 +139,7 @@ STYLES = {
         "table_stripe_bg": "rgba(224,164,88,0.08)",
         "blockquote_bg": "rgba(224,164,88,0.06)",
         "code_bg": "#16213e",
+        "default_transition": "concave",
     },
 }
 
@@ -194,22 +204,30 @@ def _bg_attrs(slide: dict) -> str:
     return (" " + " ".join(attrs)) if attrs else ""
 
 
-def render_slide(slide: dict) -> str:
-    """Render a single slide dict to a <section> HTML block."""
+def render_slide(slide: dict, fragments: bool = True) -> str:
+    """Render a single slide dict to a <section> HTML block.
+    
+    Per-slide transition: add "transition" key to slide dict.
+    Fragment animations: bullets appear one-by-one when fragments=True.
+    """
     slide_type = slide.get("type", "content")
     notes = slide.get("notes", "")
     notes_html = f'<aside class="notes">{escape(notes)}</aside>' if notes else ""
     bg = _bg_attrs(slide)
+    
+    # Per-slide transition override
+    trans = slide.get("transition", "")
+    trans_attr = f' data-transition="{escape(trans)}"' if trans else ""
 
     if slide_type == "title":
         title = escape(slide.get("title", ""))
         subtitle = escape(slide.get("subtitle", ""))
         sub_html = f"<h3>{subtitle}</h3>" if subtitle else ""
-        return f'<section data-state="title-slide"{bg}><h1>{title}</h1>{sub_html}{notes_html}</section>'
+        return f'<section data-state="title-slide"{bg}{trans_attr}><h1>{title}</h1>{sub_html}{notes_html}</section>'
 
     if slide_type == "section":
         title = escape(slide.get("title", ""))
-        return f'<section{bg}><h2>{title}</h2>{notes_html}</section>'
+        return f'<section{bg}{trans_attr}><h2>{title}</h2>{notes_html}</section>'
 
     if slide_type == "content":
         title = escape(slide.get("title", ""))
@@ -217,11 +235,12 @@ def render_slide(slide: dict) -> str:
         text = slide.get("text", "")
         body = ""
         if bullets:
-            items = "".join(f"<li>{escape(b)}</li>" for b in bullets)
+            frag_class = ' class="fragment"' if fragments else ""
+            items = "".join(f"<li{frag_class}>{escape(b)}</li>" for b in bullets)
             body = f"<ul>{items}</ul>"
         elif text:
             body = f"<p>{escape(text)}</p>"
-        return f"<section{bg}><h3>{title}</h3>{body}{notes_html}</section>"
+        return f"<section{bg}{trans_attr}><h3>{title}</h3>{body}{notes_html}</section>"
 
     if slide_type == "image":
         title = escape(slide.get("title", ""))
@@ -230,19 +249,19 @@ def render_slide(slide: dict) -> str:
         src = embed_image_base64(image_path) if image_path else ""
         img_tag = f'<img src="{src}" alt="{caption}" style="max-height:60vh;">' if src else f"<p><em>{caption}</em></p>"
         cap_html = f"<p><small>{caption}</small></p>" if caption else ""
-        return f"<section{bg}><h3>{title}</h3>{img_tag}{cap_html}{notes_html}</section>"
+        return f"<section{bg}{trans_attr}><h3>{title}</h3>{img_tag}{cap_html}{notes_html}</section>"
 
     if slide_type == "quote":
         text = escape(slide.get("text", ""))
         author = escape(slide.get("author", ""))
         cite = f"<cite>— {author}</cite>" if author else ""
-        return f"<section{bg}><blockquote><p>{text}</p>{cite}</blockquote>{notes_html}</section>"
+        return f"<section{bg}{trans_attr}><blockquote><p>{text}</p>{cite}</blockquote>{notes_html}</section>"
 
     if slide_type == "code":
         title = escape(slide.get("title", ""))
         lang = slide.get("language", "")
         code = escape(slide.get("code", ""))
-        return f'<section{bg}><h3>{title}</h3><pre><code data-trim data-noescape class="language-{lang}">{code}</code></pre>{notes_html}</section>'
+        return f'<section{bg}{trans_attr}><h3>{title}</h3><pre><code data-trim data-noescape class="language-{lang}">{code}</code></pre>{notes_html}</section>'
 
     if slide_type == "table":
         title = escape(slide.get("title", ""))
@@ -254,19 +273,20 @@ def render_slide(slide: dict) -> str:
             tds = "".join(f"<td>{escape(str(c))}</td>" for c in row)
             tr_list.append(f"<tr>{tds}</tr>")
         tbody = "".join(tr_list)
-        return f"<section{bg}><h3>{title}</h3><table><thead><tr>{th}</tr></thead><tbody>{tbody}</tbody></table>{notes_html}</section>"
+        return f"<section{bg}{trans_attr}><h3>{title}</h3><table><thead><tr>{th}</tr></thead><tbody>{tbody}</tbody></table>{notes_html}</section>"
 
     if slide_type == "closing":
         title = escape(slide.get("title", "Cảm ơn!"))
         subtitle = escape(slide.get("subtitle", ""))
         sub_html = f"<p>{subtitle}</p>" if subtitle else ""
-        return f'<section data-state="closing-slide"{bg}><h2>{title}</h2>{sub_html}{notes_html}</section>'
+        return f'<section data-state="closing-slide"{bg}{trans_attr}><h2>{title}</h2>{sub_html}{notes_html}</section>'
 
     # Fallback: treat as content
-    return render_slide({**slide, "type": "content"})
+    return render_slide({**slide, "type": "content"}, fragments=fragments)
 
 
-def generate_html(data: dict, style_name: str, global_background: Optional[str] = None) -> str:
+def generate_html(data: dict, style_name: str, global_background: Optional[str] = None,
+                   transition: Optional[str] = None, fragments: bool = True) -> str:
     """Generate complete reveal.js HTML from slide data and style.
 
     Args:
@@ -276,13 +296,28 @@ def generate_html(data: dict, style_name: str, global_background: Optional[str] 
             - color: "#1a365d"
             - gradient: "linear-gradient(135deg, #667eea, #764ba2)"
             - image URL: "https://example.com/bg.jpg"
+        transition: Transition type (none, slide, fade, convex, concave, zoom).
+                    Falls back to style default, then 'slide'.
+        fragments: Enable fragment animations for bullet points (default: True).
     """
     style = STYLES.get(style_name, STYLES["corporate"])
     title = escape(data.get("title", "Presentation"))
     author = escape(data.get("author", ""))
     slides = data.get("slides", [])
 
-    slides_html = "\n        ".join(render_slide(s) for s in slides)
+    # Resolve transition: CLI flag > JSON data > style default > 'slide'
+    effective_transition = (
+        transition
+        or data.get("transition")
+        or style.get("default_transition", "slide")
+    )
+    if effective_transition not in TRANSITIONS:
+        effective_transition = "slide"
+
+    # Resolve fragments: CLI flag > JSON data > default True
+    effective_fragments = data.get("fragments", fragments)
+
+    slides_html = "\n        ".join(render_slide(s, fragments=effective_fragments) for s in slides)
 
     # Determine effective background for Reveal.initialize
     bg_color = style["background"]
@@ -304,8 +339,6 @@ def generate_html(data: dict, style_name: str, global_background: Optional[str] 
         global_bg_css = f"""
       .reveal {{ background: {global_background}; }}
       .reveal .slide-background {{ background: transparent !important; }}"""
-
-    slides_html = "\n        ".join(render_slide(s) for s in slides)
 
     custom_css = f"""
       .reveal {{
@@ -392,7 +425,7 @@ def generate_html(data: dict, style_name: str, global_background: Optional[str] 
     Reveal.initialize({{
       hash: true,
       slideNumber: true,
-      transition: 'slide',
+      transition: '{effective_transition}',
       backgroundColor: '{bg_color}',{parallax_cfg}
       plugins: [RevealNotes, RevealHighlight]
     }});
@@ -410,6 +443,10 @@ def main():
                         help="Presentation style (default: corporate)")
     parser.add_argument("--background", default=None,
                         help="Global background: color (#hex), gradient (linear-gradient(...)), or image URL")
+    parser.add_argument("--transition", choices=TRANSITIONS, default=None,
+                        help="Slide transition type (overrides style default)")
+    parser.add_argument("--no-fragments", action="store_true",
+                        help="Disable fragment animations (bullets appear all at once)")
     args = parser.parse_args()
 
     input_path = Path(args.input)
@@ -420,7 +457,9 @@ def main():
     with open(input_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    html = generate_html(data, args.style, args.background)
+    html = generate_html(data, args.style, args.background,
+                         transition=args.transition,
+                         fragments=not args.no_fragments)
 
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)

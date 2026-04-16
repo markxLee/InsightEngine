@@ -238,8 +238,8 @@
   - Blocked By: ~~US-2.4.1~~ ✅, ~~US-3.3.1~~ ✅
   - Refs: revealjs.com, slides.com/templates
 
-- [ ] **US-4.2.2** — Transitions, animations, and visual effects
-  - Status: IN_PROGRESS
+- [x] **US-4.2.2** — Transitions, animations, and visual effects
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-4.2.2
   - Blocked By: ~~US-4.2.1~~ ✅
@@ -537,8 +537,8 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
   - Bị chặn bởi: ~~US-2.4.1~~ ✅, ~~US-3.3.1~~ ✅
   - Tham khảo: revealjs.com, slides.com/templates
 
-- [ ] **US-4.2.2** — Hiệu ứng chuyển đổi và animation
-  - Trạng thái: IN_PROGRESS
+- [x] **US-4.2.2** — Hiệu ứng chuyển đổi và animation
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-4.2.2
   - Bị chặn bởi: ~~US-4.2.1~~ ✅

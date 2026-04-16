@@ -3,9 +3,9 @@ name: tao-html
 description: |
   Create professional static HTML pages OR reveal.js presentations from synthesized content.
   Two modes: "page" (static page with inline CSS) and "presentation" (reveal.js slides).
-  8 styles with light/dark variants. Per-slide and global background support (color, gradient, image, video URL).
-  Use when user says "tạo trang web", "tạo html", or "/tao-html".
-argument-hint: "[content] [style: corporate|academic|minimal|dark-modern|creative|warm-earth|dark-neon|dark-elegant] [mode: page|presentation] [--background ...]"
+  8 styles with light/dark variants. Transitions (slide/fade/zoom/convex/concave), fragment animations,
+  per-slide backgrounds, code syntax highlighting. Use when user says "tạo trang web", "tạo html", or "/tao-html".
+argument-hint: "[content] [style: corporate|academic|minimal|dark-modern|creative|warm-earth|dark-neon|dark-elegant] [mode: page|presentation] [--transition slide|fade|zoom|convex|concave|none] [--background ...]"
 ---
 
 # Tạo HTML — Static HTML Page & Presentation Output Skill
@@ -521,6 +521,66 @@ CLI_EXAMPLES:
   # Per-slide backgrounds in JSON data
   {"type": "title", "title": "Hello", "background": {"gradient": "linear-gradient(135deg, #667eea, #764ba2)"}}
   {"type": "content", "title": "Data", "bullets": [...], "background": {"image": "https://img.jpg", "opacity": 0.2}}
+```
+
+### Transitions and Animations (US-4.2.2)
+
+Smooth slide transitions and fragment animations for professional presentations.
+
+```yaml
+TRANSITION_TYPES:
+  none:     Instant switch (no animation)
+  slide:    Horizontal slide (corporate default)
+  fade:     Crossfade (academic, dark-modern default)
+  convex:   3D convex rotation (warm-earth default)
+  concave:  3D concave rotation (dark-elegant default)
+  zoom:     Zoom in/out (creative, dark-neon default)
+
+STYLE_DEFAULTS:
+  corporate: slide
+  academic: fade
+  minimal: none
+  creative: zoom
+  warm-earth: convex
+  dark-modern: fade
+  dark-neon: zoom
+  dark-elegant: concave
+
+TRANSITION_PRIORITY:
+  1. CLI --transition flag (highest)
+  2. JSON data "transition" key (top-level)
+  3. Style default (from STYLE_DEFAULTS)
+  4. Fallback: "slide"
+
+PER_SLIDE_TRANSITION:
+  # Override transition for individual slides in JSON:
+  {"type": "content", "title": "Special", "bullets": [...], "transition": "zoom"}
+  
+FRAGMENT_ANIMATIONS:
+  # Bullet points appear one-by-one by default (class="fragment")
+  # Disable globally with --no-fragments CLI flag
+  # Or set "fragments": false in JSON data
+  
+  enabled_by_default: true
+  applies_to: bullet list items in "content" slides
+  effect: Items appear sequentially on spacebar/arrow press
+
+CLI_EXAMPLES:
+  # Corporate with fade transition
+  python3 gen_reveal.py --input data.json --output out.html --style corporate --transition fade
+  
+  # Dark-neon with zoom, no fragments
+  python3 gen_reveal.py --input data.json --output out.html --style dark-neon --transition zoom --no-fragments
+  
+  # Academic with default transition (fade)
+  python3 gen_reveal.py --input data.json --output out.html --style academic
+  
+CODE_SYNTAX_HIGHLIGHTING:
+  plugin: RevealHighlight (highlight.js via CDN)
+  theme: monokai
+  usage: |
+    {"type": "code", "title": "Example", "language": "python", "code": "def hello():\n    print('hi')"}
+  supported_languages: python, javascript, typescript, bash, json, html, css, sql, yaml, etc.
 ```
 
 ---
