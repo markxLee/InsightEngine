@@ -3,9 +3,9 @@ name: tao-html
 description: |
   Create professional static HTML pages OR reveal.js presentations from synthesized content.
   Two modes: "page" (static page with inline CSS) and "presentation" (reveal.js slides).
-  5 styles: corporate, academic, minimal, dark-modern, creative. Single-file portable output.
+  8 styles with light/dark variants. Per-slide and global background support (color, gradient, image, video URL).
   Use when user says "tạo trang web", "tạo html", or "/tao-html".
-argument-hint: "[content] [style: corporate|academic|minimal|dark-modern|creative] [mode: page|presentation]"
+argument-hint: "[content] [style: corporate|academic|minimal|dark-modern|creative|warm-earth|dark-neon|dark-elegant] [mode: page|presentation] [--background ...]"
 ---
 
 # Tạo HTML — Static HTML Page & Presentation Output Skill
@@ -413,59 +413,114 @@ REVEALJS_CDN:
     - Initialization script at bottom
 ```
 
-### Presentation Styles
+### Presentation Styles (US-4.2.3)
+
+8 themes with light/dark variants. Each theme has consistent typography, link colors,
+table styling, blockquote borders, and code block backgrounds.
 
 ```yaml
 PRESENTATION_STYLES:
-  corporate:
+  # ── Light variants ─────────────────────────────────
+  corporate:     # Professional blue business — default for formal content
     reveal_theme: white
-    custom_css:
-      background: "#ffffff"
-      heading_color: "#1a365d"
-      text_color: "#2d3748"
-      accent_color: "#3182ce"
-      font_heading: "'Segoe UI', Arial, sans-serif"
-      font_body: "'Segoe UI', Arial, sans-serif"
-      
-  academic:
+    background: "#ffffff"
+    heading: "#1a365d"  |  accent: "#3182ce"
+    fonts: Segoe UI / Segoe UI
+    
+  academic:      # Scholarly serif — default for research/papers
     reveal_theme: simple
-    custom_css:
-      background: "#fafafa"
-      heading_color: "#1a202c"
-      text_color: "#1a202c"
-      accent_color: "#744210"
-      font_heading: "Georgia, serif"
-      font_body: "Georgia, serif"
-      
-  minimal:
+    background: "#fafafa"
+    heading: "#1a202c"  |  accent: "#744210"
+    fonts: Georgia / Georgia
+    
+  minimal:       # Ultra-clean whitespace — default for clean/simple
     reveal_theme: white
-    custom_css:
-      background: "#ffffff"
-      heading_color: "#111827"
-      text_color: "#374151"
-      accent_color: "#059669"
-      font_heading: "'Inter', Arial, sans-serif"
-      font_body: "'Inter', Arial, sans-serif"
-      
-  dark-modern:
-    reveal_theme: night
-    custom_css:
-      background: "#0f172a"
-      heading_color: "#6366f1"
-      text_color: "#f1f5f9"
-      accent_color: "#22d3ee"
-      font_heading: "'Inter', sans-serif"
-      font_body: "'Inter', sans-serif"
-      
-  creative:
+    background: "#ffffff"
+    heading: "#111827"  |  accent: "#059669"
+    fonts: Inter / Inter
+    
+  creative:      # Purple-amber vibrant — default for marketing/creative
     reveal_theme: moon
-    custom_css:
-      background: "#fffbeb"
-      heading_color: "#8b5cf6"
-      text_color: "#1e1b4b"
-      accent_color: "#f59e0b"
-      font_heading: "'Poppins', sans-serif"
-      font_body: "'Open Sans', sans-serif"
+    background: "#fffbeb"
+    heading: "#8b5cf6"  |  accent: "#f59e0b"
+    fonts: Poppins / Open Sans
+
+  warm-earth:    # Warm earthy tones — for organic/natural content
+    reveal_theme: simple
+    background: "#fdf8f3"
+    heading: "#92400e"  |  accent: "#b45309"
+    fonts: Playfair Display / Source Sans Pro
+
+  # ── Dark variants ──────────────────────────────────
+  dark-modern:   # Indigo/cyan dark — default for tech/modern
+    reveal_theme: night
+    background: "#0f172a"
+    heading: "#6366f1"  |  accent: "#22d3ee"
+    fonts: Inter / Inter
+
+  dark-neon:     # Neon cyan/magenta — for bold tech/gaming
+    reveal_theme: night
+    background: "#0a0a0a"
+    heading: "#00ffc8"  |  accent: "#ff3cac"
+    fonts: JetBrains Mono / Inter
+
+  dark-elegant:  # Gold on navy — for premium/luxury
+    reveal_theme: night
+    background: "#1a1a2e"
+    heading: "#e0a458"  |  accent: "#e0a458"
+    fonts: Playfair Display / Lato
+
+STYLE_DETECTION:
+  formal/business: corporate
+  research/paper: academic
+  clean/simple: minimal
+  marketing/fun: creative
+  nature/organic: warm-earth
+  tech/modern: dark-modern
+  gaming/bold: dark-neon
+  luxury/premium: dark-elegant
+```
+
+### Custom Backgrounds (US-4.2.3)
+
+Per-slide and global background support for reveal.js presentations.
+
+```yaml
+BACKGROUND_TYPES:
+  solid_color:
+    global: --background "#1a365d"
+    per_slide: {"background": "#1a365d"}
+    
+  gradient:
+    global: --background "linear-gradient(135deg, #667eea, #764ba2)"
+    per_slide: {"background": {"gradient": "linear-gradient(135deg, #667eea, #764ba2)"}}
+    
+  image_url:
+    global: --background "https://example.com/bg.jpg"
+    per_slide: {"background": {"image": "https://example.com/bg.jpg", "opacity": 0.3}}
+    
+  local_image:
+    per_slide: {"background": {"image": "/path/to/bg.png", "size": "cover"}}
+    
+  video_url:
+    per_slide: {"background": {"video": "https://example.com/bg.mp4", "opacity": 0.5}}
+
+BACKGROUND_OPTIONS:
+  opacity: 0.0 - 1.0 (dim overlay intensity)
+  size: cover | contain | custom (CSS background-size)
+  position: center | top | bottom (CSS background-position)
+  repeat: no-repeat | repeat (CSS background-repeat)
+
+CLI_EXAMPLES:
+  # Use dark-neon theme
+  python3 gen_reveal.py --input data.json --output out.html --style dark-neon
+  
+  # Use corporate with gradient background
+  python3 gen_reveal.py --input data.json --output out.html --style corporate --background "linear-gradient(135deg, #1a365d, #3182ce)"
+  
+  # Per-slide backgrounds in JSON data
+  {"type": "title", "title": "Hello", "background": {"gradient": "linear-gradient(135deg, #667eea, #764ba2)"}}
+  {"type": "content", "title": "Data", "bullets": [...], "background": {"image": "https://img.jpg", "opacity": 0.2}}
 ```
 
 ---
