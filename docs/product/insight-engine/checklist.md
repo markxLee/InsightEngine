@@ -172,7 +172,9 @@
   - Blocked By: ~~US-2.2.1~~ ✅
 
 - [ ] **US-3.1.2** — Image generation for slides (Apple Silicon)
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-3.1.2
   - Blocked By: ~~US-3.1.1~~ ✅
 
 ### Epic 3.2: Xử lý tài liệu lớn
@@ -352,7 +354,9 @@
   - Bị chặn bởi: ~~US-2.2.1~~ ✅
 
 - [ ] **US-3.1.2** — Tạo hình minh họa cho slide (Apple Silicon)
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-3.1.2
   - Bị chặn bởi: ~~US-3.1.1~~ ✅
 
 ### Epic 3.2: Xử lý tài liệu lớn
