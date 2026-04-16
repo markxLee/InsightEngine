@@ -48,7 +48,9 @@
   - Blocked By: None
 
 - [ ] **US-0.2.2** — Setup skill (`cai-dat`)
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-0.2.2
   - Blocked By: ~~US-0.2.1~~ ✅
 
 ### Epic 0.3: Pipeline Chính (`tong-hop`)
@@ -194,7 +196,9 @@
   - Bị chặn bởi: None
 
 - [ ] **US-0.2.2** — Skill cài đặt (`cai-dat`)
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-0.2.2
   - Bị chặn bởi: ~~US-0.2.1~~ ✅
 
 ### Epic 0.3: Pipeline Chính (`tong-hop`)
