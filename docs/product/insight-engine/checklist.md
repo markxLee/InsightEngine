@@ -42,7 +42,9 @@
 ### Epic 0.2: Cài đặt môi trường (`cai-dat`)
 
 - [ ] **US-0.2.1** — Dependency check script
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-0.2.1
   - Blocked By: None
 
 - [ ] **US-0.2.2** — Setup skill (`cai-dat`)
@@ -186,7 +188,9 @@
 ### Epic 0.2: Cài đặt môi trường (`cai-dat`)
 
 - [ ] **US-0.2.1** — Script kiểm tra dependencies
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-0.2.1
   - Bị chặn bởi: None
 
 - [ ] **US-0.2.2** — Skill cài đặt (`cai-dat`)
