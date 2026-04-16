@@ -138,7 +138,9 @@
 ### Epic 2.3: Xuất PDF (`tao-pdf`)
 
 - [ ] **US-2.3.1** — PDF output from synthesized content
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-2.3.1
   - Blocked By: ~~US-1.2.1~~ ✅
 
 ### Epic 2.4: Xuất HTML (`tao-html`)
@@ -306,7 +308,9 @@
 ### Epic 2.3: Xuất PDF (`tao-pdf`)
 
 - [ ] **US-2.3.1** — Xuất PDF từ nội dung tổng hợp
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-2.3.1
   - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 ### Epic 2.4: Xuất HTML (`tao-html`)
