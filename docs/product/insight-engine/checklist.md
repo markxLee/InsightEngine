@@ -210,8 +210,9 @@
 ### Epic 4.1: Template Library PPTX
 
 - [ ] **US-4.1.1** — Professional PPTX template collection
-  - Status: PLANNED
-  - Assignee: —
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-4.1.1
   - Blocked By: ~~US-1.4.1~~ ✅, ~~US-3.3.1~~ ✅
   - Refs: slidemembers.com, aippt.com, canva.com
 
@@ -500,8 +501,9 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
 ### Epic 4.1: Template Library PPTX
 
 - [ ] **US-4.1.1** — Thư viện template PPTX chuyên nghiệp
-  - Trạng thái: PLANNED
-  - Assignee: —
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-4.1.1
   - Bị chặn bởi: ~~US-1.4.1~~ ✅, ~~US-3.3.1~~ ✅
   - Tham khảo: slidemembers.com, aippt.com, canva.com
 
