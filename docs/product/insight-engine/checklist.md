@@ -195,8 +195,8 @@
 
 ### Epic 3.4: Cải thiện UX Pipeline
 
-- [ ] **US-3.4.1** — Pipeline UX improvements
-  - Status: IN_PROGRESS
+- [x] **US-3.4.1** — Pipeline UX improvements
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-3.4.1
   - Blocked By: ~~US-0.3.1~~ ✅, ~~US-2.5.1~~ ✅
@@ -379,8 +379,8 @@
 
 ### Epic 3.4: Cải thiện UX Pipeline
 
-- [ ] **US-3.4.1** — Cải thiện UX pipeline
-  - Trạng thái: IN_PROGRESS
+- [x] **US-3.4.1** — Cải thiện UX pipeline
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-3.4.1
   - Bị chặn bởi: ~~US-0.3.1~~ ✅, ~~US-2.5.1~~ ✅
