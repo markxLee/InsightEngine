@@ -62,7 +62,9 @@
   - Blocked By: ~~US-0.1.1~~ ✅, ~~US-0.2.2~~ ✅
 
 - [ ] **US-0.3.2** — Setup check before each pipeline process
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-0.3.2
   - Blocked By: ~~US-0.3.1~~ ✅
 
 ---
@@ -212,7 +214,9 @@
   - Bị chặn bởi: ~~US-0.1.1~~ ✅, ~~US-0.2.2~~ ✅
 
 - [ ] **US-0.3.2** — Kiểm tra setup trước mỗi process
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-0.3.2
   - Bị chặn bởi: ~~US-0.3.1~~ ✅
 
 ---
