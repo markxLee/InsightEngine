@@ -1,0 +1,66 @@
+flow_1:
+  current_step: 11
+  step_name: product-checklist
+  status: complete
+  idea_slug: insight-engine
+  product_slug: insight-engine
+  artifacts:
+    - .github/copilot-instructions.md
+    - .github/instructions/insight-engine.instructions.md
+    - docs/idea/insight-engine/idea.md
+    - docs/tech-stack/insight-engine/instructions.md
+    - docs/product/insight-engine/roadmap.md
+    - docs/product/insight-engine/user-stories.md
+    - docs/product/insight-engine/checklist.md
+  tech_stack_activated: true
+  checklist_ready: true
+  user_stories_count: 21
+  verdict: READY
+  review_score: 9/10
+  history:
+    - step: 1
+      name: idea-intake
+      status: complete
+      verdict: READY_FOR_ANALYSIS
+    - step: 2
+      name: idea-analysis
+      status: complete
+      verdict: NEEDS_REVIEW
+    - step: 3
+      name: idea-analysis-review
+      status: complete
+      verdict: READY
+      review_score: 28/30
+    - step: 4
+      name: idea-to-tech-stack
+      status: complete
+    - step: 5
+      name: tech-stack-review
+      status: complete
+      verdict: READY
+      review_score: 26/30
+    - step: 6
+      name: activate-tech-stack
+      status: complete
+    - step: 7
+      name: product-roadmap
+      status: complete
+    - step: 8
+      name: product-roadmap-review
+      status: complete
+      verdict: READY
+      review_score: 9/10
+    - step: 9
+      name: roadmap-to-user-stories
+      status: complete
+      user_stories_count: 21
+    - step: 10
+      name: roadmap-to-user-stories-review
+      status: complete
+      verdict: READY
+      review_score: 9/10
+    - step: 11
+      name: product-checklist
+      status: complete
+      checklist_ready: true
+  updated_at: "2026-04-16T00:00:00Z"
