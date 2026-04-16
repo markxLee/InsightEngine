@@ -129,8 +129,8 @@
 
 ### Epic 2.2: Xuất Excel (`tao-excel`)
 
-- [ ] **US-2.2.1** — Excel output with formulas and formatting
-  - Status: IN_PROGRESS
+- [x] **US-2.2.1** — Excel output with formulas and formatting
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-2.2.1
   - Blocked By: ~~US-1.2.1~~ ✅
@@ -151,7 +151,7 @@
 
 - [ ] **US-2.5.1** — Pipeline output chaining
   - Status: PLANNED
-  - Blocked By: ~~US-1.3.1~~ ✅, ~~US-1.4.1~~ ✅, US-2.2.1
+  - Blocked By: ~~US-1.3.1~~ ✅, ~~US-1.4.1~~ ✅, ~~US-2.2.1~~ ✅
 
 ---
 
@@ -161,7 +161,7 @@
 
 - [ ] **US-3.1.1** — Chart generation from data
   - Status: PLANNED
-  - Blocked By: US-2.2.1
+  - Blocked By: ~~US-2.2.1~~ ✅
 
 - [ ] **US-3.1.2** — Image generation for slides (Apple Silicon)
   - Status: PLANNED
@@ -297,8 +297,8 @@
 
 ### Epic 2.2: Xuất Excel (`tao-excel`)
 
-- [ ] **US-2.2.1** — Xuất Excel với công thức và formatting
-  - Trạng thái: IN_PROGRESS
+- [x] **US-2.2.1** — Xuất Excel với công thức và formatting
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-2.2.1
   - Bị chặn bởi: ~~US-1.2.1~~ ✅
@@ -319,7 +319,7 @@
 
 - [ ] **US-2.5.1** — Chuỗi output trong pipeline
   - Trạng thái: PLANNED
-  - Bị chặn bởi: ~~US-1.3.1~~ ✅, ~~US-1.4.1~~ ✅, US-2.2.1
+  - Bị chặn bởi: ~~US-1.3.1~~ ✅, ~~US-1.4.1~~ ✅, ~~US-2.2.1~~ ✅
 
 ---
 
@@ -329,7 +329,7 @@
 
 - [ ] **US-3.1.1** — Tạo biểu đồ từ dữ liệu
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-2.2.1
+  - Bị chặn bởi: ~~US-2.2.1~~ ✅
 
 - [ ] **US-3.1.2** — Tạo hình minh họa cho slide (Apple Silicon)
   - Trạng thái: PLANNED
