@@ -244,8 +244,9 @@
   - Refs: revealjs.com, deckdeckgo.com
 
 - [ ] **US-4.2.3** — HTML presentation themes and backgrounds
-  - Status: PLANNED
-  - Assignee: —
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-4.2.3
   - Blocked By: ~~US-4.2.1~~ ✅
   - Refs: slides.com/templates, deckdeckgo.com
 
@@ -537,8 +538,9 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
   - Tham khảo: revealjs.com, deckdeckgo.com
 
 - [ ] **US-4.2.3** — Themes và backgrounds
-  - Trạng thái: PLANNED
-  - Assignee: —
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-4.2.3
   - Bị chặn bởi: ~~US-4.2.1~~ ✅
   - Tham khảo: slides.com/templates, deckdeckgo.com
 
