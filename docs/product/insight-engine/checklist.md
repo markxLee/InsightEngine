@@ -122,7 +122,9 @@
 ### Epic 2.1: Tìm kiếm Google tự động
 
 - [ ] **US-2.1.1** — Web search integration in thu-thap
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-2.1.1
   - Blocked By: ~~US-1.1.1~~ ✅
 
 ### Epic 2.2: Xuất Excel (`tao-excel`)
@@ -286,7 +288,9 @@
 ### Epic 2.1: Tìm kiếm Google tự động
 
 - [ ] **US-2.1.1** — Tích hợp web search vào thu-thap
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-2.1.1
   - Bị chặn bởi: ~~US-1.1.1~~ ✅
 
 ### Epic 2.2: Xuất Excel (`tao-excel`)
