@@ -1,8 +1,9 @@
 ---
 name: thu-thap
 description: |
-  Gather content from local files and URLs. Uses markitdown as primary reader
-  with format-specific fallbacks. Supports docx, xlsx, pdf, pptx, txt, md, csv.
+  Gather content from local files, URLs, and web search results.
+  Uses markitdown as primary reader with format-specific fallbacks.
+  Web search via vscode-websearchforcopilot_webSearch.
   Use when user says "đọc file", "lấy nội dung từ", "read file", or "/thu-thap".
 argument-hint: "[file paths or URLs]"
 ---
@@ -52,7 +53,8 @@ URLS:
 
 WEB_SEARCH:
   tool: vscode-websearchforcopilot_webSearch
-  note: Implemented in US-2.1.1, not this story
+  mode: Auto-search when no files/URLs provided, or hybrid with manual sources
+  results: Fetches top 3-5 relevant URLs from search results
 ```
 
 ---
@@ -80,7 +82,7 @@ IDENTIFY_SOURCES:
       📂 Nguồn dữ liệu:
       - File: {N} file ({formats})
       - URL: {M} đường dẫn
-      [- Tìm kiếm: {topic} (chưa hỗ trợ — cần US-2.1.1)]
+      - Tìm kiếm web: "{query}" → {K} kết quả
 ```
 
 ---
@@ -280,7 +282,82 @@ ERRORS:
 ## What This Skill Does NOT Do
 
 - Does NOT synthesize or merge content — that's bien-soan's job
-- Does NOT search the web — that's US-2.1.1 (future)
 - Does NOT translate content — that's bien-soan's job
 - Does NOT generate output files — that's tao-* skills' job
 - Does NOT install dependencies — redirects to /cai-dat
+
+---
+
+## Web Search Mode (US-2.1.1)
+
+Auto-search Google when user describes a topic without providing specific sources.
+
+```yaml
+TRIGGER:
+  - No files or URLs provided by user
+  - User explicitly asks to search: "tìm kiếm về", "search for"
+  - Pipeline (tong-hop) routes with search_needed: true
+  - Hybrid: user provides some files + asks to supplement with web search
+
+WORKFLOW:
+  1_DETECT_SEARCH_NEED:
+    - User gives topic description but no file paths / URLs
+    - User says "tìm thông tin", "search", "tìm kiếm"
+    - Pipeline sends search_query parameter
+    
+  2_BUILD_SEARCH_QUERY:
+    - Extract key topic from user request
+    - Add language qualifier if needed (Vietnamese / English context)
+    - Keep query concise (3-8 words for best results)
+    - Example: user says "tổng hợp về AI trong giáo dục" → query: "AI in education trends 2026"
+    
+  3_EXECUTE_SEARCH:
+    tool: vscode-websearchforcopilot_webSearch
+    params:
+      query: "{constructed_search_query}"
+    result: List of URLs with titles and snippets
+    
+  4_PRESENT_RESULTS:
+    format: |
+      🔍 Kết quả tìm kiếm cho: "{query}"
+      
+      1. **{title_1}** — {domain_1}
+         {snippet_1}
+      2. **{title_2}** — {domain_2}
+         {snippet_2}
+      3. **{title_3}** — {domain_3}
+         {snippet_3}
+      ...
+      
+      Bạn muốn lấy nội dung từ nguồn nào? (Mặc định: tất cả top 3-5)
+    
+    interactive_mode:
+      - Wait for user to approve or select specific sources
+      - User can say "tất cả" (all) or pick by number
+    pipeline_mode:
+      - Auto-select top 3-5 most relevant URLs
+      - Skip approval, proceed to fetch
+    
+  5_FETCH_SELECTED:
+    - Use Step 3 (Fetch URL Content) for each selected URL
+    - Apply same content cleaning and error handling
+    - Combine with any manually provided files/URLs
+    
+  6_REPORT:
+    format: |
+      🔍 Tìm kiếm web hoàn tất:
+      - Truy vấn: "{query}"
+      - Kết quả tìm thấy: {total_results}
+      - Đã lấy nội dung: {fetched_count} nguồn
+      - Lỗi: {error_count}
+
+HYBRID_MODE:
+  description: Combine local files + URLs + web search results
+  priority:
+    1: Local files (most reliable)
+    2: Provided URLs (user-selected)
+    3: Web search results (supplementary)
+  labeling:
+    - Mark source origin in combined output: [File], [URL], [Web Search]
+    - bien-soan can use origin to weight reliability
+```
