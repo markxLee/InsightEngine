@@ -94,7 +94,9 @@
   - Blocked By: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.2.2** — Basic translation Vietnamese ↔ English
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-1.2.2
   - Blocked By: ~~US-1.2.1~~ ✅
 
 ### Epic 1.3: Xuất Word (`tao-word`)
@@ -256,7 +258,9 @@
   - Bị chặn bởi: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.2.2** — Dịch thuật cơ bản Việt ↔ Anh
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-1.2.2
   - Bị chặn bởi: ~~US-1.2.1~~ ✅
 
 ### Epic 1.3: Xuất Word (`tao-word`)
