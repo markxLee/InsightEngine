@@ -1,20 +1,20 @@
 # Copilot Instructions — InsightEngine
 
-<!-- Version: 1.1 | Product: insight-engine | Updated: 2026-04-16 -->
+<!-- Version: 1.2 | Product: insight-engine | Updated: 2026-04-16 -->
 
 This file is read automatically by GitHub Copilot.
 It defines how Copilot MUST behave in this workspace.
 
 ---
 
-## Bắt buộc: Giao tiếp bằng tiếng Việt
+## Mandatory: Respond to User in Vietnamese
 
 ```yaml
 MANDATORY:
-  - Luôn trả lời user bằng tiếng Việt
-  - Hỏi và xác nhận bằng tiếng Việt
-  - Tên file output, thông báo kết quả: tiếng Việt
-  - Ngoại lệ: nội dung kỹ thuật trong SKILL.md, scripts, code comments dùng tiếng Anh
+  - Always respond to the user in Vietnamese
+  - Ask and confirm in Vietnamese
+  - Output file names and result messages: Vietnamese
+  - Exception: technical content in SKILL.md, scripts, code comments use English
 ```
 
 ---
@@ -25,15 +25,15 @@ MANDATORY:
 active_product:
   slug: insight-engine
   name: InsightEngine
-  description: Pipeline tổng hợp nội dung đa nguồn → đa định dạng đầu ra
+  description: Multi-source content synthesis pipeline → multi-format output
   tech_stack_file: docs/tech-stack/insight-engine/instructions.md
   activated_at: 2026-04-16
 
 COPILOT_MUST:
-  - Đọc và tuân theo tech stack tại docs/tech-stack/insight-engine/instructions.md
-  - Sử dụng đúng thư viện đã được chỉ định
-  - Tuân theo các coding conventions trong instructions.md
-  - Giao tiếp với user bằng tiếng Việt
+  - Read and follow the tech stack at docs/tech-stack/insight-engine/instructions.md
+  - Use the specified libraries exactly as documented
+  - Follow coding conventions defined in instructions.md
+  - Communicate with the user in Vietnamese
 ```
 
 ---
@@ -43,7 +43,7 @@ COPILOT_MUST:
 ```yaml
 SKILLS:
   tong-hop:
-    purpose: "Pipeline chính — nhận yêu cầu, phân tích intent, điều phối các skill con để hoàn thành tác vụ tổng hợp nội dung / Main pipeline — orchestrates all sub-skills based on user intent"
+    purpose: "Main pipeline — receives requests, analyzes intent, orchestrates sub-skills to complete content synthesis tasks"
     location: ".github/skills/tong-hop/SKILL.md"
     triggers:
       - "tổng hợp nội dung"
@@ -56,7 +56,7 @@ SKILLS:
       - "/tong-hop"
 
   thu-thap:
-    purpose: "Thu thập nội dung từ web (search Google + fetch URL) và đọc file cục bộ (docx, xlsx, pdf, pptx, txt) / Gather content from web and local files"
+    purpose: "Gather content from web (Google search + fetch URL) and read local files (docx, xlsx, pdf, pptx, txt)"
     location: ".github/skills/thu-thap/SKILL.md"
     triggers:
       - "tìm kiếm thông tin"
@@ -68,7 +68,7 @@ SKILLS:
       - "/thu-thap"
 
   bien-soan:
-    purpose: "Tổng hợp, gộp, và biên soạn nội dung từ nhiều nguồn. Hỗ trợ dịch thuật Việt ↔ Anh / Synthesize and merge multi-source content, with translation support"
+    purpose: "Synthesize and merge multi-source content. Supports Vietnamese ↔ English translation"
     location: ".github/skills/bien-soan/SKILL.md"
     triggers:
       - "tổng hợp"
@@ -81,7 +81,7 @@ SKILLS:
       - "/bien-soan"
 
   tao-word:
-    purpose: "Tạo file Word (.docx) chuyên nghiệp từ nội dung đã tổng hợp, với 3 template style / Create professional Word documents with 3 style templates"
+    purpose: "Create professional Word (.docx) documents from synthesized content, with 3 style templates"
     location: ".github/skills/tao-word/SKILL.md"
     triggers:
       - "tạo file word"
@@ -93,7 +93,7 @@ SKILLS:
       - "/tao-word"
 
   tao-excel:
-    purpose: "Tạo file Excel (.xlsx) với dữ liệu, công thức, và định dạng chuyên nghiệp / Create Excel spreadsheets with data, formulas, and professional formatting"
+    purpose: "Create Excel (.xlsx) files with data, formulas, and professional formatting"
     location: ".github/skills/tao-excel/SKILL.md"
     triggers:
       - "tạo file excel"
@@ -105,7 +105,7 @@ SKILLS:
       - "/tao-excel"
 
   tao-slide:
-    purpose: "Tạo bài thuyết trình PowerPoint (.pptx) chuyên nghiệp với 5 style template / Create professional PowerPoint presentations with style templates"
+    purpose: "Create professional PowerPoint (.pptx) presentations with 5 style templates"
     location: ".github/skills/tao-slide/SKILL.md"
     triggers:
       - "tạo slide"
@@ -118,7 +118,7 @@ SKILLS:
       - "/tao-slide"
 
   tao-pdf:
-    purpose: "Tạo file PDF từ nội dung đã tổng hợp hoặc chuyển đổi từ định dạng khác / Create PDF documents from synthesized content or converted from other formats"
+    purpose: "Create PDF documents from synthesized content or converted from other formats"
     location: ".github/skills/tao-pdf/SKILL.md"
     triggers:
       - "tạo file pdf"
@@ -129,7 +129,7 @@ SKILLS:
       - "/tao-pdf"
 
   tao-html:
-    purpose: "Tạo trang HTML tĩnh chuyên nghiệp với 5 style template (corporate, academic, minimal, dark-modern, creative) / Create professional static HTML pages with 5 style templates"
+    purpose: "Create professional static HTML pages with 5 style templates (corporate, academic, minimal, dark-modern, creative)"
     location: ".github/skills/tao-html/SKILL.md"
     triggers:
       - "tạo trang web"
@@ -141,7 +141,7 @@ SKILLS:
       - "/tao-html"
 
   tao-hinh:
-    purpose: "Tạo biểu đồ từ dữ liệu và hình ảnh minh họa (Apple Silicon). Hỗ trợ: bar, line, pie, radar, scatter chart / Generate charts from data and illustration images"
+    purpose: "Generate charts from data and illustration images (Apple Silicon). Supports: bar, line, pie, radar, scatter"
     location: ".github/skills/tao-hinh/SKILL.md"
     triggers:
       - "tạo biểu đồ"
@@ -159,24 +159,24 @@ SKILLS:
 
 ```yaml
 PIPELINE_FLOW:
-  1. User mô tả yêu cầu bằng tiếng Việt
-  2. tong-hop skill phân tích intent:
-     - Nguồn đầu vào cần thu thập?
-     - Loại xử lý cần thực hiện?
-     - Định dạng đầu ra mong muốn?
-  3. tong-hop gọi các skill con theo thứ tự:
+  1. User describes request (in Vietnamese)
+  2. tong-hop skill analyzes intent:
+     - What input sources need to be gathered?
+     - What processing is required?
+     - What output format is desired?
+  3. tong-hop calls sub-skills in order:
      thu-thap → bien-soan → tao-[format]
-  4. Copilot thực thi script qua run_in_terminal
-  5. Xác nhận kết quả (đường dẫn + kích thước file)
+  4. Copilot executes scripts via run_in_terminal
+  5. Confirm result (output file path + size)
 
 CHAINING:
-  - Hỗ trợ chuỗi output: Excel data → chart → PPT
-  - Luôn hiển thị kế hoạch chuỗi trước khi thực hiện
-  - File trung gian lưu vào tmp/ và dọn dẹp sau
+  - Supports output chaining: Excel data → chart → PPT
+  - Always show the chaining plan before executing
+  - Intermediate files saved to tmp/ and cleaned up afterwards
 
 STYLE_SELECTION:
-  - User chọn style (corporate/academic/minimal/dark-modern/creative) hoặc
-  - Tự suy luận từ context: formal → corporate, research → academic, simple → minimal, tech → dark-modern, marketing → creative
+  - User selects a style (corporate/academic/minimal/dark-modern/creative), or
+  - Infer from context: formal → corporate, research → academic, simple → minimal, tech → dark-modern, marketing → creative
 ```
 
 ---
@@ -201,17 +201,17 @@ url_fetch: Copilot fetch_webpage tool
 
 ## Commands Reference
 
-| Lệnh | Mô tả |
-|------|-------|
-| `/tong-hop` | Bắt đầu pipeline tổng hợp |
-| `/thu-thap` | Thu thập nội dung |
-| `/bien-soan` | Biên soạn/dịch thuật nội dung |
-| `/tao-word` | Tạo file Word |
-| `/tao-excel` | Tạo file Excel |
-| `/tao-slide` | Tạo bài thuyết trình |
-| `/tao-pdf` | Tạo file PDF |
-| `/tao-html` | Tạo trang HTML |
-| `/tao-hinh` | Tạo biểu đồ/hình ảnh |
+| Command | Description |
+|---------|-------------|
+| `/tong-hop` | Start content synthesis pipeline |
+| `/thu-thap` | Gather content from sources |
+| `/bien-soan` | Synthesize / translate content |
+| `/tao-word` | Create Word file |
+| `/tao-excel` | Create Excel file |
+| `/tao-slide` | Create PowerPoint presentation |
+| `/tao-pdf` | Create PDF file |
+| `/tao-html` | Create HTML page |
+| `/tao-hinh` | Create charts / images |
 
 ---
 
@@ -222,5 +222,5 @@ url_fetch: Copilot fetch_webpage tool
 
 ---
 
-**Version:** 1.0  
+**Version:** 1.2
 **Activated:** 2026-04-16
