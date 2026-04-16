@@ -74,7 +74,9 @@
 ### Epic 1.1: Thu thập nội dung (`thu-thap`)
 
 - [ ] **US-1.1.1** — Read local files via markitdown
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-1.1.1
   - Blocked By: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.1.2** — Fetch URL content
@@ -226,7 +228,9 @@
 ### Epic 1.1: Thu thập nội dung (`thu-thap`)
 
 - [ ] **US-1.1.1** — Đọc file local qua markitdown
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-1.1.1
   - Bị chặn bởi: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.1.2** — Fetch nội dung URL
