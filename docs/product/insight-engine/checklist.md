@@ -80,7 +80,9 @@
   - Blocked By: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.1.2** — Fetch URL content
-  - Status: PLANNED
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-1.1.2
   - Blocked By: ~~US-1.1.1~~ ✅
 
 ### Epic 1.2: Biên soạn nội dung (`bien-soan`)
@@ -240,7 +242,9 @@
   - Bị chặn bởi: ~~US-0.3.2~~ ✅
 
 - [ ] **US-1.1.2** — Fetch nội dung URL
-  - Trạng thái: PLANNED
+  - Trạng thái: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-1.1.2
   - Bị chặn bởi: ~~US-1.1.1~~ ✅
 
 ### Epic 1.2: Biên soạn nội dung (`bien-soan`)
