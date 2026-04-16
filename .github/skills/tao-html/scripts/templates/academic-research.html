@@ -1,0 +1,42 @@
+{# academic-research.html — Clean scholarly style for papers and lectures #}
+{% extends "base_reveal.html" %}
+
+{% set style = {
+  "reveal_theme": "simple",
+  "font_heading": "Georgia, 'Times New Roman', serif",
+  "font_body": "Georgia, 'Times New Roman', serif",
+  "heading_color": "#1a202c",
+  "text_color": "#1a202c",
+  "accent_color": "#744210",
+  "link_hover": "#5a3510",
+  "table_header_bg": "#744210",
+  "table_stripe_bg": "rgba(116,66,16,0.05)",
+  "blockquote_bg": "rgba(116,66,16,0.04)",
+  "code_bg": "#f5f0eb"
+} %}
+
+{% set transition = "fade" %}
+
+{% block extra_css %}
+    .reveal section[data-state="title-slide"] h1 {
+      font-size: 2.0em;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+    }
+    .reveal section[data-state="title-slide"] h3 {
+      font-style: italic;
+      font-weight: normal;
+      color: {{ style.accent_color }};
+    }
+    .reveal blockquote {
+      border-left-color: {{ style.accent_color }};
+      font-size: 0.95em;
+    }
+    .reveal .footnote {
+      font-size: 0.7em;
+      color: #718096;
+      position: absolute;
+      bottom: 1em;
+      left: 1em;
+    }
+{% endblock %}

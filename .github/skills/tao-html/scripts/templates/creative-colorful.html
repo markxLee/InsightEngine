@@ -1,0 +1,43 @@
+{# creative-colorful.html — Vibrant purple-amber style for marketing and creative decks #}
+{% extends "base_reveal.html" %}
+
+{% set style = {
+  "reveal_theme": "moon",
+  "font_heading": "'Poppins', 'Nunito', sans-serif",
+  "font_body": "'Open Sans', 'Nunito', sans-serif",
+  "heading_color": "#8b5cf6",
+  "text_color": "#1e1b4b",
+  "accent_color": "#f59e0b",
+  "link_hover": "#d97706",
+  "table_header_bg": "#8b5cf6",
+  "table_stripe_bg": "rgba(139,92,246,0.06)",
+  "blockquote_bg": "rgba(245,158,11,0.08)",
+  "code_bg": "#fef3c7"
+} %}
+
+{% set transition = "zoom" %}
+
+{% block extra_css %}
+    body { background: #fffbeb; }
+    .reveal section[data-state="title-slide"] {
+      background: linear-gradient(135deg, #8b5cf6, #f59e0b);
+    }
+    .reveal section[data-state="title-slide"] h1,
+    .reveal section[data-state="title-slide"] h3 {
+      color: #ffffff;
+    }
+    .reveal h2 {
+      border-left: 5px solid {{ style.accent_color }};
+      padding-left: 0.5em;
+    }
+    .reveal ul li::marker {
+      color: {{ style.accent_color }};
+    }
+    .reveal section[data-state="closing-slide"] {
+      background: linear-gradient(135deg, #f59e0b, #8b5cf6);
+    }
+    .reveal section[data-state="closing-slide"] h2,
+    .reveal section[data-state="closing-slide"] p {
+      color: #ffffff;
+    }
+{% endblock %}

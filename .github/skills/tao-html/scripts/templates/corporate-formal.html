@@ -1,0 +1,34 @@
+{# corporate-formal.html — Professional blue-gray business presentation #}
+{% extends "base_reveal.html" %}
+
+{% set style = {
+  "reveal_theme": "white",
+  "font_heading": "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+  "font_body": "'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+  "heading_color": "#1a365d",
+  "text_color": "#2d3748",
+  "accent_color": "#3182ce",
+  "link_hover": "#2b6cb0",
+  "table_header_bg": "#1a365d",
+  "table_stripe_bg": "rgba(49,130,206,0.06)",
+  "blockquote_bg": "rgba(49,130,206,0.05)",
+  "code_bg": "#f7fafc"
+} %}
+
+{% set transition = "slide" %}
+
+{% block extra_css %}
+    .reveal section[data-state="title-slide"] h1 {
+      font-size: 2.4em;
+      border-bottom: 4px solid {{ style.accent_color }};
+      padding-bottom: 0.3em;
+      display: inline-block;
+    }
+    .reveal section[data-state="closing-slide"] {
+      background: linear-gradient(135deg, #1a365d, #3182ce);
+    }
+    .reveal section[data-state="closing-slide"] h2,
+    .reveal section[data-state="closing-slide"] p {
+      color: #ffffff;
+    }
+{% endblock %}

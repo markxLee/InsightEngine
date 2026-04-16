@@ -1,0 +1,53 @@
+{# minimal-clean.html — Ultra-clean whitespace for focused, distraction-free presentations #}
+{% extends "base_reveal.html" %}
+
+{% set style = {
+  "reveal_theme": "white",
+  "font_heading": "'Inter', 'Helvetica Neue', Arial, sans-serif",
+  "font_body": "'Inter', 'Helvetica Neue', Arial, sans-serif",
+  "heading_color": "#111827",
+  "text_color": "#374151",
+  "accent_color": "#059669",
+  "link_hover": "#047857",
+  "table_header_bg": "#059669",
+  "table_stripe_bg": "rgba(5,150,105,0.05)",
+  "blockquote_bg": "rgba(5,150,105,0.04)",
+  "code_bg": "#f9fafb"
+} %}
+
+{% set transition = "fade" %}
+
+{% block extra_css %}
+    .reveal section[data-state="title-slide"] h1 {
+      font-weight: 300;
+      font-size: 2.8em;
+      letter-spacing: -0.02em;
+    }
+    .reveal section[data-state="title-slide"] h3 {
+      font-weight: 300;
+      color: #9ca3af;
+    }
+    .reveal h2, .reveal h3 {
+      font-weight: 500;
+    }
+    .reveal ul {
+      list-style: none;
+      margin-left: 0;
+    }
+    .reveal ul li {
+      padding-left: 1.5em;
+      position: relative;
+    }
+    .reveal ul li::before {
+      content: "—";
+      position: absolute;
+      left: 0;
+      color: {{ style.accent_color }};
+    }
+    .reveal table th {
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.85em;
+      letter-spacing: 0.05em;
+    }
+{% endblock %}

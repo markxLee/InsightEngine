@@ -286,8 +286,8 @@
 
 ### Epic 4.5: Template Library HTML
 
-- [ ] **US-4.5.1** — HTML reveal.js template collection
-  - Status: IN_PROGRESS
+- [x] **US-4.5.1** — HTML reveal.js template collection
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-4.5.1
   - Blocked By: ~~US-4.2.1~~ ✅, ~~US-4.2.3~~ ✅
@@ -296,7 +296,7 @@
 - [ ] **US-4.5.2** — Presenter notes and PDF export
   - Status: PLANNED
   - Assignee: —
-  - Blocked By: US-4.5.1
+  - Blocked By: ~~US-4.5.1~~ ✅
   - Refs: revealjs.com
 
 ---
@@ -582,8 +582,8 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
 
 ### Epic 4.5: Template Library HTML
 
-- [ ] **US-4.5.1** — Thư viện template HTML reveal.js
-  - Trạng thái: IN_PROGRESS
+- [x] **US-4.5.1** — Thư viện template HTML reveal.js
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-4.5.1
   - Bị chặn bởi: ~~US-4.2.1~~ ✅, ~~US-4.2.3~~ ✅
@@ -592,7 +592,7 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
 - [ ] **US-4.5.2** — Presenter notes và PDF export
   - Trạng thái: PLANNED
   - Assignee: —
-  - Bị chặn bởi: US-4.5.1
+  - Bị chặn bởi: ~~US-4.5.1~~ ✅
   - Tham khảo: revealjs.com
 
 ---

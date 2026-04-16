@@ -1,0 +1,42 @@
+{# tech-dark.html — Modern dark theme for tech talks and developer presentations #}
+{% extends "base_reveal.html" %}
+
+{% set style = {
+  "reveal_theme": "night",
+  "font_heading": "'Inter', 'SF Pro Display', sans-serif",
+  "font_body": "'Inter', 'SF Pro Text', sans-serif",
+  "heading_color": "#6366f1",
+  "text_color": "#f1f5f9",
+  "accent_color": "#22d3ee",
+  "link_hover": "#06b6d4",
+  "table_header_bg": "#4338ca",
+  "table_stripe_bg": "rgba(99,102,241,0.1)",
+  "blockquote_bg": "rgba(99,102,241,0.08)",
+  "code_bg": "#1e293b"
+} %}
+
+{% set transition = "convex" %}
+
+{% block extra_css %}
+    body { background: #0f172a; }
+    .reveal section[data-state="title-slide"] h1 {
+      font-size: 2.5em;
+      background: linear-gradient(135deg, #6366f1, #22d3ee);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .reveal pre {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      border: 1px solid #334155;
+    }
+    .reveal code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    .reveal section[data-state="closing-slide"] h2 {
+      background: linear-gradient(135deg, #22d3ee, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+{% endblock %}

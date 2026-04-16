@@ -1,0 +1,44 @@
+{# warm-elegant.html — Warm earthy tones with elegant serif typography #}
+{% extends "base_reveal.html" %}
+
+{% set style = {
+  "reveal_theme": "simple",
+  "font_heading": "'Playfair Display', Georgia, serif",
+  "font_body": "'Source Sans Pro', 'Segoe UI', sans-serif",
+  "heading_color": "#92400e",
+  "text_color": "#451a03",
+  "accent_color": "#b45309",
+  "link_hover": "#92400e",
+  "table_header_bg": "#92400e",
+  "table_stripe_bg": "rgba(180,83,9,0.05)",
+  "blockquote_bg": "rgba(180,83,9,0.06)",
+  "code_bg": "#fef3c7"
+} %}
+
+{% set transition = "fade" %}
+
+{% block extra_css %}
+    body { background: #fdf8f3; }
+    .reveal section[data-state="title-slide"] h1 {
+      font-size: 2.2em;
+      font-weight: 700;
+      color: {{ style.heading_color }};
+    }
+    .reveal section[data-state="title-slide"] h3 {
+      font-family: {{ style.font_body }};
+      font-weight: 400;
+      color: {{ style.accent_color }};
+    }
+    .reveal h2::after {
+      content: "";
+      display: block;
+      width: 60px;
+      height: 3px;
+      background: {{ style.accent_color }};
+      margin-top: 0.3em;
+    }
+    .reveal blockquote {
+      border-left-width: 3px;
+      font-family: {{ style.font_heading }};
+    }
+{% endblock %}
