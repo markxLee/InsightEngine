@@ -55,15 +55,15 @@
 
 ### Epic 0.3: Pipeline Chính (`tong-hop`)
 
-- [ ] **US-0.3.1** — Pipeline skill skeleton with intent routing
-  - Status: IN_PROGRESS
+- [x] **US-0.3.1** — Pipeline skill skeleton with intent routing
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-0.3.1
   - Blocked By: ~~US-0.1.1~~ ✅, ~~US-0.2.2~~ ✅
 
 - [ ] **US-0.3.2** — Setup check before each pipeline process
   - Status: PLANNED
-  - Blocked By: US-0.3.1
+  - Blocked By: ~~US-0.3.1~~ ✅
 
 ---
 
@@ -165,7 +165,7 @@
 
 - [ ] **US-3.4.1** — Pipeline UX improvements
   - Status: PLANNED
-  - Blocked By: US-0.3.1, US-2.5.1
+  - Blocked By: ~~US-0.3.1~~ ✅, US-2.5.1
 
 ---
 
@@ -205,15 +205,15 @@
 
 ### Epic 0.3: Pipeline Chính (`tong-hop`)
 
-- [ ] **US-0.3.1** — Pipeline skeleton với intent routing
-  - Trạng thái: IN_PROGRESS
+- [x] **US-0.3.1** — Pipeline skeleton với intent routing
+  - Trạng thái: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-0.3.1
   - Bị chặn bởi: ~~US-0.1.1~~ ✅, ~~US-0.2.2~~ ✅
 
 - [ ] **US-0.3.2** — Kiểm tra setup trước mỗi process
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-0.3.1
+  - Bị chặn bởi: ~~US-0.3.1~~ ✅
 
 ---
 
@@ -315,7 +315,7 @@
 
 - [ ] **US-3.4.1** — Cải thiện UX pipeline
   - Trạng thái: PLANNED
-  - Bị chặn bởi: US-0.3.1, US-2.5.1
+  - Bị chặn bởi: ~~US-0.3.1~~ ✅, US-2.5.1
 
 ---
 
