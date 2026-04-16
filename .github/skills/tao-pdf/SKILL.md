@@ -32,6 +32,47 @@ Use this skill when user:
 
 ---
 
+## Script Architecture (US-4.3.3)
+
+```yaml
+CLI_SCRIPT:
+  path: scripts/gen_pdf.py
+  purpose: Reusable CLI tool for generating .pdf from JSON data
+  usage: |
+    python3 scripts/gen_pdf.py --input content.json --output report.pdf --style corporate
+  
+  args:
+    --input: Path to JSON file with content data (required)
+    --output: Output .pdf file path (required)
+    --style: corporate | academic | minimal (default: corporate)
+  
+  json_format: |
+    {
+      "title": "Document Title",
+      "author": "Author Name",
+      "date": "2026-04-16",
+      "sections": [
+        {"type": "heading", "level": 1, "text": "Section Title"},
+        {"type": "text", "text": "Paragraph content"},
+        {"type": "bullets", "heading": "List Title", "items": ["Item 1", "Item 2"]},
+        {"type": "table", "heading": "Table Title", "headers": ["Col1", "Col2"], "rows": [["a", "b"]]},
+        {"type": "quote", "text": "Quote text", "author": "Attribution"},
+        {"type": "page_break"}
+      ]
+    }
+  
+  output: Prints "✅ Saved: <path> (<size> KB, <N> sections, style: <style>)"
+
+COPILOT_WORKFLOW:
+  1. Prepare content as JSON (from bien-soan output or user text)
+  2. Save JSON to tmp file
+  3. Run: python3 .github/skills/tao-pdf/scripts/gen_pdf.py --input data.json --output output.pdf --style <style>
+  4. Verify output exists
+  5. Report file path + size
+```
+
+---
+
 ## Pre-Flight Check
 
 ```yaml

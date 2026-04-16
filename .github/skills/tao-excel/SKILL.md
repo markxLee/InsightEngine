@@ -32,6 +32,42 @@ Use this skill when user:
 
 ---
 
+## Script Architecture (US-4.3.3)
+
+```yaml
+CLI_SCRIPT:
+  path: scripts/gen_xlsx.py
+  purpose: Reusable CLI tool for generating .xlsx from JSON data
+  usage: |
+    python3 scripts/gen_xlsx.py --input data.json --output report.xlsx --style corporate
+  
+  args:
+    --input: Path to JSON file with data (required)
+    --output: Output .xlsx file path (required)
+    --style: corporate | academic | minimal (default: corporate)
+  
+  json_format: |
+    {
+      "title": "Sheet Title",
+      "headers": ["Col1", "Col2", "Col3"],
+      "rows": [["a", 100, 200], ["b", 150, 250]],
+      "formulas": {"D3": "=SUM(B3:C3)"},
+      "column_widths": {"A": 20, "B": 15}
+    }
+    # Multi-sheet: wrap in {"sheets": [{...}, {...}]}
+  
+  output: Prints "✅ Saved: <path> (<size> KB, <N> sheet(s), style: <style>)"
+
+COPILOT_WORKFLOW:
+  1. Prepare data as JSON (from bien-soan output or user data)
+  2. Save JSON to tmp file
+  3. Run: python3 .github/skills/tao-excel/scripts/gen_xlsx.py --input data.json --output output.xlsx --style <style>
+  4. Run recalc.py if formulas used
+  5. Report file path + size
+```
+
+---
+
 ## Pre-Flight Check
 
 ```yaml
