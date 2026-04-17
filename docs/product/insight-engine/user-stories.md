@@ -3,8 +3,8 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Scope:** Phase 0 → Phase 4 (all phases)  
-> **Total User Stories:** 36 (21 Phase 0-3 + 15 Phase 4)
+> **Scope:** Phase 0 → Phase 5 (all phases)  
+> **Total User Stories:** 40 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5)
 
 ---
 
@@ -12,8 +12,8 @@
 
 - **Product name:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4
-- **Total stories:** 36 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15)
+- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5
+- **Total stories:** 40 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15, Phase 5: 4)
 - **ID format:** `US-<phase>.<epic>.<index>`
 
 ### Dependency Graph (Summary)
@@ -512,14 +512,69 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
 
 ---
 
+## Phase 5: Tối ưu & Độ bền (Optimization & Resilience)
+
+> **Nguồn gốc:** Phản hồi từ testing Phase 0-4 — skills chưa tối ưu cho model nhỏ; user mất tiến độ khi session bị ngắt.
+
+---
+
+### Epic 5.1: Small Model Optimization
+
+**US-5.1.1: Small model compatibility research**
+- Description: As a developer, I want to identify why InsightEngine skills fail or degrade with smaller AI models (GPT-4o-mini, GPT-3.5 Turbo), so I can target root causes for optimization.
+- Acceptance Criteria:
+  - AC1: Each SKILL.md tested against a smaller model (GPT-4o-mini or equivalent)
+  - AC2: Failure patterns documented: token overflow, instruction following degradation, context loss
+  - AC3: Compatibility report produced per skill with pass/fail per AC
+  - AC4: Top 3 root causes identified with evidence
+  - AC5: Report stored in `docs/reports/small-model-compatibility.md`
+- Blocked By: `None`
+
+**US-5.1.2: SKILL.md refactor for small model compatibility**
+- Description: As a user on a smaller model, I want InsightEngine skills to give consistent, reliable results, so I’m not forced to use GPT-4/Claude.
+- Acceptance Criteria:
+  - AC1: All SKILL.md files ≤ 300 lines (reduced from ≤ 400)
+  - AC2: Instructions rewritten as explicit, unambiguous step-by-step directives
+  - AC3: Long reference content moved to `references/` sub-files; SKILL.md links to them instead of embedding
+  - AC4: Skills re-tested on GPT-4o-mini with pass rate ≥ 80% on acceptance criteria
+  - AC5: No behavior regression on Claude/GPT-4 (existing passing tests still pass)
+- Blocked By: `US-5.1.1`
+
+---
+
+### Epic 5.2: Session State Persistence
+
+**US-5.2.1: Session state save after each pipeline step**
+- Description: As a user whose Copilot session was interrupted mid-pipeline, I want the pipeline to have saved my progress, so I can continue without re-doing completed steps.
+- Acceptance Criteria:
+  - AC1: `tong-hop` writes `tmp/.session-state.json` after each sub-skill completes successfully
+  - AC2: State file includes: original user request, execution plan, completed steps (with output file paths), pending steps
+  - AC3: State file also includes: timestamp, session ID (UUID), InsightEngine version
+  - AC4: State file is human-readable JSON (pretty-printed, UTF-8)
+  - AC5: Write operation is atomic (write to temp file, then rename) to prevent corruption
+- Blocked By: `None`
+
+**US-5.2.2: Pipeline resume from saved state**
+- Description: As a user, I want to say „tiếp tục”, „resume”, or „/resume” to have the pipeline detect and continue from a previous interrupted session.
+- Acceptance Criteria:
+  - AC1: `tong-hop` checks `tmp/.session-state.json` on startup
+  - AC2: If state file found: Copilot presents summary of previous session in Vietnamese and asks „Tiếp tục hay bắt đầu lại?”
+  - AC3: If user chooses resume: pipeline skips completed steps and continues from last checkpoint
+  - AC4: If user chooses start fresh: old state file is archived as `tmp/.session-state.<timestamp>.json`
+  - AC5: Triggers on: „tiếp tục”, „resume”, „tiếp tục từ”, „/resume”
+  - AC6: If no state file found: pipeline starts normally without asking
+- Blocked By: `US-5.2.1`
+
+---
+
 ---
 
 ## Tổng quan User Stories (Tiếng Việt)
 
 - **Tên sản phẩm:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Phạm vi:** Phase 0 → Phase 4
-- **Tổng số User Stories:** 36 (21 Phase 0-3 + 15 Phase 4)
+- **Phạm vi:** Phase 0 → Phase 5
+- **Tổng số User Stories:** 40 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5)
 
 ---
 
