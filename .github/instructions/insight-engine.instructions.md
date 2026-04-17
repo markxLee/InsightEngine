@@ -26,6 +26,7 @@ applyTo: "**"
 | HTML output | `jinja2` + inline CSS |
 | Charts | `matplotlib` + `seaborn` (Agg backend) |
 | Images | `diffusers` + `torch/MPS` (Apple Silicon, optional) |
+| Visual design | `reportlab` Canvas + `Pillow` (80+ bundled fonts) |
 | Web search | `vscode-websearchforcopilot_webSearch` (built-in) |
 | URL fetch | Copilot `fetch_webpage` (built-in) |
 
@@ -68,6 +69,7 @@ applyTo: "**"
   tao-pdf/       # Xuất PDF
   tao-html/      # Xuất HTML
   tao-hinh/      # Biểu đồ + hình ảnh
+  thiet-ke/      # Thiết kế visual (poster, bìa, certificate, banner)
 ```
 
 Full stack documentation: `docs/tech-stack/insight-engine/instructions.md`

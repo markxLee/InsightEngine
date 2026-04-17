@@ -64,6 +64,12 @@ python3 scripts/save_state.py archive
 3. Determine **output format**: word (default) | excel | slides | pdf | html
 4. Detect **style**: corporate | academic | minimal | dark-modern | creative (see `references/pipeline-ux.md`)
 5. Detect if request implies **chained outputs** (see `references/output-chaining.md`)
+6. Detect if request needs **visual design** (see routing table below):
+   - Poster, cover page, certificate, invitation, banner, infographic layout → **thiet-ke**
+   - Data charts (bar, line, pie, radar, scatter) → **tao-hinh** (chart mode)
+   - AI-generated illustration, background, character → **tao-hinh** (image mode)
+   - Keywords that signal thiet-ke: "poster", "bìa", "cover", "certificate", "bằng khen",
+     "thiệp", "invitation", "banner", "infographic", "thiết kế", "design"
 
 ---
 
@@ -98,6 +104,8 @@ ROUTING:
   translation_only: thu-thap → bien-soan (translation mode)
   chained_output:   thu-thap → bien-soan → tao-excel → tao-hinh → tao-slide
   search_and_out:   thu-thap (web search) → bien-soan → tao-<format>
+  design_output:    thu-thap → bien-soan → thiet-ke (poster/cover/certificate/banner)
+  design_chained:   thu-thap → bien-soan → thiet-ke (cover) + tao-<format> (content)
 ```
 
 After user approves plan, initialize session state:
@@ -137,6 +145,15 @@ For chained outputs and intermediate files, see `references/output-chaining.md`.
 4. **tao-hinh** (conditional — if charts requested OR output is slides with data)
    - Report: "✅ Tạo {N} biểu đồ hoàn tất"
    - Save state: `python3 scripts/save_state.py update --step tao-hinh --output-file "<chart_path>"`
+
+5. **thiet-ke** (conditional — if visual design requested: poster, cover, certificate, etc.)
+   - Input: content from bien-soan (titles, key phrases) + user design intent
+   - Output: PNG or PDF visual composition
+   - Route here instead of tao-hinh when the user wants a **designed composition** with
+     typography and layout (poster, cover page, certificate, invitation, banner, infographic)
+     rather than a data chart or AI-generated image
+   - Report: "✅ Thiết kế hoàn tất — {path} ({size})"
+   - Save state: `python3 scripts/save_state.py update --step thiet-ke --output-file "<path>"`
 
 ---
 

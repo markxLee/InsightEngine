@@ -151,6 +151,22 @@ SKILLS:
       - "generate image"
       - "visualize data"
       - "/tao-hinh"
+
+  thiet-ke:
+    purpose: "Create professional visual designs programmatically — cover pages, posters, certificates, infographic layouts, banners"
+    location: ".github/skills/thiet-ke/SKILL.md"
+    triggers:
+      - "tạo poster"
+      - "thiết kế bìa"
+      - "làm certificate"
+      - "tạo thiệp"
+      - "thiết kế cover page"
+      - "tạo bằng khen"
+      - "tạo banner"
+      - "tạo infographic"
+      - "design a poster"
+      - "make a cover"
+      - "/thiet-ke"
 ```
 
 ---
