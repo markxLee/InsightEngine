@@ -1,10 +1,11 @@
 ---
 name: tao-pdf
 description: |
-  Create professional PDF documents from synthesized content.
-  Uses reportlab Platypus for complex layouts, Canvas for simple ones.
-  Embeds fonts for Vietnamese character support.
-  Use when user says "tạo file pdf", "xuất pdf", or "/tao-pdf".
+  Create professional PDF documents from synthesized content, with Vietnamese font support.
+  Uses reportlab Platypus for complex multi-section layouts, Canvas for simple single-page PDFs.
+  Always use this skill when the user wants a PDF output — even casual requests like "xuất PDF",
+  "tạo file pdf", "lưu thành PDF để in", "tôi cần file pdf", or "cho tôi file không chỉnh sửa
+  được" (read-only document implies PDF) — even without saying "/tao-pdf" or ".pdf".
 argument-hint: "[content from bien-soan or direct text] [output path]"
 ---
 
@@ -21,14 +22,6 @@ LIBRARIES: reportlab (Platypus + Canvas), pypdf
 ```
 
 ---
-
-## Trigger Conditions
-
-Use this skill when user:
-- Says "tạo file pdf", "xuất pdf", "tạo file .pdf"
-- Says "create pdf", "export to pdf"
-- Uses command `/tao-pdf`
-- Pipeline (tong-hop) routes content here for PDF output
 
 ---
 

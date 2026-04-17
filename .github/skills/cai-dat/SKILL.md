@@ -1,9 +1,11 @@
 ---
 name: cai-dat
 description: |
-  Setup and install all InsightEngine dependencies. Runs check_deps.py first,
-  then installs only missing packages. Creates utility scripts if not present.
-  Use when user says "cài đặt", "setup", "install dependencies", or "/cai-dat".
+  Setup and install all InsightEngine dependencies. Runs check_deps.py first, installs only
+  missing packages. Creates utility scripts (recalc.py, save_state.py) if not present.
+  Always use this skill when the user gets an import error, ModuleNotFoundError, or says the tool
+  isn't working — even casual requests like "bị lỗi import", "thư viện chưa cài", "lần đầu chạy",
+  "không chạy được", "cài lại đi", or "setup môi trường" — even without saying "/cai-dat".
 argument-hint: "[none]"
 ---
 
@@ -17,14 +19,6 @@ LANGUAGE: Copilot responds in Vietnamese
 ```
 
 ---
-
-## Trigger Conditions
-
-Use this skill when user:
-- Says "cài đặt", "cài đặt môi trường", "setup"
-- Says "install dependencies", "thiếu thư viện"
-- Uses command `/cai-dat`
-- Gets dependency errors when running other skills
 
 ---
 

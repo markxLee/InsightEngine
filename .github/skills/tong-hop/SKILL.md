@@ -1,10 +1,13 @@
 ---
 name: tong-hop
 description: |
-  Main InsightEngine pipeline — orchestrates all sub-skills based on user intent.
-  Analyzes user request to determine input sources, processing type, and output format,
-  then routes to appropriate sub-skills in correct order.
-  Use when user says "tổng hợp nội dung", "làm báo cáo", "làm thuyết trình", or "/tong-hop".
+  Main InsightEngine pipeline — analyzes user intent and orchestrates all sub-skills end-to-end.
+  Handles any content task: research → synthesis → output in Word/Excel/PPT/PDF/HTML/chart format.
+  Supports session resume via save_state.py and chained outputs (e.g., Excel data → chart → slide).
+  Always use this skill whenever the user describes any content creation, reporting, or presentation
+  task — even casual requests like "làm cái báo cáo", "tổng hợp giúp tôi", "tạo slide từ mấy cái
+  file này", "search rồi tạo file", or simply describes what they need without naming a specific
+  skill. Also triggers on resume requests: "tiếp tục", "resume", "tiếp tục từ", "/resume".
 argument-hint: "[content request in Vietnamese or English]"
 ---
 
@@ -20,15 +23,6 @@ ROLE: Orchestrator — delegates ALL content work to sub-skills
 ```
 
 ---
-
-## Trigger Conditions
-
-Use this skill when user:
-- Says "tổng hợp nội dung", "làm báo cáo", "làm thuyết trình"
-- Says "tóm tắt từ nhiều nguồn", "synthesize content", "create report"
-- Uses command `/tong-hop`
-- Describes a content task involving sources or output formats
-- Says **"tiếp tục"**, **"resume"**, **"tiếp tục từ"**, **"/resume"** → run Step 0 resume check
 
 ---
 

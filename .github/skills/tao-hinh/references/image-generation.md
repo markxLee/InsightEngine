@@ -1,90 +1,202 @@
-# Image Generation — Full Reference (US-3.1.2, Apple Silicon Only)
+# Image Generation Reference — Cross-Platform AI Images
 
-> For advanced image generation (i2i restyling, portrait/face preservation, FaceID, IP-Adapter),
-> use the `gen-image` skill from a-z-copilot-flow instead.
-> `tao-hinh` only covers basic text-to-image for inline illustrations.
+> Covers: characters, backgrounds, landscapes, slide backgrounds, slide frames.
+> For advanced image-to-image restyling or face preservation, use the `gen-image` skill instead.
 
-## Availability Check
+---
+
+## GPU Auto-Detection
+
+The generation script detects the best available device automatically:
 
 ```python
-import platform, sys
-if platform.machine() != 'arm64' or platform.system() != 'Darwin':
-    print("⚠️ Tạo hình ảnh chỉ hỗ trợ trên Apple Silicon Mac.")
-    sys.exit(1)
 import torch
-if not torch.backends.mps.is_available():
-    print("⚠️ MPS backend không khả dụng. Cần macOS 12.3+.")
-    sys.exit(1)
-print("✅ Apple Silicon + MPS sẵn sàng.")
-# Install: pip3 install --user torch diffusers transformers accelerate
+
+def get_device():
+    if torch.cuda.is_available():
+        return "cuda"                     # NVIDIA GPU — fastest
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        return "mps"                      # Apple Silicon — fast
+    else:
+        return "cpu"                      # Any machine — slow (~2–10 min)
 ```
+
+Always warn the user before starting a CPU run: expected time is 2–10 minutes for 4 inference steps.
+
+---
 
 ## Style Presets
 
+Choose the preset that best fits the user's request, or suggest options if unsure.
+
 ```yaml
-PRESETS:
-  flat-icon:
-    suffix: "flat design icon, simple shapes, solid colors, no text, white background"
+CHARACTER:
+  character-cartoon:
+    prompt_suffix: "cartoon character illustration, flat design, clean linework, vibrant colors, white background, no text"
     size: [512, 512]
-  dark-tech:
-    suffix: "dark technology background, neon glow, cyberpunk aesthetic, no text"
-    size: [768, 768]
-  cartoon:
-    suffix: "cartoon illustration style, vibrant colors, clean lines, no text"
-    size: [768, 768]
-  minimal:
-    suffix: "minimalist illustration, clean lines, muted colors, lots of whitespace, no text"
+  character-realistic:
+    prompt_suffix: "digital illustration of a person, professional art style, soft shading, plain background, no text"
     size: [512, 512]
-  watercolor:
-    suffix: "watercolor painting style, soft colors, artistic, no text"
+  character-anime:
+    prompt_suffix: "anime style character illustration, detailed, colorful, clean background, no text"
+    size: [512, 512]
+
+BACKGROUND:
+  background-abstract:
+    prompt_suffix: "abstract geometric background, modern design, smooth gradients, no text, no people"
     size: [768, 768]
-  realistic:
-    suffix: "photorealistic, high quality, detailed, professional photography, no text"
+  background-gradient:
+    prompt_suffix: "soft color gradient background, smooth blending, professional, minimal, no text"
     size: [768, 768]
+  background-texture:
+    prompt_suffix: "subtle texture background, paper or fabric texture, muted tones, no text"
+    size: [768, 768]
+
+LANDSCAPE:
+  landscape-nature:
+    prompt_suffix: "beautiful natural landscape, mountains and forest, wide panoramic view, photorealistic, no text"
+    size: [768, 512]
+  landscape-urban:
+    prompt_suffix: "modern city skyline, urban landscape, professional photography style, no text"
+    size: [768, 512]
+  landscape-fantasy:
+    prompt_suffix: "fantasy landscape illustration, magical environment, vivid colors, concept art style, no text"
+    size: [768, 512]
+
+SLIDE_BACKGROUND:
+  slide-bg-corporate:
+    prompt_suffix: "professional corporate slide background, clean geometric shapes, blue and white palette, 16:9 format, no text"
+    size: [1280, 720]
+  slide-bg-dark:
+    prompt_suffix: "elegant dark presentation background, subtle gradient, minimal abstract design, 16:9 format, no text"
+    size: [1280, 720]
+  slide-bg-creative:
+    prompt_suffix: "creative colorful presentation background, modern design, dynamic shapes, 16:9, no text"
+    size: [1280, 720]
+  slide-bg-nature:
+    prompt_suffix: "soft nature-inspired slide background, leaves and light, calm colors, 16:9, no text"
+    size: [1280, 720]
+
+SLIDE_FRAME:
+  slide-frame-minimal:
+    prompt_suffix: "minimal decorative border frame, thin elegant lines, white center space, no text"
+    size: [1280, 720]
+  slide-frame-ornate:
+    prompt_suffix: "ornate decorative border frame for presentation, classical style, gold tones, transparent center, no text"
+    size: [1280, 720]
 ```
 
-## SD-Turbo Script
+---
+
+## Generation Script (gen_image.py)
 
 ```python
+#!/usr/bin/env python3
+"""Cross-platform AI image generation via SD-Turbo. Auto-detects CUDA/MPS/CPU."""
+import argparse, os, time
 import torch
 from diffusers import AutoPipelineForText2Image
 
-pipe = AutoPipelineForText2Image.from_pretrained(
-    "stabilityai/sd-turbo",
-    torch_dtype=torch.float16,
-    variant="fp16"
-)
-pipe = pipe.to("mps")
+PRESETS = {
+    "character-cartoon": ("cartoon character illustration, flat design, clean linework, vibrant colors, white background", 512, 512),
+    "character-realistic": ("digital illustration of a person, professional art style, soft shading, plain background", 512, 512),
+    "background-abstract": ("abstract geometric background, modern design, smooth gradients", 768, 768),
+    "background-gradient": ("soft color gradient background, smooth blending, professional, minimal", 768, 768),
+    "landscape-nature": ("beautiful natural landscape, mountains and forest, wide panoramic view, photorealistic", 768, 512),
+    "landscape-urban": ("modern city skyline, urban landscape, professional photography style", 768, 512),
+    "slide-bg-corporate": ("professional corporate slide background, clean geometric shapes, blue and white palette, 16:9 format", 1280, 720),
+    "slide-bg-dark": ("elegant dark presentation background, subtle gradient, minimal abstract design, 16:9 format", 1280, 720),
+    "slide-bg-creative": ("creative colorful presentation background, modern design, dynamic shapes, 16:9", 1280, 720),
+    "slide-frame-minimal": ("minimal decorative border frame, thin elegant lines, white center space", 1280, 720),
+    "slide-frame-ornate": ("ornate decorative border frame, classical style, gold tones, transparent center", 1280, 720),
+}
 
-# IMPORTANT: append style suffix and "no text, no letters, no words"
-prompt = f"{user_prompt}, {style_suffix}, no text, no letters, no words"
+def get_device():
+    if torch.cuda.is_available(): return "cuda"
+    if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available(): return "mps"
+    return "cpu"
 
-image = pipe(
-    prompt=prompt,
-    guidance_scale=0.0,
-    num_inference_steps=4,
-    width=width,
-    height=height
-).images[0]
+def generate(prompt, style, width, height, output_path, seed=None):
+    device = get_device()
+    dtype = torch.float16 if device != "cpu" else torch.float32
+    print(f"🖥️  Device: {device} | Size: {width}x{height}")
+    if device == "cpu":
+        print("⚠️  CPU mode: generation may take 2–10 minutes.")
 
-image.save(output_path)
-print(f"Image saved: {output_path} ({width}x{height})")
-# Model auto-downloads on first use (~2GB) to ~/.cache/huggingface/
+    pipe = AutoPipelineForText2Image.from_pretrained(
+        "stabilityai/sd-turbo",
+        torch_dtype=dtype,
+        variant="fp16" if device != "cpu" else None
+    ).to(device)
+
+    if style and style in PRESETS:
+        suffix, _, _ = PRESETS[style]
+        full_prompt = f"{prompt}, {suffix}, no text, no letters, no words"
+    else:
+        full_prompt = f"{prompt}, no text, no letters, no words"
+
+    generator = torch.Generator(device=device).manual_seed(seed) if seed else None
+    t0 = time.time()
+    image = pipe(
+        prompt=full_prompt,
+        guidance_scale=0.0,
+        num_inference_steps=4,
+        width=width,
+        height=height,
+        generator=generator
+    ).images[0]
+
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    image.save(output_path)
+    size_kb = os.path.getsize(output_path) // 1024
+    elapsed = time.time() - t0
+    print(f"✅ Saved: {output_path} ({size_kb} KB, {width}x{height}px, {elapsed:.0f}s, device: {device})")
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--prompt", required=True)
+    p.add_argument("--style", default=None, help="Preset name from PRESETS dict")
+    p.add_argument("--width", type=int, default=768)
+    p.add_argument("--height", type=int, default=768)
+    p.add_argument("--output", required=True)
+    p.add_argument("--seed", type=int, default=None)
+    args = p.parse_args()
+    generate(args.prompt, args.style, args.width, args.height, args.output, args.seed)
 ```
 
-## Rules
+---
 
-```yaml
-RULES:
-  - NEVER include text rendering in prompts — SD cannot render text reliably
-  - Always append "no text, no letters, no words" to prompts
-  - Use torch.float16 for memory efficiency on MPS
-  - Minimum size: 512x512; presentation images: 768x768
-  - Model caches after first download — subsequent runs are fast
+## Example Usage
 
-NON_APPLE_BEHAVIOR:
-  message: |
-    ⚠️ Chức năng tạo hình ảnh từ prompt chỉ hỗ trợ trên Apple Silicon Mac.
-    Bạn vẫn có thể sử dụng chức năng tạo biểu đồ (bar, line, pie, radar, scatter).
-  action: Skip image generation, suggest alternatives
+```bash
+# Slide background — corporate style
+python3 .github/skills/tao-hinh/scripts/gen_image.py \
+  --prompt "business meeting, professional" \
+  --style slide-bg-corporate \
+  --width 1280 --height 720 \
+  --output output/slide_bg.png
+
+# Character illustration
+python3 .github/skills/tao-hinh/scripts/gen_image.py \
+  --prompt "friendly teacher explaining to students" \
+  --style character-cartoon \
+  --output output/character.png
+
+# Nature landscape for report header
+python3 .github/skills/tao-hinh/scripts/gen_image.py \
+  --prompt "green mountains at sunrise" \
+  --style landscape-nature \
+  --output output/landscape.png
 ```
+
+---
+
+## Important Rules
+
+- Always append `no text, no letters, no words` to prompts — SD-Turbo cannot reliably render text
+- For `slide-bg` and `slide-frame`, use exactly 1280×720 to match 16:9 presentation format
+- Use `torch.float16` on CUDA/MPS and `torch.float32` on CPU (fp16 not supported on CPU)
+- Model (~2GB) auto-downloads on first run to `~/.cache/huggingface/` and caches permanently
+- On OOM (Out of Memory): reduce width/height by 256 and retry
+- `--seed` enables reproducibility — same seed + prompt = same image
+

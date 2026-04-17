@@ -1,10 +1,13 @@
 ---
 name: thu-thap
 description: |
-  Gather content from local files, URLs, and web search results.
-  Uses markitdown as primary reader with format-specific fallbacks.
-  Web search via vscode-websearchforcopilot_webSearch.
-  Use when user says "đọc file", "lấy nội dung từ", "read file", or "/thu-thap".
+  Gather content from any source: local files (docx/xlsx/pdf/pptx/txt), URLs, and web search.
+  Uses markitdown as primary reader with format-specific fallbacks for garbled output.
+  Web search via vscode-websearchforcopilot_webSearch for online research.
+  Always use this skill when the user mentions any file to read, URL to fetch, or topic to search
+  online — even casual requests like "đọc file này", "lấy thông tin từ trang web đó", "tìm hiểu
+  về X", "search Google giúp tôi", or when a file path or URL is dropped into the chat, even
+  without saying "/thu-thap".
 argument-hint: "[file paths or URLs]"
 ---
 
@@ -19,15 +22,6 @@ OUTPUT: Markdown text (passed to bien-soan or directly to user)
 ```
 
 ---
-
-## Trigger Conditions
-
-Use this skill when user:
-- Says "đọc file", "lấy nội dung từ", "read file"
-- Says "tìm kiếm thông tin", "fetch URL", "search web"
-- Uses command `/thu-thap`
-- Provides file paths or URLs for content extraction
-- Pipeline (tong-hop) routes here for input gathering
 
 ---
 

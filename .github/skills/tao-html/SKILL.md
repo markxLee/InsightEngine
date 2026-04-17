@@ -1,16 +1,19 @@
 ---
 name: tao-html
 description: |
-  Create professional static HTML pages OR reveal.js presentations from synthesized content.
+  Create professional static HTML pages OR reveal.js browser presentations from synthesized content.
   Two modes: "page" (static page with inline CSS) and "presentation" (reveal.js slides).
-  8 styles with light/dark variants. Transitions (slide/fade/zoom/convex/concave), fragment animations,
-  per-slide backgrounds, code syntax highlighting. Use when user says "tạo trang web", "tạo html", or "/tao-html".
+  8 styles with light/dark variants, transitions, fragment animations, code syntax highlighting.
+  Note: presentation mode requires internet connection for reveal.js CDN.
+  Always use this skill when the user wants a webpage, HTML report, or browser-based presentation
+  — even casual requests like "tạo trang web", "làm slide trình chiếu trong trình duyệt",
+  "xuất HTML", or "tạo cái gì đó mở được bằng Chrome" — even without saying "/tao-html".
 argument-hint: "[content] [style: corporate|academic|minimal|dark-modern|creative|warm-earth|dark-neon|dark-elegant] [mode: page|presentation]"
 ---
 
 # Tạo HTML — Static HTML Page & Presentation Output Skill
 
-**References:** `references/presentation-styles.md`
+**References:** `references/presentation-styles.md` | `references/template-styles.md` | `references/speaker-notes-pdf.md`
 
 ```yaml
 MODES:
@@ -28,14 +31,6 @@ OUTPUT: Single self-contained .html file
 ```
 
 ---
-
-## Trigger Conditions
-
-Use this skill when user:
-- Says "tạo trang web", "tạo html", "tạo file html"
-- Says "create html page", "static site", "create website"
-- Uses command `/tao-html`
-- Pipeline (tong-hop) routes content here for HTML output
 
 ---
 

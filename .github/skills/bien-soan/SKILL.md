@@ -2,10 +2,12 @@
 name: bien-soan
 description: |
   Synthesize and merge multi-source content into coherent documents.
-  Two modes: standard (concise) and comprehensive (3-5x richer detail).
-  Identifies overlapping content, resolves conflicts, proposes outline.
-  Supports translation Vietnamese ↔ English (US-1.2.2).
-  Use when user says "tổng hợp", "gộp nội dung", "biên soạn", or "/bien-soan".
+  4 modes: standard (concise), comprehensive (3-5x richer), translation (Vietnamese↔English), summary.
+  Identifies overlapping content, resolves conflicts, proposes outline before writing.
+  Always use this skill when the user has multiple pieces of content to combine, wants to translate,
+  wants to expand brief notes into a full document, or says things like "gộp lại", "tổng hợp nội
+  dung", "dịch sang tiếng Anh/Việt", "viết lại đầy đủ hơn", "biên soạn", "synthesize",
+  "merge content" — even if they don't say "/bien-soan" explicitly.
 argument-hint: "[content from thu-thap or direct text] [mode: standard|comprehensive]"
 ---
 
@@ -21,14 +23,6 @@ OUTPUT: Structured Markdown content (passed to tao-* output skills)
 ```
 
 ---
-
-## Trigger Conditions
-
-Use this skill when user:
-- Says "tổng hợp", "gộp nội dung", "biên soạn"
-- Says "synthesize", "merge content", "dịch thuật", "translate"
-- Uses command `/bien-soan`
-- Pipeline (tong-hop) routes content here for synthesis or translation
 
 ---
 

@@ -1,10 +1,12 @@
 ---
 name: tao-word
 description: |
-  Create professional Word (.docx) documents from synthesized content.
-  Supports 3 template styles: corporate, academic, minimal.
-  Uses python-docx with A4 page setup. Triggers on "tạo file word",
-  "xuất word", "create word document", or "/tao-word".
+  Create professional Word (.docx) documents with 3 template styles: corporate, academic, minimal.
+  Uses python-docx with A4 page setup. Supports tables, headings, TOC, and custom formatting.
+  Always use this skill when the user wants any Word or .docx output — even casual requests like
+  "lưu vào file word", "tạo tài liệu", "làm cái báo cáo word", "export text ra file", or
+  "cho tôi file để gửi sếp" where a Word document is clearly the right format, even without
+  saying "/tao-word" or ".docx".
 argument-hint: "[content from bien-soan or direct text] [style: corporate|academic|minimal]"
 ---
 
@@ -22,14 +24,6 @@ CRITICAL: Use WidthType.DXA for tables (never PERCENTAGE), separate Paragraph fo
 ```
 
 ---
-
-## Trigger Conditions
-
-Use this skill when user:
-- Says "tạo file word", "xuất word", "tạo tài liệu word", "tạo file .docx"
-- Says "create word document", "export to word"
-- Uses command `/tao-word`
-- Pipeline (tong-hop) routes content here for Word output
 
 ---
 

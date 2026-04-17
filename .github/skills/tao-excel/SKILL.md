@@ -3,14 +3,18 @@ name: tao-excel
 description: |
   Create professional Excel (.xlsx) files with data, formulas, and formatting.
   Uses openpyxl for formatting/formulas, pandas for data operations.
-  Runs scripts/recalc.py after generation to force recalculation.
-  Use when user says "tạo file excel", "xuất excel", or "/tao-excel".
+  Runs scripts/recalc.py after generation to force formula recalculation.
+  Always use this skill when the user needs a spreadsheet, table with calculations, or data export
+  — even casual requests like "làm cái bảng tính", "tạo file excel", "xuất ra bảng", "tính toán
+  và lưu thành file", or "cho tôi bảng so sánh" where tabular data with formulas fits, even
+  without saying "/tao-excel" or ".xlsx".
 argument-hint: "[data from bien-soan or direct input] [output path]"
 ---
 
 # Tạo Excel — Excel Spreadsheet Output Skill
 
 Generates professionally formatted `.xlsx` files with working formulas and color-coded cells.
+See `references/formatting-conventions.md` for column width standards, color codes, and cell format patterns.
 
 ```yaml
 MODE: Interactive (asks for data structure) or Pipeline (from tong-hop)
@@ -21,14 +25,6 @@ LIBRARIES: openpyxl (formatting/formulas), pandas (data operations)
 ```
 
 ---
-
-## Trigger Conditions
-
-Use this skill when user:
-- Says "tạo file excel", "xuất excel", "tạo bảng tính", "tạo file .xlsx"
-- Says "create excel", "export to excel", "export spreadsheet"
-- Uses command `/tao-excel`
-- Pipeline (tong-hop) routes data here for Excel output
 
 ---
 

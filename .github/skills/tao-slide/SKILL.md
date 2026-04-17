@@ -2,9 +2,11 @@
 name: tao-slide
 description: |
   Create professional PowerPoint (.pptx) presentations from synthesized content.
-  10 templates with light/dark variants. Template preview and auto-selection.
-  Uses pptxgenjs (Node.js). Triggers on "tạo slide", "làm thuyết trình",
-  "create powerpoint", or "/tao-slide".
+  10 templates with light/dark variants. Template auto-selected from content context.
+  Uses pptxgenjs (Node.js). Colors must be hex without # prefix (pptxgenjs format requirement).
+  Always use this skill when the user wants a PowerPoint, deck, or .pptx file — even casual
+  requests like "làm bài thuyết trình", "tạo slide", "tôi cần deck để present", "xuất ra
+  PowerPoint", or "cho tôi file pptx" — even without saying "/tao-slide".
 argument-hint: "[content] [template: corporate-blue|corporate-red|academic-serif|minimal-white|minimal-gray|dark-gradient|dark-neon|creative-gradient|creative-warm|tech-modern]"
 ---
 
@@ -21,14 +23,6 @@ LIBRARY: pptxgenjs (Node.js) — NEVER use # prefix for colors!
 ```
 
 ---
-
-## Trigger Conditions
-
-Use this skill when user:
-- Says "tạo slide", "làm thuyết trình", "tạo file powerpoint", "tạo file .pptx"
-- Says "create slides", "create powerpoint", "make presentation"
-- Uses command `/tao-slide`
-- Pipeline (tong-hop) routes content here for PPT output
 
 ---
 
