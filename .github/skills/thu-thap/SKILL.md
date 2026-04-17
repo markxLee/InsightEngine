@@ -4,6 +4,8 @@ description: |
   Gather content from any source: local files (docx/xlsx/pdf/pptx/txt), URLs, and web search.
   Uses markitdown as primary reader with format-specific fallbacks for garbled output.
   Web search via vscode-websearchforcopilot_webSearch for online research.
+  Auto-reviews gathered content quality: checks volume, coverage, specificity, and source diversity.
+  If content is insufficient, automatically expands search queries and does additional rounds.
   Always use this skill when the user mentions any file to read, URL to fetch, or topic to search
   online — even casual requests like "đọc file này", "lấy thông tin từ trang web đó", "tìm hiểu
   về X", "search Google giúp tôi", or when a file path or URL is dropped into the chat, even
@@ -30,6 +32,12 @@ clean Markdown text. It runs in two contexts: standalone (user asks to read some
 the first step in the tong-hop pipeline. The key design choice is "markitdown first, fallback
 second" — markitdown handles most formats well, and format-specific readers only kick in when
 markitdown produces garbled or empty output.
+
+**Quality-driven gathering:** After collecting content, this skill auto-reviews what was gathered
+against the request dimensions. If the content is too thin, lacks specifics, or doesn't cover
+all requested topics, it automatically expands search queries and does additional fetch rounds
+(max 2 supplementary rounds). The goal is to ensure bien-soan receives enough raw material to
+produce rich, expert-level output — not scraps that force shallow synthesis.
 
 **Two search modes:**
 - **Standard**: single-query search for simple requests (default)
@@ -218,7 +226,64 @@ For web search workflow, see `references/web-search-enrichment.md`.
 
 ---
 
-## Step 5: Combine & Return
+## Step 5: Quality Review & Auto-Expansion
+
+Before combining results, review the gathered content quality. This step prevents the common
+failure where thin research data leads to thin synthesis. Better to spend extra time gathering
+now than to produce a shallow final document.
+
+### Content Quality Assessment
+
+```yaml
+GATHERING_QUALITY_CHECK:
+  volume_check:
+    # Is there enough raw material for comprehensive synthesis?
+    minimum_total_chars: 5000  # Standard requests
+    minimum_total_chars_deep: 15000  # Deep research
+    minimum_per_dimension: 1000  # Per research dimension (if applicable)
+    fail_action: Expand search queries, fetch more URLs
+
+  specificity_check:
+    # Does the content contain specific, usable data?
+    check_for: Numbers, statistics, named entities, dates, case studies, quotes
+    fail_signal: Content is mostly generic descriptions and overviews
+    fail_action: |
+      Search for more specific queries:
+      - Add "statistics", "data", "report", "benchmark" to search terms
+      - Target data-rich sources: research papers, industry reports, official statistics
+
+  coverage_check:
+    # If dimensions were specified (by tong-hop Step 1.5), are they all covered?
+    method: Map collected content to each requested dimension
+    fail_if: Any major dimension has < 500 chars of relevant content
+    fail_action: Generate targeted queries for uncovered dimensions
+
+  source_diversity:
+    # For web search: are sources varied enough?
+    minimum_unique_domains: 3  # Don't rely on a single source
+    fail_action: Explicitly search for alternative perspectives and sources
+
+AUTO_EXPANSION_PROTOCOL:
+  if_quality_check_fails:
+    1. Identify which criteria failed and what's missing
+    2. Generate 2-3 targeted supplementary search queries
+    3. Execute supplementary searches + fetch
+    4. Re-check quality
+    5. Maximum 2 supplementary rounds
+    6. If still insufficient after 2 rounds, proceed with honest coverage report
+  
+  report_to_user: |
+    📊 Kiểm tra chất lượng thu thập:
+    - Khối lượng: {total_chars} ký tự ({pass/fail})
+    - Độ cụ thể: {specificity_assessment} ({pass/fail})
+    - Phủ sóng: {coverage_assessment} ({pass/fail})
+    - Đa dạng nguồn: {N} nguồn từ {M} domain ({pass/fail})
+    {if_supplementary: "→ Đã tìm kiếm bổ sung {K} queries"}
+```
+
+---
+
+## Step 6: Combine & Return
 
 1. Structure each source as:
    ```
@@ -236,6 +301,7 @@ For web search workflow, see `references/web-search-enrichment.md`.
    - Tổng cộng: {total_sources} nguồn
    - Thành công: {success_count}, Lỗi: {error_count}
    - Tổng nội dung: {total_chars} ký tự (~{total_words} từ)
+   - Chất lượng: {quality_assessment}
    ```
 
 ---

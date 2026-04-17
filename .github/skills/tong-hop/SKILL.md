@@ -1,7 +1,11 @@
 ---
 name: tong-hop
 description: |
-  Main InsightEngine pipeline — analyzes user intent and orchestrates all sub-skills end-to-end.
+  Main InsightEngine pipeline — analyzes user intent deeply, orchestrates all sub-skills end-to-end,
+  and auto-reviews quality at every step. Before execution, expands user prompts into comprehensive
+  dimensions and confirms analysis. After each step, reviews output quality — if insufficient, loops
+  and retries with specific improvement instructions (max 2 retries). Default content depth is
+  COMPREHENSIVE (expert-level, rich content) — not standard or brief.
   Handles any content task: research → synthesis → output in Word/Excel/PPT/PDF/HTML/chart format.
   Supports session resume via save_state.py and chained outputs (e.g., Excel data → chart → slide).
   Always use this skill whenever the user describes any content creation, reporting, or presentation
@@ -29,10 +33,21 @@ compatibility:
 This is the central orchestrator — it never generates content itself, but delegates each phase
 to a specialized sub-skill (thu-thap → bien-soan → tao-<format>). This separation matters because
 each sub-skill has deep domain expertise (e.g., tao-slide knows about 10 pptxgenjs templates),
-and the orchestrator focuses solely on planning, routing, and error recovery.
+and the orchestrator focuses solely on planning, routing, quality control, and error recovery.
+
+**Three key mechanisms that drive quality:**
+1. **Request Deep Analysis (Step 1.5)**: Before executing, deeply analyze the user's prompt,
+   expand implicit dimensions, and confirm the expanded scope with the user. This prevents
+   executing in the wrong direction.
+2. **Auto Quality Review Loop (Step 4)**: After every sub-skill step, automatically review
+   output quality against specific criteria. If quality is insufficient, loop back with
+   targeted improvement instructions. Max 2 retries per step.
+3. **Comprehensive by Default**: Default content depth is `comprehensive` (expert-level,
+   5000-15000 words). Only downgrade to `standard` when user explicitly asks for brevity.
+   The #1 user complaint is thin, shallow output — this default eliminates it.
 
 All responses to the user are in Vietnamese. The pipeline presents an execution plan, waits for
-approval, then executes step-by-step with progress reporting.
+approval, then executes step-by-step with progress reporting and quality checks.
 
 ---
 
@@ -100,27 +115,109 @@ python3 scripts/save_state.py archive
    ```yaml
    CONTENT_DEPTH_SIGNALS:
      standard:
-       # User wants something quick or explicitly short
+       # ONLY when user EXPLICITLY asks for brevity — never assume this
        - "tóm tắt", "tóm lược", "ngắn gọn", "brief", "quick", "overview"
        - "just the key points", "chỉ cần ý chính"
        - Output format is email or memo (inherently short)
      
-     enriched:
-       # DEFAULT — most requests fall here
-       # Any request that doesn't explicitly ask for brevity
+     comprehensive:
+       # DEFAULT — this is the new normal for ALL requests
+       # The single biggest user complaint is thin output. Users who invest time
+       # in a pipeline request deserve rich, expert-level content by default.
+       # Any request that doesn't explicitly ask for brevity gets comprehensive.
        - "tổng hợp", "làm báo cáo", "tạo tài liệu", "viết về"
        - "search rồi tạo file", "tạo slide", "tạo word"
        - Most web search + output requests
-     
-     comprehensive:
-       # User wants maximum depth
-       - "chi tiết", "đầy đủ", "comprehensive", "chuyên sâu", "thật kỹ"
-       - research_depth was "deep" (user invested in deep search → expects rich output)
+       - research_depth was "deep" (auto-upgrade)
        - User specifies a long document type (whitepaper, research report, thesis)
+       - "chi tiết", "đầy đủ", "comprehensive", "chuyên sâu", "thật kỹ"
        - "phân tích sâu", "deep analysis", "viết thật chi tiết"
    ```
-   Pass `content_depth` to bien-soan. Default is `enriched` — not `standard`. This is
-   important because most users expect substantive output even when they don't say "chi tiết".
+   Pass `content_depth` to bien-soan. **Default is `comprehensive`** — not `standard` or
+   `enriched`. The most common complaint is thin, shallow output. Users who go through a
+   multi-step pipeline expect expert-level, substantive content — not a surface-level summary.
+   Only downgrade to `standard` when user explicitly asks for brevity.
+
+---
+
+## Step 1.5: Request Deep Analysis (CRITICAL — DO NOT SKIP)
+
+The difference between mediocre and excellent output starts here. Most user prompts are
+underspecified — the user has a rich mental model of what they want but only types a short
+sentence. This step bridges that gap by analyzing the request deeply, expanding implicit
+dimensions, and confirming with the user before execution.
+
+**Why this matters:** Without this step, a request like "làm báo cáo về AI" gets parsed as
+"search AI → write report" which produces generic content. With deep analysis, it becomes
+"search AI applications in [user's domain], trends 2024-2026, key players, market size,
+risks, and opportunities → write analytical report with data tables and recommendations."
+
+### 1.5.1: Expand Request Dimensions
+
+For the user's request, identify ALL implicit dimensions:
+
+```yaml
+DIMENSION_EXPANSION:
+  for_each_request:
+    1. CORE_QUESTION: What is the user literally asking for?
+    2. IMPLICIT_SUBTOPICS: What sub-topics must be covered to make this useful?
+       - A report about "AI trends" implicitly needs: current state, key players,
+         recent breakthroughs, market data, risks/challenges, future predictions
+    3. CONTEXT_DIMENSIONS: What context makes this actionable?
+       - Who is the audience? (infer from style/format if not stated)
+       - What decisions will this support?
+       - What level of technical detail is appropriate?
+    4. DATA_NEEDS: What specific data would make this credible?
+       - Numbers, statistics, comparisons, timelines, case studies
+    5. ANALYTICAL_ANGLES: What analysis would add genuine value?
+       - Comparisons, trend analysis, SWOT, recommendations, implications
+    6. SCOPE_BOUNDARIES: What should NOT be included? (to stay focused)
+```
+
+### 1.5.2: Present Analysis for User Confirmation
+
+Present the expanded analysis to the user BEFORE creating the execution plan:
+
+```yaml
+ANALYSIS_FORMAT: |
+  🔍 **Phân tích yêu cầu:**
+
+  **Yêu cầu gốc:** {original_request}
+
+  **Phân tích mở rộng:**
+  Tôi hiểu bạn cần {core_interpretation}. Để tạo nội dung thật sự chất lượng,
+  tôi đề xuất mở rộng phạm vi như sau:
+
+  📌 **Các khía cạnh sẽ bao gồm:**
+  1. {dimension_1} — {why_this_matters}
+  2. {dimension_2} — {why_this_matters}
+  3. {dimension_3} — {why_this_matters}
+  ...
+
+  📊 **Dữ liệu sẽ thu thập:**
+  - {data_need_1}
+  - {data_need_2}
+  - {data_need_3}
+
+  🎯 **Góc phân tích:**
+  - {analytical_angle_1}
+  - {analytical_angle_2}
+
+  ⚠️ **Sẽ KHÔNG bao gồm:** {scope_boundaries}
+
+  **Đầu ra:** {format} kiểu {style}, dự kiến {estimated_length}
+
+  👉 Bạn đồng ý với phân tích này không? Có muốn thêm/bớt khía cạnh nào?
+
+USER_RESPONSE_HANDLING:
+  approved: Proceed to Step 2 with expanded dimensions
+  modified: Adjust dimensions based on feedback, re-present if major changes
+  simplified: Respect user's wish to narrow scope, but keep content_depth comprehensive
+```
+
+**Important:** This step may feel like it slows the pipeline down, but it prevents the much
+worse outcome of executing in the wrong direction and producing irrelevant content. A 30-second
+confirmation saves 5 minutes of wasted generation.
 
 ---
 
@@ -190,58 +287,191 @@ python3 scripts/save_state.py init \
 
 ---
 
-## Step 4: Execute Sub-Skills
+## Step 4: Execute Sub-Skills (with Auto Quality Review Loop)
 
 Show progress before and after each step (format: see `references/pipeline-ux.md`).
 For chained outputs and intermediate files, see `references/output-chaining.md`.
 
-1. **thu-thap** (`references/../../thu-thap/SKILL.md`)
-   - Input: sources from user request
-   - **If research_depth = deep**: pass this flag so thu-thap uses the Deep Research Protocol
-     (query decomposition → multi-round search → gap analysis → targeted deep dives).
-     Thu-thap will return content organized by research dimensions with coverage assessment.
-   - **If research_depth = standard**: single-query search as usual
-   - Output: combined Markdown text (with dimension headers if deep research)
-   - Report: "✅ Thu thập hoàn tất — {N} nguồn, {total_chars} ký tự"
-   - Save state: `python3 scripts/save_state.py update --step thu-thap`
+**CRITICAL: Every step now has an automatic quality review.** After each sub-skill completes,
+the orchestrator reviews the output against quality criteria. If quality is insufficient, the
+step is re-executed with specific improvement instructions. Maximum 2 retries per step —
+if quality is still poor after 2 retries, proceed with a warning to the user.
 
-2. **Analysis loop (deep research only)** — after thu-thap returns, bien-soan analyzes
-   the gathered content. If bien-soan identifies critical information gaps that make the
-   synthesis incomplete or inaccurate:
-   - bien-soan reports the gaps with specific follow-up queries
-   - tong-hop routes back to thu-thap for targeted supplementary search
-   - Maximum 1 supplementary round (to avoid infinite loops)
-   - This loop ensures the final synthesis is based on comprehensive data
+### Auto Quality Review Protocol
 
-3. **bien-soan** (`.github/skills/bien-soan/SKILL.md`)
-   - Input: Markdown from thu-thap
-   - Options: `enrich: true` (default) | `include_notes: true` (if output = presentation)
-   - **content_depth**: pass the detected depth level (standard | enriched | comprehensive)
-     - If `research_depth: deep` was used → auto-upgrade to `comprehensive`
-     - Default: `enriched` (produces 3000-8000 words — substantially richer than old default)
-   - Output: structured Markdown content
-   - Report: "✅ Biên soạn hoàn tất — {sections} phần, {total_words} từ"
-   - Save state: `python3 scripts/save_state.py update --step bien-soan`
+```yaml
+QUALITY_REVIEW_LOOP:
+  after_each_step:
+    1. Sub-skill produces output
+    2. Orchestrator reviews output against QUALITY_CRITERIA for that step
+    3. IF passes → proceed to next step
+    4. IF fails → generate IMPROVEMENT_INSTRUCTIONS, re-execute step
+    5. Maximum 2 retries per step
+    6. After max retries, proceed with warning: "⚠️ Chất lượng bước {step} chưa
+       đạt mức tối ưu. Tiếp tục với kết quả hiện tại — bạn có thể yêu cầu
+       chỉnh sửa sau."
 
-4. **tao-\<format\>** (skill determined by output_format)
-   - Mapping: word → tao-word | excel → tao-excel | slides → tao-slide | pdf → tao-pdf | html → tao-html
-   - Input: synthesized content from bien-soan
-   - Output: final file
-   - Report: "✅ Xuất file hoàn tất — {path} ({size})"
-   - Save state: `python3 scripts/save_state.py update --step tao-<format> --output-file "<path>"`
+  REVIEW_MINDSET: |
+    Review like a demanding expert reader, not a lenient validator. Ask:
+    - Would I be proud to submit this to my boss?
+    - Does this teach me something I didn't already know?
+    - Are the claims backed by specific evidence, or are they vague platitudes?
+    - Would a competing tool produce better output from the same inputs?
+```
 
-5. **tao-hinh** (conditional — if charts requested OR output is slides with data)
-   - Report: "✅ Tạo {N} biểu đồ hoàn tất"
-   - Save state: `python3 scripts/save_state.py update --step tao-hinh --output-file "<chart_path>"`
+---
 
-6. **thiet-ke** (conditional — if visual design requested: poster, cover, certificate, etc.)
-   - Input: content from bien-soan (titles, key phrases) + user design intent
-   - Output: PNG or PDF visual composition
-   - Route here instead of tao-hinh when the user wants a **designed composition** with
-     typography and layout (poster, cover page, certificate, invitation, banner, infographic)
-     rather than a data chart or AI-generated image
-   - Report: "✅ Thiết kế hoàn tất — {path} ({size})"
-   - Save state: `python3 scripts/save_state.py update --step thiet-ke --output-file "<path>"`
+### 4.1: thu-thap (with quality gate)
+
+**Execute:**
+- Input: sources from user request + expanded dimensions from Step 1.5
+- **If research_depth = deep**: pass this flag so thu-thap uses the Deep Research Protocol
+  (query decomposition → multi-round search → gap analysis → targeted deep dives).
+  Thu-thap will return content organized by research dimensions with coverage assessment.
+- **If research_depth = standard**: single-query search as usual
+- Output: combined Markdown text (with dimension headers if deep research)
+- Report: "✅ Thu thập hoàn tất — {N} nguồn, {total_chars} ký tự"
+- Save state: `python3 scripts/save_state.py update --step thu-thap`
+
+**Quality Gate — THU-THAP:**
+```yaml
+THU_THAP_QUALITY_CRITERIA:
+  volume_check:
+    # Is there enough raw material to produce rich output?
+    minimum_chars: 5000  # For standard requests
+    minimum_chars_deep: 15000  # For deep research requests
+    fail_action: "Thu thập chưa đủ dữ liệu. Tìm kiếm bổ sung với queries mở rộng."
+
+  coverage_check:
+    # Do the collected sources cover ALL dimensions from Step 1.5?
+    method: Check each expanded dimension from analysis against collected content
+    fail_if: Any major dimension has < 500 chars of relevant content
+    fail_action: "Thiếu dữ liệu về {missing_dimensions}. Tìm kiếm bổ sung."
+
+  diversity_check:
+    # Are sources diverse enough? (not all from one website)
+    minimum_unique_sources: 3  # For web search requests
+    fail_action: "Nguồn dữ liệu quá tập trung. Tìm thêm từ nguồn khác."
+
+  specificity_check:
+    # Does content contain specific data (numbers, names, dates)?
+    method: Scan for numeric data, proper nouns, dates in collected content
+    fail_if: Content is mostly generic descriptions without specifics
+    fail_action: "Nội dung thu thập quá chung chung, thiếu số liệu cụ thể. Tìm nguồn có data."
+```
+
+### 4.2: Analysis loop (ALWAYS — not just deep research)
+
+After thu-thap returns, **always** analyze the gathered content quality:
+- Review each dimension from Step 1.5 analysis against collected data
+- If bien-soan identifies critical information gaps:
+  - Generate specific follow-up queries targeting the gaps
+  - Route back to thu-thap for supplementary search
+  - Maximum 2 supplementary rounds (up from 1)
+- This loop ensures the synthesis is based on substantive data, not thin scraps
+
+### 4.3: bien-soan (with quality gate)
+
+**Execute:**
+- Input: Markdown from thu-thap
+- Options: `enrich: true` (always) | `include_notes: true` (if output = presentation)
+- **content_depth**: pass the detected depth level (standard | comprehensive)
+  - Default: `comprehensive` (produces 5000-15000 words — expert-level depth)
+  - Only `standard` if user explicitly asked for brevity
+- Output: structured Markdown content
+- Report: "✅ Biên soạn hoàn tất — {sections} phần, {total_words} từ"
+- Save state: `python3 scripts/save_state.py update --step bien-soan`
+
+**Quality Gate — BIEN-SOAN (MOST CRITICAL):**
+```yaml
+BIEN_SOAN_QUALITY_CRITERIA:
+  depth_check:
+    # Is the content genuinely substantive?
+    method: Read through the synthesized output and evaluate
+    fail_if_any:
+      - Average section length < 300 words (comprehensive) or < 200 words (standard)
+      - More than 30% of sentences are generic (no specific data/examples)
+      - Sections that just restate source content without analysis
+      - Missing analytical paragraphs (what the facts mean, implications)
+    fail_action: |
+      "Nội dung biên soạn chưa đủ sâu. Cần bổ sung:
+      - Thêm số liệu cụ thể và ví dụ cho các phần: {weak_sections}
+      - Thêm phân tích (implications, trends) cho: {sections_without_analysis}
+      - Mở rộng các phần quá ngắn: {short_sections}"
+
+  specificity_check:
+    # Does output contain concrete, verifiable information?
+    method: Count specific data points (numbers, names, dates, examples, case studies)
+    minimum_per_section: 3  # At least 3 specific data points per major section
+    fail_action: "Nội dung quá chung chung. Cần thêm số liệu cụ thể, ví dụ, case study."
+
+  structure_check:
+    # Is the document well-organized?
+    fail_if_any:
+      - No H2/H3 hierarchy (flat structure)
+      - Sections longer than 2000 words without sub-headings
+      - No comparison tables where comparison data exists
+      - No key takeaways at end of major sections
+    fail_action: "Cấu trúc cần cải thiện: {specific_structural_issues}"
+
+  analytical_depth_check:
+    # Does the content go beyond facts to provide genuine insights?
+    method: Check for analysis paragraphs, implications, trend identification, recommendations
+    fail_if: More than half of sections are purely factual with no analysis
+    fail_action: "Thiếu phân tích chuyên sâu. Mỗi phần cần có đoạn phân tích: xu hướng,
+    ý nghĩa, khuyến nghị — không chỉ liệt kê sự kiện."
+```
+
+### 4.4: tao-\<format\> (with quality gate)
+
+**Execute:**
+- Mapping: word → tao-word | excel → tao-excel | slides → tao-slide | pdf → tao-pdf | html → tao-html
+- Input: synthesized content from bien-soan
+- Output: final file
+- Report: "✅ Xuất file hoàn tất — {path} ({size})"
+- Save state: `python3 scripts/save_state.py update --step tao-<format> --output-file "<path>"`
+
+**Quality Gate — OUTPUT:**
+```yaml
+OUTPUT_QUALITY_CRITERIA:
+  completeness_check:
+    # Did the output skill include ALL sections from bien-soan?
+    method: Compare section count in input vs output
+    fail_if: Output is missing sections or has significantly truncated content
+    fail_action: "File đầu ra thiếu nội dung. Kiểm tra lại các phần: {missing_sections}"
+
+  formatting_check:
+    # Is the formatting professional?
+    fail_if_any:
+      - Tables with broken layouts
+      - Missing headings or inconsistent hierarchy
+      - Images overflowing margins
+      - Empty pages or sections
+    fail_action: "Lỗi format: {specific_issues}. Tạo lại file."
+
+  size_sanity_check:
+    # Is file size reasonable for the content volume?
+    # A 10-page report shouldn't be 2KB (probably empty)
+    minimum_size_kb:
+      docx: 15
+      pptx: 50
+      pdf: 20
+      html: 5
+    fail_action: "File quá nhỏ — có thể thiếu nội dung. Kiểm tra lại."
+```
+
+### 4.5: tao-hinh (conditional — if charts requested OR output is slides with data)
+- Report: "✅ Tạo {N} biểu đồ hoàn tất"
+- Save state: `python3 scripts/save_state.py update --step tao-hinh --output-file "<chart_path>"`
+
+### 4.6: thiet-ke (conditional — if visual design requested: poster, cover, certificate, etc.)
+- Input: content from bien-soan (titles, key phrases) + user design intent
+- Output: PNG or PDF visual composition
+- Route here instead of tao-hinh when the user wants a **designed composition** with
+  typography and layout (poster, cover page, certificate, invitation, banner, infographic)
+  rather than a data chart or AI-generated image
+- Report: "✅ Thiết kế hoàn tất — {path} ({size})"
+- Save state: `python3 scripts/save_state.py update --step thiet-ke --output-file "<path>"`
 
 ---
 
@@ -307,15 +537,18 @@ See `references/session-summary.md` for full format and view suggestion specs.
 
 **Example 1:**
 Input: "Tổng hợp 3 file PDF trong thư mục input/ thành báo cáo Word kiểu corporate"
-Output: Pipeline thu-thap (đọc 3 PDF) → bien-soan (merge + synthesize) → tao-word (corporate .docx) → file output/bao-cao.docx (15 trang, 45 KB)
+Flow: Request Analysis → Expand (xác nhận scope) → thu-thap (đọc 3 PDF + quality check) → bien-soan (comprehensive synthesis + self-review) → tao-word (thin content guard → corporate .docx)
+Output: output/bao-cao.docx (20 trang, 55 KB — comprehensive default)
 
 **Example 2:**
 Input: "Search Google về AI trends 2026, rồi làm slide thuyết trình dark-modern"
-Output: Pipeline thu-thap (web search + fetch top 5 URLs) → bien-soan (synthesize) → tao-slide (dark-gradient .pptx) → file output/ai-trends-2026.pptx (18 slides)
+Flow: Request Analysis → Expand 5 dimensions (trends, players, market, risks, predictions) → confirm → thu-thap (deep search 5 queries + gap analysis + supplementary) → bien-soan (comprehensive + self-review loop) → tao-slide (thin content guard → dark-gradient .pptx)
+Output: output/ai-trends-2026.pptx (22 slides — rich content from expanded research)
 
 **Example 3:**
 Input: "Đọc file Excel sales_data.xlsx, tạo biểu đồ bar chart rồi nhúng vào Word report"
-Output: Pipeline thu-thap (đọc xlsx) → bien-soan → tao-hinh (bar chart PNG) → tao-word (embed chart) → 2 files output
+Flow: Request Analysis → thu-thap (đọc xlsx) → bien-soan → tao-hinh (bar chart PNG) → tao-word (embed chart)
+Output: 2 files output — comprehensive report with embedded charts
 
 ---
 

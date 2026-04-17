@@ -2,40 +2,70 @@
 name: tao-slide
 description: |
   Create professional PowerPoint (.pptx) presentations from synthesized content.
-  10 templates with light/dark variants. Template auto-selected from content context.
-  Uses pptxgenjs (Node.js). Colors must be hex without # prefix (pptxgenjs format requirement).
+  Two engines: Quick mode (pptxgenjs, 10 templates) for pipeline tasks, and Pro mode
+  (ppt-master SVG→PPTX) for consulting-grade output with native DrawingML shapes,
+  20+ layout templates, 50+ chart templates, and 6700+ icons.
+  Colors must be hex without # prefix (pptxgenjs format requirement).
   Always use this skill when the user wants a PowerPoint, deck, or .pptx file — even casual
   requests like "làm bài thuyết trình", "tạo slide", "tôi cần deck để present", "xuất ra
-  PowerPoint", or "cho tôi file pptx" — even without saying "/tao-slide".
-argument-hint: "[content] [template: corporate-blue|corporate-red|academic-serif|minimal-white|minimal-gray|dark-gradient|dark-neon|creative-gradient|creative-warm|tech-modern]"
-version: 1.1
+  PowerPoint", "cho tôi file pptx", "tạo bài slide chuyên nghiệp" — even without saying
+  "/tao-slide". Use Pro mode when user says "slide chuyên nghiệp", "consulting-grade",
+  "slide đẹp thật sự", "dùng ppt-master", or has source docs (PDF/DOCX/URL) to convert.
+argument-hint: "[content] [mode: quick|pro] [template: corporate-blue|...|mckinsey|google-style|...]"
+version: 2.0
 compatibility:
   requires:
     - Node.js >= 18
     - pptxgenjs (npm install -g pptxgenjs)
+  optional:
+    - Python 3.10+ with ppt-master requirements (for Pro mode)
   tools:
     - run_in_terminal
 ---
 
 # Tạo Slide — PowerPoint Output Skill
 
-**References:** `references/template-styles.md`
+**References:** `references/template-styles.md` | `references/pro-mode.md`
 
-Generates professional `.pptx` presentations using pptxgenjs (Node.js). This is the one skill
-that uses Node.js instead of Python — pptxgenjs produces significantly better visual output
-than python-pptx, with proper support for gradients, shadows, and modern slide layouts.
+Two engines — **Pro là mặc định** cho mọi bài thuyết trình mới:
 
-The skill offers 10 templates covering light and dark variants. One critical pptxgenjs rule:
-colors must be hex strings **without** the `#` prefix (e.g., `"1F4E79"` not `"#1F4E79"`).
-The `#` prefix causes silent rendering errors.
+| Mode | Engine | Khi nào dùng |
+|------|--------|-------------|
+| **Pro** (mặc định) | ppt-master SVG→PPTX | Mọi bài thuyết trình mới — native DrawingML, consulting-grade |
+| **Quick** | pptxgenjs (Node.js) | Chỉ khi user yêu cầu rõ ràng "simple", "nhanh", "prototype" |
+
+## Mode Selection
+
+```
+User request →
+  ├─ Pipeline call từ tong-hop HOẶC bất kỳ yêu cầu tạo slide?
+  │   → Pro mode (MẶC ĐỊNH)
+  │   Đọc `references/pro-mode.md`
+  │
+  ├─ User nói rõ "slide đơn giản" / "quick" / "nhanh" / "prototype"?
+  │   → Quick mode
+  │   Tiếp tục đọc bên dưới
+  │
+  └─ User nói "tạo slide đơn giản" / "5 slides nhanh" / "prototype deck"?
+      → Quick mode
+```
+
+Pro mode: đọc `references/pro-mode.md`.
+Quick mode: tiếp tục đọc bên dưới.
 
 All responses to the user are in Vietnamese.
 
 ---
 
+## Quick Mode (pptxgenjs)
+
+pptxgenjs produces good visual output with proper support for gradients, shadows, and modern
+slide layouts. Colors must be hex strings **without** the `#` prefix (e.g., `"1F4E79"` not
+`"#1F4E79"`). The `#` prefix causes silent rendering errors.
+
 ---
 
-## Available Templates
+## Available Templates (Quick Mode)
 
 ```yaml
 LIGHT:
@@ -69,19 +99,28 @@ Full color/font specs: `references/template-styles.md`
 3. Determine style (user-specified, pipeline-inferred, or ask)
 4. Determine output path (default: `./<title>.pptx`)
 
-### Thin Content Guard
+### Thin Content Guard (STRICT — reject and loop back)
 
-A presentation with only bullet-point titles and no substance looks amateurish. Before
-building slides, check content depth:
+A presentation with only bullet-point titles and no substance looks amateurish. This is the
+last line of defense against thin output. Better to loop back and enrich content than to
+deliver a deck that embarrasses the user.
 
-- **< 300 words** for a multi-section presentation: this will produce slides with mostly
-  empty space. Flag to pipeline/user for content enrichment first.
-- **Sections with only 1 bullet**: expand — a single bullet per slide wastes the audience's
-  time. Either merge with adjacent sections or flag for enrichment.
-- **All sections are surface-level** (no data, no examples, no specifics): warn that the
-  presentation will feel generic. Suggest going back to bien-soan with deeper content.
-- When in pipeline mode, signal back to tong-hop: "Content quá mỏng cho presentation —
-  cần biên soạn ở mức enriched/comprehensive trước khi tạo slide."
+**Automatic rejection criteria (when called from pipeline):**
+- **< 500 words** for a multi-section presentation: REJECT. Do not generate. Signal back to
+  tong-hop: "❌ Content quá mỏng ({word_count} từ) cho presentation. Cần biên soạn lại
+  ở mức comprehensive." This triggers tong-hop's quality loop to re-run bien-soan.
+- **Sections with only 1 bullet or 1 sentence**: these will produce nearly-empty slides.
+  If more than 40% of sections are this thin, REJECT and loop back.
+- **All sections are surface-level** (no data, no examples, no specifics): REJECT. A
+  presentation without concrete content wastes the audience's time.
+- **No speaker notes content**: For comprehensive content, bien-soan should provide enough
+  material for both slides AND speaker notes. If content is only enough for slide text,
+  it's too thin.
+
+**When called standalone:**
+- Warn: "⚠️ Nội dung chỉ có ~{word_count} từ. Bài thuyết trình sẽ khá mỏng. Bạn muốn
+  bổ sung thêm không?"
+- Proceed if user insists
 
 ---
 

@@ -31,10 +31,10 @@ DEEP_OUTLINE:
     - Conclusion with forward-looking insights
 ```
 
-## Enriched Synthesis
+## Comprehensive Synthesis
 
 ```yaml
-ENRICHED_SYNTHESIZE:
+COMPREHENSIVE_SYNTHESIZE:
   for_each_section:
     1. Write introduction paragraph (why this section matters)
     2. Expand each key point with definition, example, data support, source attribution

@@ -1,8 +1,11 @@
 ---
 name: bien-soan
 description: |
-  Synthesize and merge multi-source content into coherent documents.
-  4 modes: standard (concise), comprehensive (3-5x richer), translation (Vietnamese↔English), summary.
+  Synthesize and merge multi-source content into coherent, expert-level documents.
+  Default mode is COMPREHENSIVE — rich, analytical content with specific data, examples, and insights.
+  Auto-reviews its own output: checks depth, specificity, and analytical quality per section.
+  If any section is too thin or generic, automatically rewrites it before delivery.
+  4 modes: standard (brief), comprehensive (default — rich expert-level), translation (Vietnamese↔English), summary.
   Identifies overlapping content, resolves conflicts, proposes outline before writing.
   Always use this skill when the user has multiple pieces of content to combine, wants to translate,
   wants to expand brief notes into a full document, or says things like "gộp lại", "tổng hợp nội
@@ -26,8 +29,14 @@ The key challenge is merging overlapping information without losing important de
 creating contradictions. The skill proposes an outline first (so the user can adjust structure
 before writing begins), then synthesizes content section by section.
 
-Four modes: **synthesis** (default — merge sources), **comprehensive** (3-5x richer depth),
-**translation** (Vietnamese↔English), and **summary** (extract key points and condense).
+**Quality-first approach:** This skill auto-reviews its own output section by section. After
+writing each major section, it checks against a richness scorecard. Sections that are too thin,
+too generic, or lack analysis are automatically rewritten before moving to the next section.
+This self-review loop is what transforms a basic summary into an expert-level document.
+
+Four modes: **comprehensive** (default — expert-level depth with analysis and specifics),
+**standard** (brief, only when explicitly requested), **translation** (Vietnamese↔English),
+and **summary** (extract key points and condense).
 
 All responses to the user are in Vietnamese.
 
@@ -38,15 +47,17 @@ All responses to the user are in Vietnamese.
 ## Mode Selection
 
 Detect mode from user keywords:
-- **synthesis** (default): merge multiple sources into one document
-- **comprehensive**: triggered by "chi tiết", "comprehensive", "đầy đủ", or `--mode=comprehensive`.
-  See `references/comprehensive-mode.md` for the full spec on how to produce 3-5x richer content.
+- **comprehensive** (DEFAULT for all synthesis requests): merge sources AND produce rich,
+  analytical, expert-level content. See `references/comprehensive-mode.md` for the full spec.
+  This is now the default because the #1 user complaint is thin, shallow output.
+- **standard**: triggered ONLY by explicit brevity keywords: "tóm tắt", "ngắn gọn", "brief",
+  "quick", "overview", "chỉ cần ý chính". Produces shorter output but still maintains specificity.
 - **translation**: triggered by "dịch", "translate", "dịch sang".
   See `references/translation-mode.md` for language detection and translation workflow.
 - **summary**: triggered by "tóm tắt", "summarize" — extract key points and condense.
 
 In interactive mode, ask the user which mode they prefer. In pipeline mode, default to
-standard synthesis unless tong-hop specifies otherwise.
+**comprehensive** unless tong-hop specifies otherwise.
 
 ### Content Depth — Why Default Output Is Often Too Thin
 
@@ -55,7 +66,7 @@ because standard synthesis mode focuses on *merging* sources efficiently — eli
 redundancy and creating concise output. But users usually want *rich* output, not concise
 output. They want to learn from the document, not just see their sources compressed.
 
-**The fix: default to "enriched" synthesis, not bare-minimum synthesis.**
+**The fix: default to "comprehensive" synthesis, not bare-minimum synthesis.**
 
 When synthesizing, the goal is not to produce the shortest possible document that covers all
 points. The goal is to produce a document that a reader finds **genuinely useful and
@@ -87,35 +98,34 @@ tong-hop passes a `content_depth` parameter based on request analysis:
 ```yaml
 CONTENT_DEPTH:
   standard:
-    # User asks for something quick, simple, or explicitly short
+    # ONLY when user EXPLICITLY asks for brevity — never the default
     trigger: "tóm tắt", "ngắn gọn", "quick", "brief", "overview"
     target_words_per_section: 200-400
     total_target: 1000-3000 words
-    approach: Concise, key points only, minimal elaboration
-
-  enriched:
-    # DEFAULT for most requests — this is the new normal
-    trigger: Most requests that don't specify length
-    target_words_per_section: 400-800
-    total_target: 3000-8000 words
-    approach: |
-      Each section gets:
-      - Introduction paragraph (context + why this matters)
-      - Core content with specific facts, numbers, examples
-      - Analysis paragraph (implications, trends, connections)
-      - Key data points in tables or formatted lists
+    approach: Concise, key points only — but still with specific data, not generalities
 
   comprehensive:
-    # User explicitly wants depth, or deep research was performed
-    trigger: "chi tiết", "comprehensive", "đầy đủ", or research_depth=deep
+    # DEFAULT for ALL requests — this is the new standard
+    # Users who use a content pipeline expect expert-level output.
+    # A request like "làm báo cáo" means "make me a professional report",
+    # not "give me a quick summary."
+    trigger: Most requests (anything that doesn't explicitly ask for brevity)
     target_words_per_section: 800-2000
     total_target: 5000-15000 words
-    approach: Full comprehensive-mode.md spec (3-5x standard)
+    approach: |
+      Each section gets:
+      - Introduction paragraph (context + why this matters to the reader)
+      - Core content with specific facts, numbers, examples, case studies
+      - Comparison tables where data naturally supports it
+      - Analysis paragraph (implications, trends, connections, "so what?")
+      - Key takeaways (2-3 bullet points per major section)
+      Follow full comprehensive-mode.md spec.
 ```
 
-**Important:** when `research_depth: deep` was used (multi-round search), automatically
-upgrade to `comprehensive` depth — the user invested time in deep research, so they
-expect a thorough document, not a brief summary of all that research.
+**Important:** There is no "enriched" middle tier anymore. The old "enriched" (3000-8000 words)
+was still too thin for most use cases. Now it's binary: `comprehensive` (the default, expert-level)
+or `standard` (explicit brevity). This simplification eliminates the ambiguity that caused
+the model to default to shallow output.
 
 ---
 
@@ -171,7 +181,7 @@ expect a thorough document, not a brief summary of all that research.
 
 ---
 
-## Step 3: Synthesize Content
+## Step 3: Synthesize Content (with Section-Level Quality Loop)
 
 For each section in the approved outline:
 
@@ -189,14 +199,14 @@ For each section in the approved outline:
    time periods, approaches), create a Markdown table instead of writing paragraphs. Tables
    are denser and easier to scan than "Option A does X. Option B does Y." prose.
 
-4. **Analysis paragraph** (enriched/comprehensive mode): after presenting the facts, write
-   1-2 paragraphs analyzing what they mean:
+4. **Analysis paragraph** (comprehensive mode — which is the default): after presenting the
+   facts, write 1-2 paragraphs analyzing what they mean:
    - What patterns or trends emerge across sources?
    - What are the implications for the reader?
    - What connections exist between this section and others?
    - What's the "so what?" — why should the reader care?
 
-5. **Section key takeaways** (enriched/comprehensive mode): end each major section with
+5. **Section key takeaways** (comprehensive mode): end each major section with
    2-3 bullet-point takeaways. This helps readers who skim and reinforces the main points.
 
 6. Merge overlapping content — eliminate redundancy but keep specifics from each source.
@@ -206,41 +216,116 @@ For each section in the approved outline:
 
 8. Output format: Structured Markdown (H1/H2/H3, paragraphs, bullet lists, tables, bold/italic)
 
-### Content Richness Checklist
+### Section-Level Self-Review (MANDATORY — run after writing each major section)
 
-Before moving to the next section, verify:
-- [ ] Contains at least 2-3 specific data points (numbers, names, dates) — not just generalities
-- [ ] Has at least one comparison, example, or case study
-- [ ] Provides analysis (what the facts mean), not just a list of facts
-- [ ] A reader who hasn't seen the sources would find this section informative on its own
+After completing each H2 section, pause and review it against this scorecard. This is the
+mechanism that prevents thin output — catching problems section-by-section is far more
+effective than reviewing the entire document at the end.
 
-If a section fails this checklist and the content depth is enriched or comprehensive, go back
-and add substance. The most common failure mode is writing generic sentences like "AI đang
-phát triển nhanh chóng" without any supporting specifics.
+```yaml
+SECTION_SCORECARD:
+  # Score each criterion: PASS or FAIL
+  # If ANY criterion fails → rewrite the section before moving on
+
+  specificity: # PASS if section contains ≥3 specific data points
+    check: Count numbers, proper nouns, dates, percentages, specific examples
+    fail_example: "AI đang phát triển nhanh" (no specifics)
+    pass_example: "Theo McKinsey (2025), 72% doanh nghiệp Fortune 500 đã triển khai AI,
+    tăng từ 55% năm 2023" (specific source, number, comparison)
+
+  depth: # PASS if average paragraph has ≥3 sentences with substance
+    check: Are paragraphs substantive or just topic sentences?
+    fail_example: A section with 3 one-sentence paragraphs
+    pass_example: Each paragraph develops an idea with evidence and analysis
+
+  analysis: # PASS if section contains at least 1 analytical paragraph
+    check: Is there a paragraph that interprets facts, identifies patterns, or draws implications?
+    fail_example: Section only lists facts without any "what this means" analysis
+    pass_example: "Xu hướng này cho thấy..." or "Điều đáng chú ý là..."
+
+  examples: # PASS if section contains at least 1 concrete example or case study
+    check: Is there an illustrative example, case study, or real-world application?
+    fail_example: Abstract descriptions without grounding
+    pass_example: "Ví dụ, Tesla đã áp dụng phương pháp này để..."
+
+  word_count: # PASS if comprehensive mode section has ≥500 words
+    check: Count words in the section
+    fail_threshold_comprehensive: 500 words minimum per H2 section
+    fail_threshold_standard: 150 words minimum per H2 section
+
+REWRITE_PROTOCOL:
+  if_section_fails:
+    1. Identify which criteria failed
+    2. Re-read source material for this section's topic
+    3. Rewrite with specific focus on failed criteria:
+       - specificity fail → find and add concrete data points
+       - depth fail → expand one-liners into full paragraphs
+       - analysis fail → add "implications" and "what this means" paragraphs
+       - examples fail → add real-world case study or illustrative example
+    4. Re-check scorecard — if still failing after 1 rewrite, proceed with warning
+    5. Maximum 1 rewrite per section (to avoid infinite loops)
+```
+
+### Content Richness Checklist (Final — after all sections complete)
+
+Before moving to delivery, verify the entire document:
+- [ ] Every major section contains at least 3 specific data points (numbers, names, dates)
+- [ ] Every major section has at least one comparison, example, or case study
+- [ ] Every major section provides analysis (what the facts mean), not just a list of facts
+- [ ] A reader who hasn't seen the sources would find each section informative on its own
+- [ ] The document has clear narrative flow — each section builds on the previous
+- [ ] Comparison tables are used wherever data naturally supports comparison
+- [ ] Total word count meets the target for the content_depth level
+
+If the document as a whole fails this checklist, identify the weakest sections and rewrite
+them. The goal is not perfection on every criterion, but consistent quality across the document.
 
 For comprehensive mode (full 3-5x depth), see `references/comprehensive-mode.md`.
 For speaker notes (when output is presentation), see `references/extra-modes.md`.
 
 ---
 
-## Step 4: Format & Deliver
+## Step 4: Format & Deliver (with Final Quality Gate)
 
 1. Apply target length based on content_depth:
-   - **standard**: 1000-3000 words (quick summaries, overviews)
-   - **enriched**: 3000-8000 words (default — most requests)
-   - **comprehensive**: 5000-15000 words (deep research, detailed reports)
+   - **standard**: 1000-3000 words (only when user explicitly asked for brevity)
+   - **comprehensive**: 5000-15000 words (DEFAULT — most requests)
    - **user-specified**: honor explicit length requests
 2. Quality checks: no duplicate paragraphs, consistent headings, tables have headers, consistent language
-3. **Self-review before delivery**: read through the full output and ask:
-   - Would I learn something new from this document?
-   - Are the claims backed by specific evidence?
-   - Could I remove any section and not lose important information?
-   - Does each section add something the previous one didn't?
+3. **Mandatory self-review before delivery** — this is the last quality gate. Read through
+   the ENTIRE output critically and score it:
+
+   ```yaml
+   FINAL_QUALITY_GATE:
+     # All checks must pass before delivery. If any fail → fix and re-check.
+     
+     overall_depth:
+       check: Does this document feel like expert analysis or a surface-level summary?
+       fail_signal: Most sections under 400 words, generic language, few specifics
+       fix: Go back to Step 3 and rewrite the 3 weakest sections
+     
+     actionable_value:
+       check: Would the reader learn something genuinely useful from this?
+       fail_signal: Content is a rehash of common knowledge without new insights
+       fix: Add analytical paragraphs, identify non-obvious patterns, add recommendations
+     
+     evidence_density:
+       check: Are claims supported by specific data throughout?
+       fail_signal: Lots of "nhiều", "đa số", "thường" without actual numbers
+       fix: Replace vague quantifiers with specific data from sources
+     
+     structural_quality:
+       check: Is the document well-organized with clear hierarchy?
+       fail_signal: Flat structure, missing sub-headings, no tables where comparisons exist
+       fix: Add H3 sub-headings, convert comparison text to tables, add section summaries
+   ```
+
 4. Deliver:
    ```
    ✅ Biên soạn hoàn tất:
    - Cấu trúc: {N} phần, {M} phần phụ
    - Độ dài: ~{word_count} từ
+   - Chế độ: {mode} (comprehensive/standard)
    - Ngôn ngữ: {language}
    [Preview first section]
    Bạn muốn chỉnh sửa gì trước khi xuất file?
@@ -302,18 +387,20 @@ merging those sections. For a JSON report: add `--output dedup_report.json`.
 
 ## Examples
 
-**Example 1 — Enriched synthesis (new default):**
+**Example 1 — Comprehensive synthesis (default for all requests):**
 Input: 3 sources about marketing strategy (~8,000 words total, 40% overlap)
-Output: Enriched document (~5,000 words), 6 sections each with intro + analysis + takeaways,
-2 comparison tables, conflicts noted with attribution, references section
+Output: Comprehensive document (~8,000 words), 6 sections each with intro + analysis + takeaways,
+3 comparison tables, case studies from each source, conflicts noted with attribution, references section.
+Self-review caught 2 thin sections → rewrote with specific data before delivery.
 
-**Example 2 — Comprehensive mode (deep research):**
+**Example 2 — Deep research + comprehensive:**
 Input: Deep research output (~50,000 chars) about AI trends, 8 research dimensions
 Output: Comprehensive document (~12,000 words) with executive summary, 8 detailed sections
-each with data tables + analysis + case studies, conclusion with forward-looking insights
+each with data tables + analysis + case studies, conclusion with forward-looking insights.
+Section-level review ensured every section has ≥3 specific data points.
 
-**Example 3 — Standard (quick summary):**
-Input: 2 meeting notes (~1,500 words total), user says "tóm tắt ngắn gọn"
+**Example 3 — Standard (explicit brevity):**
+Input: 2 meeting notes (~1,500 words total), user explicitly says "tóm tắt ngắn gọn"
 Output: Concise summary (~800 words), key decisions, action items, no elaboration
 
 **Example 4 — Translation:**

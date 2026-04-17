@@ -43,7 +43,7 @@ COPILOT_MUST:
 ```yaml
 SKILLS:
   tong-hop:
-    purpose: "Main pipeline — receives requests, analyzes intent, orchestrates sub-skills to complete content synthesis tasks"
+    purpose: "Main pipeline — deeply analyzes user intent, expands prompt dimensions, orchestrates sub-skills with auto-quality-review loops. Default content depth is COMPREHENSIVE (expert-level, rich). Auto-reviews each step's output and loops if quality is insufficient."
     location: ".github/skills/tong-hop/SKILL.md"
     triggers:
       - "tổng hợp nội dung"
@@ -56,7 +56,7 @@ SKILLS:
       - "/tong-hop"
 
   thu-thap:
-    purpose: "Gather content from web (Google search + fetch URL) and read local files (docx, xlsx, pdf, pptx, txt)"
+    purpose: "Gather content from web (Google search + fetch URL) and read local files. Auto-reviews gathered content quality and expands search if insufficient."
     location: ".github/skills/thu-thap/SKILL.md"
     triggers:
       - "tìm kiếm thông tin"
@@ -68,7 +68,7 @@ SKILLS:
       - "/thu-thap"
 
   bien-soan:
-    purpose: "Synthesize and merge multi-source content. Supports Vietnamese ↔ English translation"
+    purpose: "Synthesize multi-source content into expert-level documents (comprehensive by default). Self-reviews each section for depth, specificity, and analysis — auto-rewrites thin sections. Supports Vietnamese ↔ English translation."
     location: ".github/skills/bien-soan/SKILL.md"
     triggers:
       - "tổng hợp"
@@ -105,7 +105,7 @@ SKILLS:
       - "/tao-excel"
 
   tao-slide:
-    purpose: "Create professional PowerPoint (.pptx) presentations with 5 style templates"
+    purpose: "Create professional PowerPoint (.pptx) presentations. Default: Pro mode (ppt-master SVG→PPTX, native DrawingML, 20+ layouts, 50+ charts, 6700+ icons, embedded in repo). Quick mode (pptxgenjs) only when user explicitly asks for simple/fast deck"
     location: ".github/skills/tao-slide/SKILL.md"
     triggers:
       - "tạo slide"
@@ -115,6 +115,9 @@ SKILLS:
       - "create slides"
       - "create powerpoint"
       - "make presentation"
+      - "slide chuyên nghiệp"
+      - "consulting-grade slides"
+      - "dùng ppt-master"
       - "/tao-slide"
 
   tao-pdf:
@@ -129,7 +132,7 @@ SKILLS:
       - "/tao-pdf"
 
   tao-html:
-    purpose: "Create professional static HTML pages with 5 style templates (corporate, academic, minimal, dark-modern, creative)"
+    purpose: "Create professional static HTML pages OR reveal.js presentations with 8 styles (corporate, academic, minimal, dark-modern, creative, warm-earth, dark-neon, dark-elegant)"
     location: ".github/skills/tao-html/SKILL.md"
     triggers:
       - "tạo trang web"

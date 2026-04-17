@@ -97,7 +97,7 @@ ENRICHMENT_WORKFLOW:
     - Fetch top 2-3 URLs via fetch_webpage
 
   4_MERGE:
-    - Tag enriched content with [Web: source_url]
+    - Tag supplementary content with [Web: source_url]
     - Proceed with normal synthesis using combined material
 
   5_ATTRIBUTE:

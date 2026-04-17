@@ -21,7 +21,7 @@ applyTo: "**"
 | File reading | `markitdown[all]` |
 | Word output | `python-docx` |
 | Excel output | `openpyxl` + `pandas` |
-| PPT output | `pptxgenjs` (Node.js) |
+| PPT output | `pptxgenjs` (Node.js) quick mode; `ppt-master` SVG→PPTX pro mode |
 | PDF output | `reportlab` + `pypdf` |
 | HTML output | `jinja2` + inline CSS |
 | Charts | `matplotlib` + `seaborn` (Agg backend) |
@@ -43,6 +43,8 @@ applyTo: "**"
 - All scripts must accept CLI arguments — no hardcoded paths
 - Always print output file path + size as last line of every script
 - markitdown first; if empty/garbled → format-specific fallback library
+- **Default content depth is COMPREHENSIVE** — expert-level, rich content. Only use standard when user explicitly asks for brevity.
+- **Auto-review every pipeline step** — check quality after each sub-skill, loop back if insufficient (max 2 retries)
 
 ---
 
@@ -60,14 +62,14 @@ applyTo: "**"
 
 ```
 .github/skills/
-  tong-hop/      # 🔑 Pipeline chính — đọc intent → route → orchestrate
-  thu-thap/      # Thu thập từ web (search + fetch) và đọc file
-  bien-soan/     # Tổng hợp nội dung + dịch thuật
-  tao-word/      # Xuất Word (.docx)
+  tong-hop/      # 🔑 Pipeline chính — phân tích prompt → mở rộng → route → orchestrate + auto-review loop
+  thu-thap/      # Thu thập từ web (search + fetch) và đọc file + auto quality check
+  bien-soan/     # Tổng hợp nội dung comprehensive (default) + self-review loop + dịch thuật
+  tao-word/      # Xuất Word (.docx) + thin content guard
   tao-excel/     # Xuất Excel (.xlsx)
-  tao-slide/     # Xuất PowerPoint (.pptx)
-  tao-pdf/       # Xuất PDF
-  tao-html/      # Xuất HTML
+  tao-slide/     # Xuất PowerPoint (.pptx) + thin content guard
+  tao-pdf/       # Xuất PDF + thin content guard
+  tao-html/      # Xuất HTML + thin content guard
   tao-hinh/      # Biểu đồ + hình ảnh
   thiet-ke/      # Thiết kế visual (poster, bìa, certificate, banner)
 ```

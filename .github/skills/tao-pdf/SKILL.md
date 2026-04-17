@@ -72,6 +72,19 @@ OUTPUT: Prints "✅ Saved: <path> (<size> KB, <N> sections, style: <style>)"
 2. Check for: tables, images to embed, need for table of contents (3+ headings), page orientation
 3. Register Vietnamese font from system (see `references/pdf-script-details.md`)
 
+### Thin Content Guard (STRICT — reject and loop back)
+
+PDF is often the final delivery format — it goes to bosses, clients, or gets printed. A thin
+PDF is worse than a thin Word doc because the recipient can't easily fix it.
+
+**Automatic rejection criteria (when called from pipeline):**
+- **< 1000 words** for a multi-section report PDF: REJECT. Signal back to tong-hop:
+  "❌ Content quá mỏng ({word_count} từ) cho PDF. Cần biên soạn lại ở mức comprehensive."
+- **< 500 words** for any PDF: REJECT (unless it's a single-page certificate/label).
+- **Sections without substance**: If more than 30% of sections have only 1-2 sentences, REJECT.
+
+**When called standalone:** warn the user and suggest enrichment.
+
 ### Content Intelligence for PDF
 
 PDF is often the final delivery format — the user sends it to a boss, prints it, or attaches

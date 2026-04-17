@@ -42,19 +42,26 @@ All responses to the user are in Vietnamese.
 3. Determine style (user-specified, pipeline-inferred, or ask user: corporate / academic / minimal)
 4. Determine output path (default: `./<title>.docx`)
 
-### Thin Content Guard
+### Thin Content Guard (STRICT — reject and loop back)
 
 Before generating the document, check if the input content is substantive enough for the
-requested output. A 10-page Word report with only 500 words of content will look embarrassingly
-empty. If content seems thin:
+requested output. This is the last line of defense against thin output. A professionally
+formatted document with shallow content is worse than no document — it makes the entire
+pipeline look incompetent.
 
-- **< 500 words** for a multi-section report: warn the user and suggest going back to bien-soan
-  with `content_depth: enriched` or `comprehensive`. The document will look sparse.
-- **Sections with only 1-2 sentences**: these will appear as nearly-empty pages. Either:
-  - Merge short sections together under a shared heading
-  - Flag to the user: "Phần '{section}' chỉ có 2 câu — bạn muốn bổ sung thêm?"
-- **When called from pipeline**: report back to tong-hop that content is thin rather than
-  generating a sparse document. Better to fix content than to wrap thin content in fancy formatting.
+**Automatic rejection criteria (when called from pipeline):**
+- **< 1000 words** for a multi-section report: REJECT. Do not generate. Signal back to
+  tong-hop: "❌ Content quá mỏng ({word_count} từ) cho Word document. Cần biên soạn lại
+  ở mức comprehensive." This triggers tong-hop's quality loop to re-run bien-soan.
+- **< 500 words** for any document: REJECT. Same as above.
+- **Sections with only 1-2 sentences**: Flag as thin. If more than 30% of sections are thin,
+  REJECT the entire document and loop back.
+- **No data/specifics**: If content is mostly generic text without numbers, examples, or
+  specific data, warn: "⚠️ Nội dung thiếu số liệu cụ thể — file Word sẽ trông chung chung."
+
+**When called standalone (not from pipeline):**
+- Warn the user and suggest enrichment, but proceed if they insist
+- "⚠️ Nội dung chỉ có ~{word_count} từ. Bạn muốn bổ sung thêm trước khi tạo file?"
 
 ---
 

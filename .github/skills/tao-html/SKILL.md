@@ -57,6 +57,19 @@ Full color/font specs: `references/presentation-styles.md`
 2. Confirm content available (from pipeline or ask user)
 3. Determine style
 
+### Thin Content Guard (STRICT — reject and loop back)
+
+HTML pages are often shared via link or email. A thin page with mostly whitespace and generic
+text looks unprofessional and reflects poorly on the user.
+
+**Automatic rejection criteria (when called from pipeline):**
+- **< 800 words** for a multi-section page: REJECT. Signal back to tong-hop:
+  "❌ Content quá mỏng ({word_count} từ) cho trang HTML. Cần biên soạn lại ở mức comprehensive."
+- **Sections without substance**: If more than 30% of sections have only 1-2 sentences, REJECT.
+- **Presentation mode with < 300 words**: REJECT — slides will be nearly empty.
+
+**When called standalone:** warn the user and suggest enrichment.
+
 ### Step 2: Parse Content & Generate HTML
 
 Before converting, analyze the content to make UX-aware decisions. HTML has more layout
