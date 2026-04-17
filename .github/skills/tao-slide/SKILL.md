@@ -8,19 +8,22 @@ description: |
   requests like "làm bài thuyết trình", "tạo slide", "tôi cần deck để present", "xuất ra
   PowerPoint", or "cho tôi file pptx" — even without saying "/tao-slide".
 argument-hint: "[content] [template: corporate-blue|corporate-red|academic-serif|minimal-white|minimal-gray|dark-gradient|dark-neon|creative-gradient|creative-warm|tech-modern]"
+version: 1.1
 ---
 
 # Tạo Slide — PowerPoint Output Skill
 
 **References:** `references/template-styles.md`
 
-```yaml
-MODE: Interactive (asks style) or Pipeline (style from tong-hop)
-LANGUAGE: Copilot responds in Vietnamese
-INPUT: Structured Markdown from bien-soan or user text
-OUTPUT: .pptx file (16:9 LAYOUT_WIDE)
-LIBRARY: pptxgenjs (Node.js) — NEVER use # prefix for colors!
-```
+Generates professional `.pptx` presentations using pptxgenjs (Node.js). This is the one skill
+that uses Node.js instead of Python — pptxgenjs produces significantly better visual output
+than python-pptx, with proper support for gradients, shadows, and modern slide layouts.
+
+The skill offers 10 templates covering light and dark variants. One critical pptxgenjs rule:
+colors must be hex strings **without** the `#` prefix (e.g., `"1F4E79"` not `"#1F4E79"`).
+The `#` prefix causes silent rendering errors.
+
+All responses to the user are in Vietnamese.
 
 ---
 
@@ -68,6 +71,11 @@ Map content to slide types:
 - H1 → title slide; H2 → section divider; H3 → content slide title
 - Bullet lists → content bullets (max 6/slide); Tables → table slide; Images → image slide
 - Key data points → highlight/callout slide; Auto-add closing slide "Cảm ơn!"
+
+**Content overflow**: when a section has more than 6 bullet points, split across multiple
+slides (e.g., "Key Findings (1/2)" and "Key Findings (2/2)"). Long paragraphs should be
+condensed to bullets — slides are visual aids, not documents. Aim for 15-25 slides total;
+more than 30 slides usually means content needs more aggressive condensation.
 
 Present plan to user (interactive):
 ```

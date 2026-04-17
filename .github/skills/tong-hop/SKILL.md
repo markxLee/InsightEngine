@@ -9,6 +9,7 @@ description: |
   file này", "search rồi tạo file", or simply describes what they need without naming a specific
   skill. Also triggers on resume requests: "tiếp tục", "resume", "tiếp tục từ", "/resume".
 argument-hint: "[content request in Vietnamese or English]"
+version: 1.1
 ---
 
 # Tổng Hợp — InsightEngine Pipeline Orchestrator
@@ -16,11 +17,13 @@ argument-hint: "[content request in Vietnamese or English]"
 **References:** `references/pipeline-ux.md` | `references/session-summary.md` | `references/output-chaining.md`
 **State:** `tmp/.session-state.json` (written after each step via `scripts/save_state.py`)
 
-```yaml
-MODE: Interactive — presents plan, gets approval, then executes
-LANGUAGE: All Copilot responses in Vietnamese
-ROLE: Orchestrator — delegates ALL content work to sub-skills
-```
+This is the central orchestrator — it never generates content itself, but delegates each phase
+to a specialized sub-skill (thu-thap → bien-soan → tao-<format>). This separation matters because
+each sub-skill has deep domain expertise (e.g., tao-slide knows about 10 pptxgenjs templates),
+and the orchestrator focuses solely on planning, routing, and error recovery.
+
+All responses to the user are in Vietnamese. The pipeline presents an execution plan, waits for
+approval, then executes step-by-step with progress reporting.
 
 ---
 
@@ -134,6 +137,29 @@ For chained outputs and intermediate files, see `references/output-chaining.md`.
 4. **tao-hinh** (conditional — if charts requested OR output is slides with data)
    - Report: "✅ Tạo {N} biểu đồ hoàn tất"
    - Save state: `python3 scripts/save_state.py update --step tao-hinh --output-file "<chart_path>"`
+
+---
+
+## Error Recovery
+
+Pipeline steps can fail (network timeout in thu-thap, missing font in tao-pdf, etc.).
+Without recovery, the entire pipeline stops and the user loses all progress. These rules
+ensure graceful degradation:
+
+1. **Retry once** — if a sub-skill fails, retry the same step once. Transient errors (network,
+   file locks) often resolve on retry.
+2. **Partial delivery** — if retry also fails, save whatever was completed so far. For example,
+   if thu-thap succeeded but bien-soan fails, offer the raw collected content to the user:
+   "⚠️ Biên soạn gặp lỗi. Tôi đã lưu nội dung thu thập tại tmp/collected_content.md — bạn muốn thử lại hay dùng nội dung thô?"
+3. **Skip non-critical steps** — tao-hinh (charts) is often optional. If it fails, deliver
+   the main document without charts and note what's missing.
+4. **Save state before each step** — this way, if the pipeline crashes mid-way, the user can
+   resume from the last completed step via session resume (Step 0).
+5. **Report clearly** — on any failure, tell the user what step failed, what error occurred,
+   and what options they have (retry / skip / manual fix).
+
+When called from pipeline, sub-skills skip their own pre-flight checks (tong-hop already ran
+`check_deps.py` in Step 2). This avoids redundant checks that slow down execution.
 
 ---
 

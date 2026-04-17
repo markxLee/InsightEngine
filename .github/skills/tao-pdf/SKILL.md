@@ -7,19 +7,22 @@ description: |
   "tạo file pdf", "lưu thành PDF để in", "tôi cần file pdf", or "cho tôi file không chỉnh sửa
   được" (read-only document implies PDF) — even without saying "/tao-pdf" or ".pdf".
 argument-hint: "[content from bien-soan or direct text] [output path]"
+version: 1.1
 ---
 
 # Tạo PDF — PDF Document Output Skill
 
 **References:** `references/pdf-script-details.md`
 
-```yaml
-MODE: Interactive (asks style) or Pipeline (from tong-hop)
-LANGUAGE: Copilot responds in Vietnamese
-INPUT: Structured Markdown from bien-soan or user text
-OUTPUT: .pdf file
-LIBRARIES: reportlab (Platypus + Canvas), pypdf
-```
+Generates professional PDF documents using reportlab. For complex multi-section documents
+(the common case), use Platypus — it handles page breaks, headers, and flowing content
+automatically. For simple single-page outputs (certificates, labels), the Canvas API is
+more direct.
+
+Vietnamese font support is critical for this skill's target audience — the skill registers
+system fonts and falls back to DejaVuSans if needed.
+
+All responses to the user are in Vietnamese.
 
 ---
 
@@ -87,15 +90,33 @@ OUTPUT: Prints "✅ Saved: <path> (<size> KB, <N> sections, style: <style>)"
 
 ---
 
+## PDF Metadata & Bookmarks
+
+Adding metadata makes PDF files searchable and professional — the title shows in browser tabs,
+author shows in file properties, and bookmarks let readers jump between sections:
+
+1. **Metadata**: set title, author, subject, and creation date via reportlab's `doc.title`,
+   `doc.author`, `doc.subject` properties. These appear in File > Properties in PDF readers.
+2. **Bookmarks**: for documents with 3+ sections, add PDF bookmarks (outlines) that mirror
+   the heading structure. reportlab supports this via `doc.addOutlineEntry()` or by using
+   `Paragraph` with `bookmarkName` parameter.
+3. **Page numbers**: always include page numbers ("Trang X / Y") in the footer via
+   `onFirstPage` and `onLaterPages` callbacks.
+
+---
+
 ## Error Handling
 
-```yaml
-ERRORS:
-  font_error: Try alternative font path; fallback to DejaVuSans
-  image_error: Skip image, add placeholder text
-  table_overflow: Split columns or reduce font size
-  memory_error: Process in chunks, merge with pypdf
-```
+Common issues and recovery strategies:
+- **Font error**: Vietnamese characters render as boxes if the font lacks Vietnamese glyphs.
+  Try system fonts first (`/System/Library/Fonts/` on macOS), fall back to DejaVuSans which
+  has broad Unicode coverage.
+- **Image error**: skip the image and add a placeholder text note ("[Hình ảnh không thể
+  nhúng vào]"). Don't let one bad image crash the entire document.
+- **Table overflow**: wide tables may not fit on A4. Reduce font size to 8pt first; if still
+  too wide, split into multiple tables or switch to landscape orientation.
+- **Memory error**: very large documents (100+ pages with images) may exhaust memory. Process
+  in chunks using pypdf to merge partial PDFs.
 
 ---
 

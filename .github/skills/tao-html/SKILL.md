@@ -9,26 +9,23 @@ description: |
   — even casual requests like "tạo trang web", "làm slide trình chiếu trong trình duyệt",
   "xuất HTML", or "tạo cái gì đó mở được bằng Chrome" — even without saying "/tao-html".
 argument-hint: "[content] [style: corporate|academic|minimal|dark-modern|creative|warm-earth|dark-neon|dark-elegant] [mode: page|presentation]"
+version: 1.1
 ---
 
 # Tạo HTML — Static HTML Page & Presentation Output Skill
 
 **References:** `references/presentation-styles.md` | `references/template-styles.md` | `references/speaker-notes-pdf.md`
 
-```yaml
-MODES:
-  page: Static HTML with inline CSS (jinja2)
-  presentation: reveal.js slide deck via scripts/gen_reveal.py
+Two output modes:
+- **page**: Self-contained static HTML with inline CSS (jinja2). No JavaScript, no external
+  dependencies — the file works offline and can be emailed as-is.
+- **presentation**: reveal.js slide deck via `scripts/gen_reveal.py`. Requires internet on
+  first load for CDN resources.
 
-MODE_DETECTION:
-  presentation_triggers: "tạo slide html", "html presentation", "reveal.js", "slide deck html"
-  page_triggers: "tạo trang web", "static page", "html report"
-  default: page
+Mode detection: keywords like "slide html", "html presentation", "reveal.js" trigger
+presentation mode; everything else defaults to page mode.
 
-LANGUAGE: Copilot responds in Vietnamese
-INPUT: Structured Markdown from bien-soan or user text
-OUTPUT: Single self-contained .html file
-```
+All responses to the user are in Vietnamese.
 
 ---
 
@@ -125,13 +122,31 @@ For transitions, custom backgrounds, speaker notes, PDF export:
 
 ## Error Handling
 
-```yaml
-ERRORS:
-  template_error: Check Jinja2 syntax; escape special characters
-  encoding_error: Ensure UTF-8 in meta tag and file write
-  image_embed_error: Skip image on base64 failure; add alt text placeholder
-  large_output: Warn if HTML > 5MB (many embedded images)
-```
+Common issues and fixes:
+- **Template error**: check Jinja2 syntax; escape special characters in user content
+- **Encoding error**: ensure UTF-8 in both the meta tag and the Python file write call
+- **Image embed error**: skip the image on base64 failure; add alt text placeholder so the
+  document still makes sense without the image
+- **Large output**: warn if HTML > 5MB (many embedded images); suggest external image files
+
+---
+
+## Accessibility
+
+HTML output should be usable by everyone, including people using screen readers or who have
+visual impairments. These practices don't add much effort but significantly improve usability:
+
+1. **Semantic HTML**: use `<h1>` through `<h6>` in order (no skipping levels), `<nav>`,
+   `<main>`, `<article>`, `<section>` where appropriate. Screen readers use heading hierarchy
+   to navigate.
+2. **Alt text for images**: every `<img>` tag needs a descriptive `alt` attribute. For charts,
+   describe what the chart shows (e.g., "Bar chart showing Q4 revenue by region").
+3. **Color contrast**: ensure text-to-background contrast ratio ≥ 4.5:1 (WCAG AA). The
+   built-in styles already meet this — be careful when users request custom colors.
+4. **Keyboard navigation**: for presentation mode, reveal.js handles this natively. For static
+   pages, ensure links and interactive elements are reachable via Tab key.
+5. **Language attribute**: set `<html lang="vi">` for Vietnamese content, `lang="en"` for
+   English. This helps screen readers pronounce text correctly.
 
 ---
 

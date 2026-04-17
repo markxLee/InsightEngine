@@ -9,6 +9,7 @@ description: |
   và lưu thành file", or "cho tôi bảng so sánh" where tabular data with formulas fits, even
   without saying "/tao-excel" or ".xlsx".
 argument-hint: "[data from bien-soan or direct input] [output path]"
+version: 1.1
 ---
 
 # Tạo Excel — Excel Spreadsheet Output Skill
@@ -16,13 +17,12 @@ argument-hint: "[data from bien-soan or direct input] [output path]"
 Generates professionally formatted `.xlsx` files with working formulas and color-coded cells.
 See `references/formatting-conventions.md` for column width standards, color codes, and cell format patterns.
 
-```yaml
-MODE: Interactive (asks for data structure) or Pipeline (from tong-hop)
-LANGUAGE: Copilot responds in Vietnamese
-INPUT: Structured data from bien-soan, tables, or user-provided data
-OUTPUT: .xlsx file saved to user-specified path
-LIBRARIES: openpyxl (formatting/formulas), pandas (data operations)
-```
+This skill uses openpyxl for formatting and formulas, and pandas for data operations. The
+most important rule: never hardcode calculated values — always use Excel formulas. This
+ensures the spreadsheet stays interactive so users can modify input data and see results
+update automatically.
+
+All responses to the user are in Vietnamese.
 
 ---
 
@@ -66,157 +66,87 @@ COPILOT_WORKFLOW:
 
 ## Pre-Flight Check
 
-```yaml
-PRE_FLIGHT:
-  1. Check openpyxl installed:
-     command: python3 -c "import openpyxl" 2>&1
-     if_fail: "Chạy: pip install --user openpyxl"
-     
-  2. Check pandas installed:
-     command: python3 -c "import pandas" 2>&1
-     if_fail: "Chạy: pip install --user pandas"
-     
-  3. Check recalc.py exists:
-     path: scripts/recalc.py
-     if_missing: Create from template (see Script Pattern)
-     
-  4. Check data available:
-     - From pipeline: structured data from bien-soan
-     - From user: raw data, CSV, or description
-     if_missing: Ask user for data or redirect to thu-thap
-```
+1. Check openpyxl: `python3 -c "import openpyxl"` → if fail: "Chạy: pip install --user openpyxl"
+2. Check pandas: `python3 -c "import pandas"` → if fail: "Chạy: pip install --user pandas"
+3. Confirm recalc.py exists at `scripts/recalc.py` → if missing: create from template
+4. Confirm data available from pipeline or ask user
 
 ---
 
 ## Step 1: Analyze Data Structure
 
-```yaml
-ANALYZE_DATA:
-  determine:
-    - Number of sheets needed
-    - Column headers and data types
-    - Which values should be formulas vs static data
-    - Summary rows/columns needed (SUM, AVERAGE, COUNT)
-    - Cross-sheet references if multi-sheet
-    
-  data_sources:
-    - Markdown tables from bien-soan
-    - CSV/TSV data
-    - User-described structure
-    - Numbers extracted from synthesized text
-    
-  present_plan:
-    format: |
-      📊 Kế hoạch tạo Excel:
-      - Số sheet: {N}
-      - Sheet 1: {name} — {rows} hàng × {cols} cột
-      - Công thức: {formula_count} ô tính toán
-      - Định dạng: {format_description}
-      
-      Bạn muốn điều chỉnh gì không?
-    pipeline_mode: Auto-approve, proceed immediately
+Before generating, understand what the spreadsheet needs:
+- How many sheets? What are column headers and data types?
+- Which values should be formulas vs static data?
+- Summary rows/columns needed (SUM, AVERAGE, COUNT)?
+- Cross-sheet references if multi-sheet?
+
+Data can come from: Markdown tables (bien-soan output), CSV/TSV files, user-described
+structure, or numbers extracted from synthesized text.
+
+Present the plan to user (interactive mode):
 ```
+📊 Kế hoạch tạo Excel:
+- Số sheet: {N}
+- Sheet 1: {name} — {rows} hàng × {cols} cột
+- Công thức: {formula_count} ô tính toán
+- Định dạng: {format_description}
+
+Bạn muốn điều chỉnh gì không?
+```
+Pipeline mode: auto-approve, proceed immediately.
 
 ---
 
-## Step 2: Generate Excel Script
+## Step 2: Generate Excel via CLI Script
 
-```yaml
-GENERATE_SCRIPT:
-  approach: |
-    Copilot generates an ephemeral Python script that:
-    1. Creates workbook with openpyxl
-    2. Adds data and formulas
-    3. Applies formatting
-    4. Saves to output path
-    
-  script_structure: |
-    import openpyxl
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    from openpyxl.utils import get_column_letter
-    
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "{sheet_name}"
-    
-    # --- Column widths ---
-    # --- Headers with formatting ---
-    # --- Data rows ---
-    # --- Formula rows (NEVER hardcode calculated values) ---
-    # --- Conditional formatting ---
-    # --- Save ---
-    wb.save("{output_path}")
+Use the bundled CLI script as the primary generation method. Prepare data as JSON, save to
+a tmp file, then run the script. This approach is preferred over writing ephemeral scripts
+because gen_xlsx.py already handles styles, formulas, formatting, and edge cases.
+
+```bash
+python3 .github/skills/tao-excel/scripts/gen_xlsx.py --input data.json --output output.xlsx --style corporate
 ```
+
+For complex cases that go beyond what gen_xlsx.py supports (e.g., conditional formatting,
+data validation dropdowns, or pivot-table-like structures), extend the script or write a
+focused helper — but still use openpyxl directly, not pandas to_excel (which lacks
+formatting control).
 
 ---
 
 ## Step 3: Apply Formatting Rules
 
-```yaml
-FORMATTING:
-  color_coding:
-    inputs: 
-      font_color: "0000FF"     # Blue — user-editable input cells
-      description: Cells containing raw data that users may modify
-    formulas:
-      font_color: "000000"     # Black — formula/calculated cells
-      description: Cells with Excel formulas (SUM, AVERAGE, etc.)
-    cross_sheet:
-      font_color: "008000"     # Green — cross-sheet references
-      description: Cells referencing other sheets
-    headers:
-      font: Bold
-      fill: Light gray background
-      alignment: Center
-      
-  number_formats:
-    currency: '#,##0'
-    percentage: '0.0%'
-    date: 'YYYY-MM-DD'
-    decimal: '#,##0.00'
-    integer: '#,##0'
-    
-  layout:
-    freeze_panes: "A2"        # Freeze header row
-    auto_filter: true          # Enable filter on header row
-    column_width: Auto-fit based on content (min 10, max 40)
-    row_height: Default 15, header 20
-    
-  page_setup:
-    orientation: landscape     # For wide tables
-    paper_size: A4
-    fit_to_page: true
-```
+Color coding helps users understand which cells they can edit vs which are calculated:
+- **Blue font** (`0000FF`) — input cells (user-editable raw data)
+- **Black font** (`000000`) — formula cells (calculated, don't edit manually)
+- **Green font** (`008000`) — cross-sheet references (data from another sheet)
+- **Headers** — bold, light gray background, centered
+
+Number formats: currency `#,##0`, percentage `0.0%`, date `YYYY-MM-DD`, decimal `#,##0.00`
+
+Layout: freeze panes at A2 (header row visible while scrolling), auto-filter enabled,
+column widths auto-fit (min 10, max 40), page setup A4 landscape for wide tables.
 
 ---
 
 ## Step 4: Formula Rules
 
-```yaml
-FORMULA_RULES:
-  CRITICAL: |
-    NEVER hardcode calculated values. ALWAYS use Excel formulas.
-    This ensures the spreadsheet remains interactive and recalculates
-    when users modify input data.
-    
-  examples:
-    sum: "=SUM(B2:B10)"
-    average: "=AVERAGE(C2:C10)"
-    count: "=COUNTA(A2:A100)"
-    percentage: "=B2/B$11"
-    if_condition: '=IF(C2>100,"Cao","Thấp")'
-    vlookup: "=VLOOKUP(A2,Sheet2!A:B,2,FALSE)"
-    cross_sheet: "=Sheet2!B5"
-    
-  validation:
-    after_save:
-      1. Run scripts/recalc.py to force recalculation
-      2. Reopen and check for formula errors
-      3. Verify no #REF!, #DIV/0!, #NAME?, #VALUE! errors
-      
-  recalc_command: |
-    python3 scripts/recalc.py "{output_path}"
+The single most important rule for Excel generation: **never hardcode calculated values.**
+When a cell should show a sum, average, or any derived value, write an Excel formula instead
+of computing the number in Python and writing the result. This matters because users will
+edit input data after receiving the file — hardcoded values won't update, but formulas will.
+
+Common formula patterns:
+- Sum: `=SUM(B2:B10)` | Average: `=AVERAGE(C2:C10)` | Count: `=COUNTA(A2:A100)`
+- Percentage: `=B2/B$11` | Conditional: `=IF(C2>100,"Cao","Thấp")`
+- Cross-sheet: `=VLOOKUP(A2,Sheet2!A:B,2,FALSE)` or `=Sheet2!B5`
+
+After saving, always run recalc to mark formulas as needing recalculation:
+```bash
+python3 scripts/recalc.py "{output_path}"
 ```
+Then verify no formula errors (#REF!, #DIV/0!, #NAME?, #VALUE!) in the output.
 
 ---
 

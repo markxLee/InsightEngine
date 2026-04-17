@@ -8,20 +8,22 @@ description: |
   "cho tôi file để gửi sếp" where a Word document is clearly the right format, even without
   saying "/tao-word" or ".docx".
 argument-hint: "[content from bien-soan or direct text] [style: corporate|academic|minimal]"
+version: 1.1
 ---
 
 # Tạo Word — Word Document Output Skill
 
 **References:** `references/word-styles-rules.md`
 
-```yaml
-MODE: Interactive (asks style) or Pipeline (style from tong-hop)
-LANGUAGE: Copilot responds in Vietnamese
-INPUT: Structured Markdown from bien-soan or user text
-OUTPUT: .docx file (A4, 1" margins)
-LIBRARY: python-docx
-CRITICAL: Use WidthType.DXA for tables (never PERCENTAGE), separate Paragraph for each line (never \n in TextRun)
-```
+Generates professional `.docx` files from structured content. The skill uses python-docx with
+A4 page setup. Three things regularly cause bugs with python-docx and must be avoided:
+- Table column widths: use `WidthType.DXA` (twips), never `WidthType.PERCENTAGE` (it silently
+  produces broken layouts in most Word versions)
+- Line breaks: create a separate `Paragraph` object for each line, never use `\n` inside a
+  `TextRun` (it renders as a literal newline character, not a paragraph break)
+- Images: always constrain to `max_width=Inches(6)` to avoid overflow on A4
+
+All responses to the user are in Vietnamese.
 
 ---
 
@@ -64,10 +66,40 @@ Map Markdown to Word elements:
 - H1 → Document title; H2 → Heading 1; H3 → Heading 2; H4 → Heading 3
 - Paragraphs → Normal; Bullet lists → Bullet style; Numbered lists → List Number
 - Tables → Word tables; Bold/italic → Text runs; Blockquotes → Indented italic
-- Images (if paths provided) → Inline images (max 6" width)
+- Images (if paths provided) → Inline images (max 6" width, preserve aspect ratio)
+  - Position images after their associated paragraph, with a caption below if provided
+  - For charts from tao-hinh: embed the PNG at full column width for readability
 
 For style specs (fonts, colors, visual elements): `references/word-styles-rules.md`
 For critical rules (tables DXA, lists, images, line breaks): `references/word-styles-rules.md`
+
+---
+
+## Step 3.5: Table of Contents (if 3+ headings)
+
+Documents with 3 or more headings benefit from a table of contents — it helps readers navigate
+and looks professional for formal reports.
+
+1. Insert TOC field after the title page (before first H2):
+   ```python
+   from docx.oxml.ns import qn
+   paragraph = doc.add_paragraph()
+   run = paragraph.add_run()
+   fldChar = OxmlElement('w:fldChar')
+   fldChar.set(qn('w:fldCharType'), 'begin')
+   run._r.append(fldChar)
+   instrText = OxmlElement('w:instrText')
+   instrText.set(qn('xml:space'), 'preserve')
+   instrText.text = 'TOC \\o "1-3" \\h \\z \\u'
+   run2 = paragraph.add_run()
+   run2._r.append(instrText)
+   fldChar2 = OxmlElement('w:fldChar')
+   fldChar2.set(qn('w:fldCharType'), 'end')
+   run3 = paragraph.add_run()
+   run3._r.append(fldChar2)
+   ```
+2. The TOC will auto-populate when the user opens the file in Word and presses Ctrl+A, F9
+3. Add a note in the report: "Mục lục sẽ tự động cập nhật khi mở file trong Word"
 
 ---
 

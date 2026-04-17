@@ -9,17 +9,20 @@ description: |
   về X", "search Google giúp tôi", or when a file path or URL is dropped into the chat, even
   without saying "/thu-thap".
 argument-hint: "[file paths or URLs]"
+version: 1.1
 ---
 
 # Thu Thập — Content Gathering Skill
 
 **References:** `references/code-patterns.md` | `references/web-search-enrichment.md`
 
-```yaml
-MODE: Interactive (reports progress) or Pipeline (called by tong-hop)
-LANGUAGE: Copilot responds in Vietnamese
-OUTPUT: Markdown text (passed to bien-soan or directly to user)
-```
+This skill reads content from any source — local files, URLs, or web search — and returns
+clean Markdown text. It runs in two contexts: standalone (user asks to read something) or as
+the first step in the tong-hop pipeline. The key design choice is "markitdown first, fallback
+second" — markitdown handles most formats well, and format-specific readers only kick in when
+markitdown produces garbled or empty output.
+
+All responses to the user are in Vietnamese.
 
 ---
 
@@ -63,20 +66,26 @@ WEB_SEARCH:
 ## Step 2: Read Local Files
 
 For each file:
-1. Try markitdown first (see `references/code-patterns.md`)
-2. If output < 100 chars → use format-specific fallback reader
-3. Report: "  ✅ {filename} — {char_count} ký tự ({format})"
-4. On error: "  ❌ {filename} — Lỗi: {error_message}" → skip file, continue with others
+1. Check file size first — skip files larger than 50 MB with a warning (large files exhaust
+   context and slow processing; the user can split them or provide specific pages/sheets)
+2. Try markitdown first (see `references/code-patterns.md`)
+3. If output < 100 chars → use format-specific fallback reader
+4. Report: "  ✅ {filename} — {char_count} ký tự ({format})"
+5. On error: "  ❌ {filename} — Lỗi: {error_message}" → skip file, continue with others
 
 ---
 
 ## Step 3: Fetch URL Content
 
 For each URL:
-1. Use `fetch_webpage` tool with `query: "main content"`
-2. If unavailable or empty → use httpx + BeautifulSoup fallback
+1. Use `fetch_webpage` tool with `query: "main content"` — set a 30-second mental timeout:
+   if fetch_webpage hangs or returns nothing after ~30s, fall back to httpx immediately
+   rather than waiting indefinitely (unresponsive servers should not block the whole pipeline)
+2. If unavailable or empty → use httpx + BeautifulSoup fallback (with `timeout=15` seconds)
 3. Clean content: remove nav/footer/cookie boilerplate, limit to 50,000 chars
 4. Report: "  ✅ {page_title} ({url_domain}) — {char_count} ký tự"
+5. Rate limiting: when fetching multiple URLs, pause briefly between requests to avoid
+   triggering rate limits on the same domain
 
 For error messages and URL error types, see `references/code-patterns.md`.
 

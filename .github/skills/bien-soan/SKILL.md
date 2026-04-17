@@ -9,18 +9,22 @@ description: |
   dung", "dịch sang tiếng Anh/Việt", "viết lại đầy đủ hơn", "biên soạn", "synthesize",
   "merge content" — even if they don't say "/bien-soan" explicitly.
 argument-hint: "[content from thu-thap or direct text] [mode: standard|comprehensive]"
+version: 1.1
 ---
 
 # Biên Soạn — Content Synthesis Skill
 
 **References:** `references/comprehensive-mode.md` | `references/translation-mode.md` | `references/extra-modes.md`
 
-```yaml
-MODE: Interactive (proposes outline, gets approval) or Pipeline (from tong-hop)
-LANGUAGE: Copilot responds in Vietnamese
-INPUT: Markdown text from thu-thap or direct user input
-OUTPUT: Structured Markdown content (passed to tao-* output skills)
-```
+This skill takes raw content from multiple sources and produces a unified, coherent document.
+The key challenge is merging overlapping information without losing important details or
+creating contradictions. The skill proposes an outline first (so the user can adjust structure
+before writing begins), then synthesizes content section by section.
+
+Four modes: **synthesis** (default — merge sources), **comprehensive** (3-5x richer depth),
+**translation** (Vietnamese↔English), and **summary** (extract key points and condense).
+
+All responses to the user are in Vietnamese.
 
 ---
 
@@ -28,19 +32,16 @@ OUTPUT: Structured Markdown content (passed to tao-* output skills)
 
 ## Mode Selection
 
-```yaml
-MODES:
-  synthesis:    Default — merge multiple sources into one document
-  comprehensive: "chi tiết", "comprehensive", "đầy đủ", "--mode=comprehensive"
-                 See references/comprehensive-mode.md for full spec
-  translation:  "dịch", "translate", "dịch sang"
-                See references/translation-mode.md for full spec
-  summary:      "tóm tắt", "summarize" — extract key points and condense
+Detect mode from user keywords:
+- **synthesis** (default): merge multiple sources into one document
+- **comprehensive**: triggered by "chi tiết", "comprehensive", "đầy đủ", or `--mode=comprehensive`.
+  See `references/comprehensive-mode.md` for the full spec on how to produce 3-5x richer content.
+- **translation**: triggered by "dịch", "translate", "dịch sang".
+  See `references/translation-mode.md` for language detection and translation workflow.
+- **summary**: triggered by "tóm tắt", "summarize" — extract key points and condense.
 
-MODE_SELECTION:
-  interactive: Ask user: "Bạn muốn biên soạn ở chế độ nào? Standard hay Comprehensive?"
-  pipeline: Default standard unless tong-hop specifies mode=comprehensive
-```
+In interactive mode, ask the user which mode they prefer. In pipeline mode, default to
+standard synthesis unless tong-hop specifies otherwise.
 
 ---
 
@@ -110,19 +111,39 @@ For speaker notes (when output is presentation), see `references/extra-modes.md`
 
 ## Conflict Resolution
 
-```yaml
-CONFLICTS:
-  data_conflicts:
-    action: Present both values with source attribution
-    format: "Theo {source_A}: X. Trong khi đó, {source_B} ghi nhận: Y."
-  opinion_conflicts:
-    action: Present both perspectives fairly
-  date_conflicts:
-    action: Use most recent source, note the discrepancy
-  user_resolution:
-    - Interactive: ask user to decide on critical conflicts
-    - Pipeline: use most recent/reliable source
-```
+When sources disagree, the worst outcome is silently choosing one version — the user loses
+information and may not realize it. Instead:
+
+- **Data conflicts** (e.g., different numbers for the same metric): present both values with
+  clear source attribution: "Theo {source_A}: X. Trong khi đó, {source_B} ghi nhận: Y."
+- **Opinion conflicts**: present both perspectives fairly, without taking sides
+- **Date conflicts**: use the most recent source, but note the discrepancy
+- **Critical conflicts**: in interactive mode, ask the user to decide. In pipeline mode, use
+  the most recent or most authoritative source.
+
+---
+
+## Source Attribution
+
+Readers need to know where information came from, especially in formal reports. Apply these
+rules consistently:
+
+1. When quoting or closely paraphrasing a source, add an inline citation: "(Nguồn: {source_name})"
+2. For data tables, note the source below the table
+3. At the end of the document, include a "Nguồn tham khảo" (References) section listing all
+   sources with their paths/URLs
+4. When multiple sources agree on a fact, attribution is optional (it clutters the text)
+
+---
+
+## Quality Checks
+
+Before delivering, verify:
+1. No duplicate paragraphs (common when merging overlapping sources)
+2. Consistent heading hierarchy (H1 → H2 → H3, no skips)
+3. All tables have headers
+4. Consistent language throughout (don't mix Vietnamese and English mid-paragraph)
+5. Source attribution present for key claims and data points
 
 ---
 

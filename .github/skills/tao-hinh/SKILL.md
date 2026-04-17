@@ -11,20 +11,25 @@ description: |
   "vẽ nhân vật", "cần ảnh minh họa", "làm slide đẹp hơn", "tạo background", "vẽ cái gì đó",
   "tạo biểu đồ", "vẽ chart", or "/tao-hinh", even without naming a specific skill.
 argument-hint: "[mode: chart|image] [chart type: bar|line|pie|radar|scatter] [image type: character|background|landscape|slide-bg|slide-frame]"
+version: 1.1
 ---
 
 # Tạo Hình — Charts & AI Images
 
 **References:** `references/chart-templates.md` | `references/image-generation.md`
 
-```yaml
-LANGUAGE: All Copilot responses in Vietnamese
-CHART_OUTPUT: PNG at dpi=160, bbox_inches='tight', matplotlib Agg backend (headless)
-IMAGE_OUTPUT: PNG, auto GPU: CUDA > MPS > CPU (works on all platforms, CPU is slower)
-```
+This skill handles two distinct visual output modes:
+- **Charts** (matplotlib): data-driven bar, line, pie, radar, scatter charts from Excel/CSV/inline data
+- **AI images** (diffusers/torch): generated illustrations, backgrounds, and slide assets
 
-> matplotlib.use('Agg') must be called before any other matplotlib import so the chart
-> renders without requiring a display server — this is what makes charts work in headless/CLI environments.
+Chart output: PNG at dpi=160, `bbox_inches='tight'`, matplotlib Agg backend (headless).
+Image output: PNG, auto GPU detection — CUDA > MPS > CPU (works everywhere, CPU is slower).
+
+`matplotlib.use('Agg')` must be called before any other matplotlib import so the chart
+renders without requiring a display server — this is what makes charts work in headless/CLI
+environments.
+
+All responses to the user are in Vietnamese.
 
 ---
 
@@ -59,6 +64,13 @@ IMAGE mode: User wants an AI-generated illustration
 - Infer chart type from data shape when not specified (time series → line, categories → bar)
 - Confirm title and axis labels; suggest from data context
 - Defaults: figsize=[10,6], dpi=160, title_fontsize=16, grid=True (alpha=0.3)
+- **Color-blind safe mode**: when user mentions accessibility, color-blind, or the chart will
+  be printed in B&W, use the color-blind friendly palette: `['#0072B2', '#E69F00', '#009E73',
+  '#CC79A7', '#D55E00', '#56B4E9', '#F0E442', '#000000']` (Okabe-Ito palette). Pass
+  `--palette colorblind` to gen_chart.py to activate.
+- **Batch charts**: when multiple charts are needed (e.g., pipeline produces 3 datasets),
+  loop through data items and generate each chart sequentially. Name files with index:
+  `{name}_{chart_type}_{index}_{date}.png`
 - Use bundled `gen_chart.py` as primary method:
 
 ```bash
