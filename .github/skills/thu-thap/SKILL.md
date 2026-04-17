@@ -4,19 +4,22 @@ description: |
   Gather content from any source: local files (docx/xlsx/pdf/pptx/txt), URLs, and web search.
   Uses markitdown as primary reader with format-specific fallbacks for garbled output.
   Web search via vscode-websearchforcopilot_webSearch for online research.
+  3-tier URL fetching: fetch_webpage → httpx → Playwright stealth mode (for bot-protected sites).
   Auto-reviews gathered content quality: checks volume, coverage, specificity, and source diversity.
   If content is insufficient, automatically expands search queries and does additional rounds.
   Always use this skill when the user mentions any file to read, URL to fetch, or topic to search
   online — even casual requests like "đọc file này", "lấy thông tin từ trang web đó", "tìm hiểu
   về X", "search Google giúp tôi", or when a file path or URL is dropped into the chat, even
-  without saying "/thu-thap".
+  without saying "/thu-thap". For bot-protected sites (Cloudflare, CAPTCHA walls, JS-heavy SPAs),
+  automatically escalates to Playwright with anti-detection stealth mode.
 argument-hint: "[file paths or URLs]"
-version: 1.1
+version: 1.2
 compatibility:
   requires:
     - Python >= 3.10
     - markitdown[all]
     - httpx, beautifulsoup4 (URL fallback)
+    - playwright (bot-protected URL fallback)
   tools:
     - run_in_terminal
     - fetch_webpage (primary URL reader)
@@ -25,7 +28,7 @@ compatibility:
 
 # Thu Thập — Content Gathering Skill
 
-**References:** `references/code-patterns.md` | `references/web-search-enrichment.md` | `references/deep-research.md`
+**References:** `references/code-patterns.md` | `references/web-search-enrichment.md` | `references/deep-research.md` | `references/playwright-stealth.md`
 
 This skill reads content from any source — local files, URLs, or web search — and returns
 clean Markdown text. It runs in two contexts: standalone (user asks to read something) or as
@@ -59,8 +62,19 @@ LOCAL_FILES:
   supported: .docx, .xlsx, .pdf, .pptx, .txt, .md, .csv, .html, .jpg, .png
 
 URLS:
-  primary: Copilot fetch_webpage tool
-  secondary: httpx + beautifulsoup4 (fallback)
+  tier_1: Copilot fetch_webpage tool (fast, no overhead)
+  tier_2: httpx + beautifulsoup4 (fallback for fetch_webpage failures)
+  tier_3: Playwright stealth mode (for bot-protected sites — Cloudflare, CAPTCHA, JS-heavy SPAs)
+
+BOT_PROTECTED_SITES:
+  detection_signals:
+    - HTTP 403/429 from tier 1 or tier 2
+    - Empty/garbled content despite valid URL
+    - "Just a moment", "Checking your browser", "Verify you are human"
+    - Cloudflare challenge page, CAPTCHA walls
+    - JavaScript-rendered content (SPA) returning empty HTML
+  escalation: Automatic — if tier 1+2 fail or return < 50 chars, try Playwright
+  script: scripts/playwright_fetch.py
 
 WEB_SEARCH:
   tool: vscode-websearchforcopilot_webSearch
@@ -208,20 +222,58 @@ For each file:
 
 ---
 
-## Step 4: Fetch URL Content (Standard Mode)
+## Step 4: Fetch URL Content (Standard Mode — 3-Tier Fallback)
 
-For each URL:
-1. Use `fetch_webpage` tool with `query: "main content"` — set a 30-second mental timeout:
-   if fetch_webpage hangs or returns nothing after ~30s, fall back to httpx immediately
-   rather than waiting indefinitely (unresponsive servers should not block the whole pipeline)
-2. If unavailable or empty → use httpx + BeautifulSoup fallback (with `timeout=15` seconds)
-3. Clean content: remove nav/footer/cookie boilerplate, limit to 50,000 chars
-4. Report: "  ✅ {page_title} ({url_domain}) — {char_count} ký tự"
-5. Rate limiting: when fetching multiple URLs, pause briefly between requests to avoid
-   triggering rate limits on the same domain
+For each URL, try tiers in order — escalate on failure:
+
+### Tier 1: fetch_webpage (fastest, default)
+1. Use `fetch_webpage` tool with `query: "main content"`
+2. Set a 30-second mental timeout — if it hangs or returns nothing, move to Tier 2
+3. If content ≥ 50 chars → success, clean and use it
+
+### Tier 2: httpx + BeautifulSoup (fallback)
+1. If Tier 1 fails or returns < 50 chars → use httpx + BeautifulSoup (with `timeout=15`)
+2. See `references/code-patterns.md` for the exact code pattern
+3. If content ≥ 50 chars → success
+
+### Tier 3: Playwright Stealth Mode (anti-bot fallback)
+1. If both Tier 1 and Tier 2 fail — OR if bot-detection signals are detected (403,
+   Cloudflare challenge page, empty JS-rendered content) → escalate to Playwright
+2. Run the stealth fetch script:
+   ```bash
+   python3 .github/skills/thu-thap/scripts/playwright_fetch.py "URL" --wait 3
+   ```
+3. For multiple URLs:
+   ```bash
+   python3 .github/skills/thu-thap/scripts/playwright_fetch.py URL1 URL2 URL3 --output collected.md
+   ```
+4. The script uses comprehensive anti-detection:
+   - `--disable-blink-features=AutomationControlled` (hide automation)
+   - `navigator.webdriver` override → `undefined`
+   - Chrome runtime + plugin array spoofing
+   - Real Chrome User-Agent profile
+   - CSP bypass + extra HTTP headers
+5. See `references/playwright-stealth.md` for full technical details
+
+### Common for all tiers:
+- Clean content: remove nav/footer/cookie boilerplate, limit to 50,000 chars
+- Report: "  ✅ {page_title} ({url_domain}) — {char_count} ký tự"
+- On final failure (all 3 tiers): "  ❌ {url} — Không thể lấy nội dung (đã thử 3 phương pháp)"
+- Rate limiting: pause briefly between requests to the same domain
+
+### When to Skip Directly to Playwright
+Some sites are known to block non-browser requests consistently. For these, skip Tier 1+2
+and go directly to Playwright to save time:
+```yaml
+DIRECT_PLAYWRIGHT_SIGNALS:
+  - User explicitly says "trang này chặn bot" or "cần dùng browser"
+  - Domain is known bot-protected (job boards, social media, news paywalls)
+  - Previous fetch from same domain failed with 403/429
+  - URL pattern suggests dynamic SPA (single-page app with client-side rendering)
+```
 
 For error messages and URL error types, see `references/code-patterns.md`.
-
+For Playwright anti-detection details, see `references/playwright-stealth.md`.
 For web search workflow, see `references/web-search-enrichment.md`.
 
 ---

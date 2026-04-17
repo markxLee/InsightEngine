@@ -62,6 +62,28 @@ FALLBACK_HTTPX: |
   main = soup.find("article") or soup.find("main") or soup.find("body")
   content = main.get_text(separator="\n", strip=True) if main else ""
 
+FALLBACK_PLAYWRIGHT: |
+  # Tier 3 — For bot-protected sites (Cloudflare, CAPTCHA walls, JS-heavy SPAs)
+  # Use the bundled script:
+  python3 .github/skills/thu-thap/scripts/playwright_fetch.py "URL" --wait 3
+  
+  # Multiple URLs:
+  python3 .github/skills/thu-thap/scripts/playwright_fetch.py URL1 URL2 --output result.md
+  
+  # See references/playwright-stealth.md for full anti-detection details
+
+ESCALATION_LOGIC: |
+  1. Try fetch_webpage → if content >= 50 chars → done
+  2. Try httpx → if content >= 50 chars → done
+  3. If both failed OR bot-detection signals (403, Cloudflare, empty SPA) → Playwright
+  4. If Playwright also fails → report error honestly
+
+BOT_DETECTION_SIGNALS:
+  http_codes: [403, 429, 503]
+  page_text: ["Just a moment", "Checking your browser", "Verify you are human",
+              "Access denied", "Enable JavaScript", "Cloudflare"]
+  empty_spa: Content < 50 chars despite valid URL (JS-rendered page)
+
 CONTENT_CLEANING:
   - Remove duplicate blank lines
   - Strip navigation breadcrumbs
