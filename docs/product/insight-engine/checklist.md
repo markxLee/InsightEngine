@@ -620,11 +620,11 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Branch: feature/insight-engine-us-5.1.1
   - Blocked By: None
 
-- [ ] **US-5.1.2** — SKILL.md refactor for small model compatibility
-  - Status: PLANNED
+- [x] **US-5.1.2** — SKILL.md refactor for small model compatibility
+  - Status: DONE ✅
   - Assignee: copilot
   - Branch: feature/insight-engine-us-5.1.2
-  - Blocked By: US-5.1.1
+  - Blocked By: ~~US-5.1.1~~ ✅
 
 ### Epic 5.2: Session State Persistence
 

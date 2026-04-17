@@ -10,13 +10,13 @@ argument-hint: "[content from bien-soan or direct text] [output path]"
 
 # Tạo PDF — PDF Document Output Skill
 
-Generates professionally formatted `.pdf` files with proper Vietnamese character support.
+**References:** `references/pdf-script-details.md`
 
 ```yaml
 MODE: Interactive (asks style) or Pipeline (from tong-hop)
 LANGUAGE: Copilot responds in Vietnamese
 INPUT: Structured Markdown from bien-soan or user text
-OUTPUT: .pdf file saved to user-specified path
+OUTPUT: .pdf file
 LIBRARIES: reportlab (Platypus + Canvas), pypdf
 ```
 
@@ -32,270 +32,65 @@ Use this skill when user:
 
 ---
 
-## Script Architecture (US-4.3.3)
+## Step 1: Pre-flight Check
 
-```yaml
-CLI_SCRIPT:
-  path: scripts/gen_pdf.py
-  purpose: Reusable CLI tool for generating .pdf from JSON data
-  usage: |
-    python3 scripts/gen_pdf.py --input content.json --output report.pdf --style corporate
-  
-  args:
-    --input: Path to JSON file with content data (required)
-    --output: Output .pdf file path (required)
-    --style: corporate | academic | minimal (default: corporate)
-  
-  json_format: |
-    {
-      "title": "Document Title",
-      "author": "Author Name",
-      "date": "2026-04-16",
-      "sections": [
-        {"type": "heading", "level": 1, "text": "Section Title"},
-        {"type": "text", "text": "Paragraph content"},
-        {"type": "bullets", "heading": "List Title", "items": ["Item 1", "Item 2"]},
-        {"type": "table", "heading": "Table Title", "headers": ["Col1", "Col2"], "rows": [["a", "b"]]},
-        {"type": "quote", "text": "Quote text", "author": "Attribution"},
-        {"type": "page_break"}
-      ]
-    }
-  
-  output: Prints "✅ Saved: <path> (<size> KB, <N> sections, style: <style>)"
-
-COPILOT_WORKFLOW:
-  1. Prepare content as JSON (from bien-soan output or user text)
-  2. Save JSON to tmp file
-  3. Run: python3 .github/skills/tao-pdf/scripts/gen_pdf.py --input data.json --output output.pdf --style <style>
-  4. Verify output exists
-  5. Report file path + size
-```
+1. Check: `python3 -c "from reportlab.platypus import SimpleDocTemplate"` → if fail: "pip install --user reportlab"
+2. Check: `python3 -c "import pypdf"` → if fail: "pip install --user pypdf"
+3. Confirm content available (pipeline or ask user)
 
 ---
 
-## Pre-Flight Check
+## Step 2: Use CLI Script (Recommended)
 
 ```yaml
-PRE_FLIGHT:
-  1. Check reportlab installed:
-     command: python3 -c "from reportlab.platypus import SimpleDocTemplate" 2>&1
-     if_fail: "Chạy: pip install --user reportlab"
-     
-  2. Check pypdf installed:
-     command: python3 -c "import pypdf" 2>&1
-     if_fail: "Chạy: pip install --user pypdf"
-     
-  3. Check content available:
-     - From pipeline: content variable from bien-soan
-     - From user: raw text or file path
-     if_missing: Ask user for content or redirect to thu-thap + bien-soan
-```
-
----
-
-## Step 1: Analyze Content Structure
-
-```yaml
-ANALYZE:
-  determine:
-    - Document title and metadata
-    - Number of sections and subsections
-    - Tables present (need Table flowable)
-    - Images to embed (need Image flowable)
-    - Need for table of contents
-    - Page orientation (portrait vs landscape)
-    
-  choose_approach:
-    simple: Canvas API for single-page, minimal formatting
-    complex: Platypus (SimpleDocTemplate) for multi-page with flowables
-    default: Platypus (recommended for most cases)
-```
-
----
-
-## Step 2: Generate PDF Script
-
-```yaml
-SCRIPT_STRUCTURE:
-  imports: |
-    from reportlab.platypus import (
-        SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-        PageBreak, Image, ListFlowable, ListItem
-    )
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.units import mm, cm
-    from reportlab.lib.colors import HexColor
-    from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
-    
-  page_setup:
-    pagesize: A4
-    margins: [25*mm, 25*mm, 20*mm, 20*mm]  # left, right, top, bottom
-    
-  font_setup: |
-    # Vietnamese font support — use system fonts
-    # macOS: try Helvetica (built-in) or register a TTF with Vietnamese support
-    # Fallback: DejaVuSans from reportlab bundled fonts
-    import os
-    font_paths = [
-        "/System/Library/Fonts/Helvetica.ttc",
-        "/Library/Fonts/Arial Unicode.ttf",
-        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+SCRIPT: scripts/gen_pdf.py
+USAGE: python3 scripts/gen_pdf.py --input content.json --output report.pdf --style corporate
+STYLES: corporate (default) | academic | minimal
+JSON_FORMAT: |
+  {
+    "title": "...", "author": "...", "date": "2026-04-16",
+    "sections": [
+      {"type": "heading", "level": 1, "text": "Section Title"},
+      {"type": "text", "text": "Paragraph content"},
+      {"type": "bullets", "heading": "List", "items": ["Item 1", "Item 2"]},
+      {"type": "table", "heading": "Table", "headers": ["Col1","Col2"], "rows": [["a","b"]]},
+      {"type": "quote", "text": "Quote", "author": "Attribution"},
+      {"type": "page_break"}
     ]
-    for fp in font_paths:
-        if os.path.exists(fp):
-            try:
-                pdfmetrics.registerFont(TTFont("ViFont", fp))
-                break
-            except:
-                continue
+  }
+OUTPUT: Prints "✅ Saved: <path> (<size> KB, <N> sections, style: <style>)"
 ```
 
 ---
 
-## Step 3: Style Configuration
+## Step 3: Analyze Content
 
-```yaml
-STYLES:
-  title:
-    fontName: Helvetica-Bold
-    fontSize: 24
-    spaceAfter: 12*mm
-    alignment: TA_CENTER
-    
-  heading1:
-    fontName: Helvetica-Bold
-    fontSize: 16
-    spaceBefore: 8*mm
-    spaceAfter: 4*mm
-    textColor: "#1a1a2e"
-    
-  heading2:
-    fontName: Helvetica-Bold
-    fontSize: 13
-    spaceBefore: 6*mm
-    spaceAfter: 3*mm
-    textColor: "#16213e"
-    
-  body:
-    fontName: Helvetica
-    fontSize: 11
-    leading: 16
-    alignment: TA_JUSTIFY
-    spaceAfter: 3*mm
-    
-  table_header:
-    fontName: Helvetica-Bold
-    fontSize: 10
-    textColor: "#FFFFFF"
-    background: "#1a1a2e"
-    
-  table_cell:
-    fontName: Helvetica
-    fontSize: 10
-    padding: 6
-```
+1. Determine document complexity: simple (Canvas API) vs complex multi-page (Platypus — default)
+2. Check for: tables, images to embed, need for table of contents (3+ headings), page orientation
+3. Register Vietnamese font from system (see `references/pdf-script-details.md`)
 
 ---
 
-## Step 4: Content Conversion Rules
+## Step 4: Convert Content & Build
 
-```yaml
-MARKDOWN_TO_PDF:
-  headings:
-    "# Title" -> Paragraph(text, styles["Title"])
-    "## Heading" -> Paragraph(text, styles["Heading1"])  
-    "### Subheading" -> Paragraph(text, styles["Heading2"])
-    
-  paragraphs:
-    plain_text -> Paragraph(text, styles["BodyText"])
-    
-  bold_italic:
-    "**bold**" -> "<b>bold</b>"
-    "*italic*" -> "<i>italic</i>"
-    # reportlab uses XML-like markup inside Paragraph
-    
-  lists:
-    bullet_list -> ListFlowable with ListItem elements
-    numbered_list -> ListFlowable with bulletType="1"
-    
-  tables:
-    markdown_table -> Table flowable with TableStyle
-    style: alternating row colors, header background
-    
-  code_blocks:
-    fenced_code -> Paragraph with monospace font, gray background
-    
-  subscript_superscript:
-    MUST use XML tags: "<sub>text</sub>" and "<super>text</super>"
-    NEVER use Unicode subscript/superscript characters
-    reason: reportlab XML tags render correctly; Unicode may not
-    
-  images:
-    "![alt](path)" -> Image(path, width, height)
-    auto_scale: fit within page margins
-    
-  page_breaks:
-    "---" or explicit break -> PageBreak()
-```
+1. Convert Markdown → reportlab flowables (Paragraph, Table, Image, ListFlowable, PageBreak)
+2. Critical: use `<sub>` / `<super>` XML tags — NEVER Unicode subscript/superscript characters
+3. Build document: `doc.build(story, onFirstPage=add_page_number, onLaterPages=add_page_number)`
+4. For full import/style/conversion specs: `references/pdf-script-details.md`
 
 ---
 
-## Step 5: Page Numbering and TOC
+## Step 5: Verify & Report
 
-```yaml
-PAGE_FEATURES:
-  page_numbers:
-    position: bottom center
-    format: "Trang {page_num} / {total_pages}"
-    implementation: |
-      def add_page_number(canvas, doc):
-          page_num = canvas.getPageNumber()
-          text = f"Trang {page_num}"
-          canvas.saveState()
-          canvas.setFont("Helvetica", 9)
-          canvas.drawCentredString(A4[0]/2, 15*mm, text)
-          canvas.restoreState()
-          
-  table_of_contents:
-    condition: Document has 3+ H1/H2 headings
-    position: After title page
-    auto_generate: true
-    
-  header:
-    content: Document title (abbreviated if long)
-    position: top right
-    font: Helvetica 8pt, gray
-```
-
----
-
-## Step 6: Save and Verify
-
-```yaml
-SAVE_AND_VERIFY:
-  1_BUILD:
-    command: |
-      doc = SimpleDocTemplate(output_path, pagesize=A4, ...)
-      doc.build(story, onFirstPage=add_page_number, onLaterPages=add_page_number)
-      
-  2_VERIFY:
-    script: |
-      import pypdf
-      reader = pypdf.PdfReader(output_path)
-      page_count = len(reader.pages)
-      sample_text = reader.pages[0].extract_text()[:200]
-      
-  3_REPORT:
-    format: |
-      File PDF created:
-      - Path: {output_path}
-      - Size: {file_size}
-      - Pages: {page_count}
-      - Content: {section_count} sections
-```
+1. Verify with pypdf: `len(reader.pages)` and sample text extraction
+2. Report:
+   ```
+   ✅ File PDF:
+   - Đường dẫn: {output_path}
+   - Kích thước: {file_size}
+   - Số trang: {page_count}
+   - Số phần: {section_count}
+   ```
 
 ---
 
@@ -303,29 +98,17 @@ SAVE_AND_VERIFY:
 
 ```yaml
 ERRORS:
-  font_error:
-    detect: Vietnamese characters showing as boxes/question marks
-    action: Try alternative font path, fallback to DejaVuSans
-    message: "Font error for Vietnamese. Trying alternative..."
-    
-  image_error:
-    detect: Image file not found or unsupported format
-    action: Skip image, add placeholder text
-    
-  table_overflow:
-    detect: Table wider than page
-    action: Split columns or reduce font size
-    
-  memory_error:
-    detect: Large document exceeds memory
-    action: Process in chunks, merge with pypdf
+  font_error: Try alternative font path; fallback to DejaVuSans
+  image_error: Skip image, add placeholder text
+  table_overflow: Split columns or reduce font size
+  memory_error: Process in chunks, merge with pypdf
 ```
 
 ---
 
 ## What This Skill Does NOT Do
 
-- Does NOT read existing PDFs — that is thu-thap job
-- Does NOT create charts — that is tao-hinh job (charts can be embedded as images)
-- Does NOT synthesize content — that is bien-soan job
+- Does NOT read existing PDFs — that is thu-thap
+- Does NOT create charts — that is tao-hinh
+- Does NOT synthesize content — that is bien-soan
 - Does NOT install dependencies — redirects to /cai-dat
