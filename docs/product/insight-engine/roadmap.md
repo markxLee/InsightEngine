@@ -95,6 +95,21 @@
 
 ---
 
+## Phase 5 — Tối ưu & Độ bền (Optimization & Resilience)
+
+**Goal:** Make InsightEngine work reliably with smaller AI models and ensure pipeline progress is never lost when a Copilot session is interrupted.
+
+> **Nguồn gốc:** Phản hồi từ testing Phase 0-4 — skills chưa tối ưu cho model nhỏ (GPT-4o-mini, GPT-3.5); user mất tiến độ khi session bị ngắt.
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 5.1 — Small Model Optimization** | Research nguyên nhân skills hoạt động kém với model nhỏ. Refactor SKILL.md files để giảm complexity (≤ 300 lines), tối ưu instruction clarity, kiểm tra compatibility với GPT-4o-mini / GPT-3.5 Turbo. |
+| **Epic 5.2 — Session State Persistence** | `tong-hop` lưu `.session-state.json` sau mỗi bước. Skill detect và resume session chưa hoàn thành. User nói "tiếp tục" / "resume" để khôi phục pipeline từ checkpoint. |
+
+---
+
 ## Skill Map theo Phase
 
 ```
@@ -103,6 +118,7 @@ Phase 1:  thu-thap          bien-soan          tao-word     tao-slide
 Phase 2:  thu-thap (nâng)   tao-excel          tao-pdf      tao-html   tong-hop (chaining)
 Phase 3:  tao-hinh (MỚI)    bien-soan (nâng)   tao-slide (nâng)  tong-hop (nâng)
 Phase 4:  tao-slide (templates)  tao-html (reveal.js)  bien-soan (depth)  all skills (scripts/)
+Phase 5:  all skills (small model refactor)  tong-hop (session state + resume)
 ```
 
 **Tổng số skills:** 10 (không thêm skill mới — nâng cấp skills hiện tại)
@@ -220,7 +236,16 @@ Phase 0 là bắt buộc — không có `cai-dat` và `tong-hop` thì các skill
 | **Epic 4.3 — Script Architecture** | Mỗi output skill có `scripts/` CLI tools |
 | **Epic 4.4 — Content Depth** | `bien-soan` comprehensive mode, content enrichment |
 | **Epic 4.5 — Template Library HTML** | 5-8 reveal.js presentation templates, presenter notes, PDF export |
+---
 
+## Phase 5 — Tối ưu & Độ bền
+
+**Mục tiêu:** Làm InsightEngine hoạt động tốt với nhiều model AI hơn và không bị mất tiến độ khi session bị ngắt.
+
+| Epic | Mô tả |
+|------|-------|
+| **Epic 5.1 — Small Model Optimization** | Research tại sao skills hoạt động kém với model nhỏ. Refactor SKILL.md giảm complexity, tối ưu instruction clarity |
+| **Epic 5.2 — Session State Persistence** | Pipeline lưu state sau mỗi bước. `tong-hop` detect và resume session chưa hoàn thành |
 ---
 
 *Roadmap này không bao gồm task-level breakdown. Xem User Stories để biết chi tiết triển khai.*  

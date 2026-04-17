@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 36 (21 Phase 0-3 DONE + 15 Phase 4 PLANNED)  
+> **Total User Stories:** 40 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -323,6 +323,9 @@ Wave 10 (parallel): US-4.1.1, US-4.2.1, US-4.4.1
 Wave 11 (parallel): US-4.1.2, US-4.1.3, US-4.2.2, US-4.2.3, US-4.4.2
 Wave 12 (parallel): US-4.3.1, US-4.3.2, US-4.5.1
 Wave 13 (parallel): US-4.3.3, US-4.5.2
+--- Phase 4 DONE (15/15) ---
+Wave 14 (parallel): US-5.1.1, US-5.2.1
+Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 ```
 
 - **Tên sản phẩm:** InsightEngine
@@ -607,6 +610,38 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
 
 ---
 
+## Phase 5: Tối ưu & Độ bền
+
+### Epic 5.1: Small Model Optimization
+
+- [x] **US-5.1.1** — Small model compatibility research
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-5.1.1
+  - Blocked By: None
+
+- [ ] **US-5.1.2** — SKILL.md refactor for small model compatibility
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-5.1.2
+  - Blocked By: US-5.1.1
+
+### Epic 5.2: Session State Persistence
+
+- [ ] **US-5.2.1** — Session state save after each pipeline step
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-5.2.1
+  - Blocked By: None
+
+- [ ] **US-5.2.2** — Pipeline resume from saved state
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-5.2.2
+  - Blocked By: US-5.2.1
+
+---
+
 ### Execution Order (Recommended)
 
 ```
@@ -624,6 +659,9 @@ Wave 10 (parallel): US-4.1.1, US-4.2.1, US-4.4.1
 Wave 11 (parallel): US-4.1.2, US-4.1.3, US-4.2.2, US-4.2.3, US-4.4.2
 Wave 12 (parallel): US-4.3.1, US-4.3.2, US-4.5.1
 Wave 13 (parallel): US-4.3.3, US-4.5.2
+--- Phase 4 DONE (15/15) ---
+Wave 14 (parallel): US-5.1.1, US-5.2.1
+Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 ```
 
 ---
