@@ -682,10 +682,10 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Branch: feature/insight-engine-us-6.3.1
   - Blocked By: None
 
-- [ ] **US-6.3.2** — Model self-declaration with fallback
-  - Status: PLANNED
-  - Assignee: —
-  - Branch: —
+- [x] **US-6.3.2** — Model self-declaration with fallback
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-6.3.2
   - Blocked By: ~~US-6.3.1~~ ✅, ~~US-6.2.1~~ ✅
 
 - [x] **US-6.3.3** — Pre-built workflow templates
@@ -700,7 +700,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: US-6.3.2, US-6.3.3, ~~US-6.2.1~~ ✅
+  - Blocked By: ~~US-6.3.2~~ ✅, ~~US-6.3.3~~ ✅, ~~US-6.2.1~~ ✅
 
 ### Epic 6.5: Tiered Audit System
 
