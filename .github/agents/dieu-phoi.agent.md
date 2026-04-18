@@ -94,16 +94,49 @@ BUDGET_ENFORCEMENT:
 ```yaml
 STATE:
   file: tmp/.session-state.json
-  save_after: every sub-skill completion
-  fields:
-    - raw_prompt: original user request
-    - intent_classification: detected category
-    - workflow_plan: from strategist
-    - current_step: which skill is running
-    - completed_steps: list of finished steps
-    - pending_steps: list of remaining steps
-    - audit_results: quality scores per step
-    - output_files: paths to generated files
+  schema_version: 2
+  
+  save_points:
+    after_classification:
+      what: raw_prompt, intent_classification
+      command: "python3 scripts/save_state.py save '{json}'"
+      
+    after_planning:
+      what: generated_plan, step_states (all pending)
+      command: "python3 scripts/save_state.py save '{json}'"
+      
+    after_each_step:
+      what: Update step status, output_summary, output files
+      command: "python3 scripts/save_state.py update --step {name} --status completed --output-file {path}"
+      
+    after_audit:
+      what: audit_test_cases, score_history
+      command: "python3 scripts/save_state.py save '{json}'"
+      
+    on_completion:
+      what: Mark pipeline completed
+      command: "python3 scripts/save_state.py complete"
+      
+    on_failure:
+      what: Save error context for resume
+      command: "python3 scripts/save_state.py update --step {name} --status failed"
+
+  step_states_schema:
+    name: string        # e.g., "thu-thap", "bien-soan", "tao-word"
+    status: string      # pending | in_progress | completed | failed | skipped
+    input_summary: string   # Brief description of input to this step
+    output_summary: string  # Brief description of output from this step
+    started_at: ISO8601
+    completed_at: ISO8601
+    output_files: list  # [{path, hash, format, size}]
+    error: string       # Error message if failed
+
+PERSISTENCE_RULES:
+  - ALWAYS save state after intent classification (enables resume from planning)
+  - ALWAYS save after each step completion (enables mid-pipeline resume)
+  - ALWAYS save on failure (enables retry from failed step)
+  - State file is JSON — human readable for debugging
+  - Archive old state before starting new pipeline
 ```
 
 ---
