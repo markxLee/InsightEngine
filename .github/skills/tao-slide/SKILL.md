@@ -306,6 +306,28 @@ Output: academic-serif .pptx, 25 slides (long sections split across 2-3 slides),
 
 ---
 
+## Step 5: Shared Auditor Agent Call (Post-Generation)
+
+```yaml
+AUDITOR_GATE:
+  when: After slide generation and verification
+  how:
+    1. READ .github/skills/shared-agents/auditor.md
+    2. BUILD prompt with:
+       user_request: original user request
+       output_content: slide titles + content summaries from .pptx
+       output_format: "slides"
+       required_fields: topics/sections user wanted
+    3. CALL runSubagent(prompt=<built_prompt>, description="Audit Slide output")
+    4. PARSE response:
+       IF VERDICT == PASS → deliver to user
+       IF VERDICT == FAIL → re-generate slides with IMPROVEMENTS guidance (max 2 retries)
+  budget: Counts toward max 5 auditor calls per pipeline run
+  skip_when: Standalone quick generation
+```
+
+---
+
 ## What This Skill Does NOT Do
 
 - Does NOT read input files — that's thu-thap

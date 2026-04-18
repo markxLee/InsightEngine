@@ -223,6 +223,28 @@ Output: academic .html, embedded charts, semantic headings, print-friendly, 80 K
 
 ---
 
+## Step 5: Shared Auditor Agent Call (Post-Generation)
+
+```yaml
+AUDITOR_GATE:
+  when: After HTML generation and verification
+  how:
+    1. READ .github/skills/shared-agents/auditor.md
+    2. BUILD prompt with:
+       user_request: original user request
+       output_content: HTML content (read the .html file)
+       output_format: "html"
+       required_fields: sections/topics user asked for
+    3. CALL runSubagent(prompt=<built_prompt>, description="Audit HTML output")
+    4. PARSE response:
+       IF VERDICT == PASS → deliver to user
+       IF VERDICT == FAIL → re-generate with IMPROVEMENTS guidance (max 2 retries)
+  budget: Counts toward max 5 auditor calls per pipeline run
+  skip_when: Standalone quick generation
+```
+
+---
+
 ## What This Skill Does NOT Do
 
 - Does NOT create multi-page websites (single .html file only)

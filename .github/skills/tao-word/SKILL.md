@@ -209,6 +209,28 @@ Output: minimal .docx, clean layout, 4 pages, no TOC (< 3 headings), 12 KB
 
 ---
 
+## Step 5: Shared Auditor Agent Call (Post-Generation)
+
+```yaml
+AUDITOR_GATE:
+  when: After Step 4.5 verification passes
+  how:
+    1. READ .github/skills/shared-agents/auditor.md
+    2. BUILD prompt with:
+       user_request: original user request (from pipeline context or conversation)
+       output_content: content read from generated .docx (markitdown or text)
+       output_format: "word"
+       required_fields: sections/topics user asked for
+    3. CALL runSubagent(prompt=<built_prompt>, description="Audit Word output")
+    4. PARSE response:
+       IF VERDICT == PASS → deliver to user
+       IF VERDICT == FAIL → re-generate with IMPROVEMENTS as guidance (max 2 retries)
+  budget: Counts toward max 5 auditor calls per pipeline run
+  skip_when: Standalone quick generation (user just wants a simple doc, no pipeline)
+```
+
+---
+
 ## What This Skill Does NOT Do
 
 - Does NOT read input files — that's thu-thap
