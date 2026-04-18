@@ -223,6 +223,14 @@ SKILLS:
       - "review skill quality"
       - "audit skill"
       - "production-grade skill"
+
+  # Shared Agents (invocable from any skill via runSubagent)
+  shared-agents:
+    auditor:
+      purpose: "Quality verification agent — receives output + requirements, returns PASS/FAIL verdict with issues list. Any output skill can invoke after file generation."
+      location: ".github/skills/shared-agents/auditor.md"
+      invocation: "runSubagent with prompt built from auditor.md template"
+      budget: "max 5 calls per pipeline run"
 ```
 
 ---
