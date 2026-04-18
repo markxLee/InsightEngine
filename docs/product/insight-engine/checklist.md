@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 59 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE)  
+> **Total User Stories:** 65 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -788,6 +788,56 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ---
 
+## Phase 8: Shared Copilot Agent Architecture
+
+> Refactor agents from Phase 6 inline instructions → standalone shared Copilot agents (`runSubagent`).
+
+### Epic 8.1: Shared Auditor Agent
+
+- [ ] **US-8.1.1** — Auditor as standalone Copilot agent
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-8.1.1
+  - Blocked By: None
+
+- [ ] **US-8.1.2** — Auditor integration into output skills
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-8.1.2
+  - Blocked By: US-8.1.1
+
+### Epic 8.2: Shared Strategist Agent
+
+- [ ] **US-8.2.1** — Strategist as standalone Copilot agent
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-8.2.1
+  - Blocked By: None
+
+### Epic 8.3: Shared Advisory Agent
+
+- [ ] **US-8.3.1** — Advisory as standalone Copilot agent
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-8.3.1
+  - Blocked By: None
+
+### Epic 8.4: Agent Integration Protocol
+
+- [ ] **US-8.4.1** — Standardized agent calling protocol
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-8.4.1
+  - Blocked By: US-8.1.1, US-8.2.1, US-8.3.1
+
+- [ ] **US-8.4.2** — tong-hop migration to shared agents
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-8.4.2
+  - Blocked By: US-8.4.1
+
+---
+
 ### Execution Order (Recommended)
 
 ```
@@ -817,6 +867,11 @@ Wave 19 (parallel): US-6.5.2, US-6.6.3, US-6.7.1
 Wave 20 (parallel): US-7.1.1, US-7.2.1, US-7.3.1
 Wave 21 (sequential): US-7.1.2 (after 7.1.1), US-7.2.2 (after 7.2.1)
 --- Phase 7 DONE (5/5) ---
+Wave 22 (parallel): US-8.1.1, US-8.2.1, US-8.3.1
+Wave 23 (sequential): US-8.1.2 (after 8.1.1)
+Wave 24 (sequential): US-8.4.1 (after 8.1.1, 8.2.1, 8.3.1)
+Wave 25 (sequential): US-8.4.2 (after 8.4.1)
+--- Phase 8 DONE (6/6) ---
 ```
 
 ---

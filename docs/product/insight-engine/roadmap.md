@@ -166,6 +166,23 @@ ROOT_CAUSES:
 
 ---
 
+## Phase 8 — Shared Copilot Agent Architecture
+
+**Goal:** Refactor Phase 6 agents from inline tong-hop instructions into standalone shared Copilot agents (`runSubagent`). Any skill can invoke any agent — auditor checks quality at every output generation point, not just pipeline end. Strategist and advisory are reusable across skills.
+
+> **Nguồn gốc:** Phase 6 embedded agents inside tong-hop SKILL.md as inline instructions. Real-world usage shows: (1) standalone skill calls have no quality audit, (2) agents share reasoning context with orchestrator leading to shortcuts, (3) tong-hop is overloaded with agent logic. Phase 8 makes agents first-class shared infrastructure.
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 8.1 — Shared Auditor Agent** | Create auditor as a standalone Copilot agent (`runSubagent`). Receives generated output + original requirements → returns quality verdict + specific issues. Any output skill (tao-word, tao-excel, tao-slide, tao-pdf, tao-html) can invoke it after file generation. |
+| **Epic 8.2 — Shared Strategist Agent** | Refactor strategist from inline tong-hop logic → standalone `runSubagent` agent. Receives user request + model profile → returns optimized workflow plan. Tong-hop calls it instead of inline strategy logic. |
+| **Epic 8.3 — Shared Advisory Agent** | Refactor advisory → standalone `runSubagent` agent. Any skill can call it when facing ambiguous decisions (not just tong-hop). Returns multi-perspective analysis in single call. |
+| **Epic 8.4 — Agent Integration Protocol** | Standardize input/output format for all agents. Define when each skill calls which agent. Update output skills to call auditor after generation. Budget: auditor max 5/pipeline, advisory max 2, strategist max 1. Remove AGENT_MODE flag from tong-hop (agents always available). |
+
+---
+
 ## Skill Map theo Phase
 
 ```
@@ -177,9 +194,10 @@ Phase 4:  tao-slide (templates)  tao-html (reveal.js)  bien-soan (depth)  all sk
 Phase 5:  all skills (small model refactor)  tong-hop (session state + resume)
 Phase 6:  agents (MỚI: strategist, audit, advisory)  tong-hop (dynamic workflow)  all skills (strict rules)
 Phase 7:  tong-hop (inline critical steps + hard gates)  thu-thap (data collection hardening)  pipeline trace
+Phase 8:  shared agents (refactor → runSubagent)  all output skills (auditor integration)  tong-hop (delegate to agents)
 ```
 
-**Tổng số skills:** 10 + 3 agents (strategist, audit, advisory)
+**Tổng số skills:** 10 + 3 shared Copilot agents (auditor, strategist, advisory)
 
 ---
 
@@ -333,6 +351,21 @@ Phase 0 là bắt buộc — không có `cai-dat` và `tong-hop` thì các skill
 | **Epic 7.1 — Inline Critical Steps & Hard Gates** | Đưa Step 1.5 và REQUEST_TYPE detection về inline trong tong-hop. Thêm gate xác nhận bắt buộc trước Step 3. |
 | **Epic 7.2 — Data Collection Enforcement** | Inline data_collection protocol trong thu-thap. URL validation chạy TRƯỚC khi tạo Excel output. |
 | **Epic 7.3 — Visible Pipeline Trace** | Pipeline in danh sách step có đánh số ở đầu, đánh dấu ✅ từng step khi hoàn thành. |
+
+---
+
+## Phase 8 — Shared Copilot Agent Architecture
+
+**Mục tiêu:** Tái cấu trúc agents từ Phase 6 (nhúng trong tong-hop) thành **shared Copilot agents** (`runSubagent`). Bất kỳ skill nào cũng gọi được agent. Auditor kiểm tra chất lượng ở mọi điểm tạo output, không chỉ cuối pipeline.
+
+> **Nguồn gốc:** Phase 6 nhúng agents trong tong-hop SKILL.md dưới dạng inline instructions. Thực tế cho thấy: (1) gọi skill standalone không có audit, (2) agents chia sẻ reasoning context với orchestrator dẫn đến shortcut, (3) tong-hop quá tải với agent logic.
+
+| Epic | Mô tả |
+|------|-------|
+| **Epic 8.1 — Shared Auditor Agent** | Tạo auditor dưới dạng Copilot agent (`runSubagent`). Nhận output + yêu cầu gốc → trả verdict + issues. Mọi output skill đều gọi được. |
+| **Epic 8.2 — Shared Strategist Agent** | Refactor strategist từ inline tong-hop → standalone `runSubagent`. Nhận request + model profile → trả workflow plan. |
+| **Epic 8.3 — Shared Advisory Agent** | Refactor advisory → standalone `runSubagent`. Bất kỳ skill nào cần tư vấn đều gọi được. Trả phân tích đa góc nhìn. |
+| **Epic 8.4 — Agent Integration Protocol** | Chuẩn hóa input/output format cho agents. Cập nhật output skills gọi auditor. Budget: auditor 5/pipeline, advisory 2, strategist 1. Bỏ AGENT_MODE flag. |
 
 ---
 

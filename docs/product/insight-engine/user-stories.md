@@ -3,8 +3,8 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Scope:** Phase 0 → Phase 7 (all phases)  
-> **Total User Stories:** 59 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7)
+> **Scope:** Phase 0 → Phase 8 (all phases)  
+> **Total User Stories:** 65 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8)
 
 ---
 
@@ -12,8 +12,8 @@
 
 - **Product name:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7
-- **Total stories:** 59 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15, Phase 5: 4, Phase 6: 14, Phase 7: 5)
+- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, Phase 8
+- **Total stories:** 65 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15, Phase 5: 4, Phase 6: 14, Phase 7: 5, Phase 8: 6)
 - **ID format:** `US-<phase>.<epic>.<index>`
 
 ### Dependency Graph (Summary)
@@ -807,14 +807,97 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
 
 ---
 
+## Phase 8: Shared Copilot Agent Architecture
+
+> **Nguồn gốc:** Phase 6 embedded agents inside tong-hop as inline instructions. Phase 8 refactors them into standalone shared Copilot agents (`runSubagent`) that any skill can invoke.
+
+---
+
+### Epic 8.1: Shared Auditor Agent
+
+**US-8.1.1: Auditor as standalone Copilot agent**
+- Description: As a pipeline, I need an auditor agent that can be invoked via `runSubagent` from any skill, so output quality is verified at every generation point — not just at pipeline end.
+- Acceptance Criteria:
+  - AC1: Auditor agent exists as a standalone prompt/agent definition (not inline in tong-hop)
+  - AC2: Receives: generated file content (or summary) + original user requirements
+  - AC3: Returns structured verdict: PASS/FAIL + specific issues list + improvement suggestions
+  - AC4: Can be invoked via `runSubagent` from any skill context
+  - AC5: Auditor reads back file content and verifies against requirements (not just checks file existence)
+- Blocked By: `None`
+
+**US-8.1.2: Auditor integration into output skills**
+- Description: As a user, I want every output skill (tao-word, tao-excel, tao-slide, tao-pdf, tao-html) to automatically call the auditor agent after file generation, so quality is verified regardless of whether I used the full pipeline or called a skill directly.
+- Acceptance Criteria:
+  - AC1: tao-word calls auditor after generating .docx — verifies content depth, section completeness
+  - AC2: tao-excel calls auditor after generating .xlsx — verifies data population, URL validity, formula correctness
+  - AC3: tao-slide calls auditor after generating .pptx — verifies slide count, content per slide, coverage
+  - AC4: tao-pdf and tao-html call auditor with appropriate checks
+  - AC5: If auditor returns FAIL → skill re-generates with auditor's improvement suggestions (max 2 retries)
+  - AC6: Budget: max 5 auditor calls per pipeline run
+- Blocked By: `US-8.1.1`
+
+---
+
+### Epic 8.2: Shared Strategist Agent
+
+**US-8.2.1: Strategist as standalone Copilot agent**
+- Description: As a pipeline orchestrator, I need the strategist agent refactored from inline tong-hop logic into a standalone `runSubagent` agent, so workflow generation is isolated and reusable.
+- Acceptance Criteria:
+  - AC1: Strategist agent exists as standalone prompt/agent definition
+  - AC2: Receives: user request + model profile (from shared context)
+  - AC3: Returns: step-by-step workflow with skill assignments and quality checkpoints
+  - AC4: Selects from pre-built workflow templates (retained from Phase 6)
+  - AC5: tong-hop calls strategist via `runSubagent` instead of inline strategy logic
+  - AC6: Budget: max 1 strategist call per pipeline run
+- Blocked By: `None`
+
+---
+
+### Epic 8.3: Shared Advisory Agent
+
+**US-8.3.1: Advisory as standalone Copilot agent**
+- Description: As any skill facing an ambiguous decision, I need an advisory agent I can call via `runSubagent` to get multi-perspective analysis, so decisions are informed rather than guessed.
+- Acceptance Criteria:
+  - AC1: Advisory agent exists as standalone prompt/agent definition
+  - AC2: Receives: decision question + context → returns analysis from 3-5 perspectives + recommendation
+  - AC3: Any skill can invoke it (not restricted to tong-hop)
+  - AC4: Single call format (not multiple separate calls per perspective)
+  - AC5: Budget: max 2 advisory calls per pipeline run
+- Blocked By: `None`
+
+---
+
+### Epic 8.4: Agent Integration Protocol
+
+**US-8.4.1: Standardized agent calling protocol**
+- Description: As a developer, I need a standardized protocol for how skills call agents, so all agent interactions are consistent and predictable.
+- Acceptance Criteria:
+  - AC1: Documented input format for each agent (auditor, strategist, advisory) — what data to pass in `runSubagent` prompt
+  - AC2: Documented output format — how to parse agent response (verdict, workflow, recommendation)
+  - AC3: Budget enforcement documented: auditor 5/pipeline, advisory 2, strategist 1
+  - AC4: Protocol documented in `references/agent-protocol.md`
+- Blocked By: `US-8.1.1`, `US-8.2.1`, `US-8.3.1`
+
+**US-8.4.2: tong-hop migration to shared agents**
+- Description: As a pipeline orchestrator, I need tong-hop to delegate to shared agents instead of using inline agent logic, so the SKILL.md is leaner and agents are truly shared.
+- Acceptance Criteria:
+  - AC1: tong-hop calls strategist agent via `runSubagent` for workflow generation (replaces inline strategy)
+  - AC2: tong-hop calls auditor agent for critical step verification (replaces inline quality gate text)
+  - AC3: AGENT_MODE feature flag removed — agents are always available as infrastructure
+  - AC4: tong-hop SKILL.md reduced in complexity (inline agent personas removed)
+  - AC5: No regression in pipeline behavior — same user experience, better quality
+- Blocked By: `US-8.4.1`
+
+---
+
 ---
 
 ## Tổng quan User Stories (Tiếng Việt)
 
 - **Tên sản phẩm:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Phạm vi:** Phase 0 → Phase 7
-- **Tổng số User Stories:** 59 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7)
+- **Phạm vi:** Phase 0 → Phase 8
+- **Tổng số User Stories:** 65 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8)
 
 ---
 
@@ -1381,6 +1464,81 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
   - AC4: Step fail → ❌ + error summary
   - AC5: Trace luôn hiển thị, không bị ẩn
 - Bị chặn bởi: `None`
+
+---
+
+## Phase 8: Shared Copilot Agent Architecture
+
+> **Nguồn gốc:** Phase 6 nhúng agents trong tong-hop dưới dạng inline instructions. Phase 8 tái cấu trúc thành shared Copilot agents (`runSubagent`) mà bất kỳ skill nào cũng gọi được.
+
+### Epic 8.1: Shared Auditor Agent
+
+**US-8.1.1: Auditor dưới dạng standalone Copilot agent**
+- Mô tả: Auditor agent được gọi qua `runSubagent` từ bất kỳ skill nào, kiểm tra chất lượng output tại mọi điểm tạo file.
+- Tiêu chí nghiệm thu:
+  - AC1: Auditor agent tồn tại dưới dạng standalone prompt/agent definition
+  - AC2: Nhận: nội dung file + yêu cầu gốc của user
+  - AC3: Trả verdict: PASS/FAIL + danh sách issues + gợi ý cải thiện
+  - AC4: Gọi được qua `runSubagent` từ mọi skill
+  - AC5: Đọc lại nội dung file và so sánh với yêu cầu
+- Bị chặn bởi: `None`
+
+**US-8.1.2: Tích hợp auditor vào output skills**
+- Mô tả: Mọi output skill (tao-word, tao-excel, tao-slide, tao-pdf, tao-html) tự động gọi auditor sau khi tạo file.
+- Tiêu chí nghiệm thu:
+  - AC1: tao-word gọi auditor sau khi tạo .docx
+  - AC2: tao-excel gọi auditor sau khi tạo .xlsx
+  - AC3: tao-slide gọi auditor sau khi tạo .pptx
+  - AC4: tao-pdf và tao-html gọi auditor tương tự
+  - AC5: Auditor FAIL → skill tạo lại (tối đa 2 lần retry)
+  - AC6: Budget: tối đa 5 lần gọi auditor / pipeline
+- Bị chặn bởi: `US-8.1.1`
+
+### Epic 8.2: Shared Strategist Agent
+
+**US-8.2.1: Strategist dưới dạng standalone Copilot agent**
+- Mô tả: Refactor strategist từ inline trong tong-hop → standalone `runSubagent` agent.
+- Tiêu chí nghiệm thu:
+  - AC1: Strategist agent tồn tại dưới dạng standalone definition
+  - AC2: Nhận: user request + model profile
+  - AC3: Trả: workflow plan từng bước với skill assignments
+  - AC4: Chọn từ workflow templates có sẵn
+  - AC5: tong-hop gọi qua `runSubagent`
+  - AC6: Budget: tối đa 1 lần gọi / pipeline
+- Bị chặn bởi: `None`
+
+### Epic 8.3: Shared Advisory Agent
+
+**US-8.3.1: Advisory dưới dạng standalone Copilot agent**
+- Mô tả: Refactor advisory → standalone `runSubagent` agent. Bất kỳ skill nào cũng gọi được khi cần tư vấn.
+- Tiêu chí nghiệm thu:
+  - AC1: Advisory agent tồn tại dưới dạng standalone definition
+  - AC2: Nhận: câu hỏi quyết định + context → trả phân tích 3-5 góc nhìn + khuyến nghị
+  - AC3: Bất kỳ skill nào đều gọi được
+  - AC4: Gọi 1 lần duy nhất (không tách nhiều lần gọi cho mỗi góc nhìn)
+  - AC5: Budget: tối đa 2 lần gọi / pipeline
+- Bị chặn bởi: `None`
+
+### Epic 8.4: Agent Integration Protocol
+
+**US-8.4.1: Chuẩn hóa protocol gọi agent**
+- Mô tả: Protocol chuẩn cho cách skills gọi agents, đảm bảo mọi tương tác nhất quán.
+- Tiêu chí nghiệm thu:
+  - AC1: Tài liệu input format cho từng agent
+  - AC2: Tài liệu output format — cách parse response
+  - AC3: Budget enforcement: auditor 5/pipeline, advisory 2, strategist 1
+  - AC4: Protocol tài liệu hóa trong `references/agent-protocol.md`
+- Bị chặn bởi: `US-8.1.1`, `US-8.2.1`, `US-8.3.1`
+
+**US-8.4.2: Migration tong-hop sang shared agents**
+- Mô tả: tong-hop delegate cho shared agents thay vì dùng inline agent logic.
+- Tiêu chí nghiệm thu:
+  - AC1: tong-hop gọi strategist agent cho workflow generation
+  - AC2: tong-hop gọi auditor agent cho verification
+  - AC3: Xóa AGENT_MODE feature flag — agents luôn khả dụng
+  - AC4: tong-hop SKILL.md giảm complexity (bỏ inline agent personas)
+  - AC5: Không regression — cùng user experience, chất lượng tốt hơn
+- Bị chặn bởi: `US-8.4.1`
 
 ---
 
