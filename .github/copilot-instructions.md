@@ -236,6 +236,11 @@ SKILLS:
       location: ".github/skills/shared-agents/strategist.md"
       invocation: "runSubagent with prompt built from strategist.md template"
       budget: "max 1 call per pipeline run"
+    advisory:
+      purpose: "Multi-perspective decision support agent — receives decision question + context, returns analysis from 3-5 perspectives + recommendation. Any skill can invoke when facing ambiguous decisions."
+      location: ".github/skills/shared-agents/advisory.md"
+      invocation: "runSubagent with prompt built from advisory.md template"
+      budget: "max 2 calls per pipeline run"
 ```
 
 ---
