@@ -14,7 +14,7 @@ description: |
   reviews (depth, writing style) — those are handled by bien-soan's self-review loop.
   This skill specifically checks: did the output match what the user requested?
 argument-hint: "[original request] [output file or content to audit]"
-version: 1.0
+version: 1.1
 compatibility:
   tools:
     - read_file
@@ -22,6 +22,8 @@ compatibility:
 ---
 
 # Kiểm Tra — Output Audit Skill
+
+**References:** `references/audit-rubric.md`
 
 This skill answers one question: **"Does the output actually match what the user asked for?"**
 

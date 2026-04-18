@@ -14,7 +14,7 @@ description: |
   Do NOT use for one-off output fixes (use kiem-tra for that) or for creating skills from scratch
   without session context (use skill-creator/skill-forge for that).
 argument-hint: "[session context or specific issue to analyze]"
-version: 1.0
+version: 1.1
 compatibility:
   tools:
     - read_file
@@ -23,6 +23,8 @@ compatibility:
 ---
 
 # Cải Tiến — Session Retrospective & Continuous Improvement
+
+**References:** `references/retrospective-template.md`
 
 This skill looks at a completed (or failed) InsightEngine session and asks: **"What went wrong,
 why did it go wrong, and how do we prevent it next time?"**
