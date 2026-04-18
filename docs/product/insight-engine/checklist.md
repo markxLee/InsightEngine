@@ -982,8 +982,10 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Branch: feature/insight-engine-us-10.5.1
   - Blocked By: None
 
-- [ ] **US-10.5.2** — Remove duplicate agent files
-  - Status: PLANNED
+- [x] **US-10.5.2** — Remove duplicate agent files
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-10.5.2
   - Blocked By: ~~US-10.5.1~~ ✅
 
 ### Epic 10.6: Backfill Missing Skill Stories

@@ -184,20 +184,7 @@ SKILLS:
       - "cải thiện quy trình"
       - "improve pipeline"
       - "nâng cấp skill"
-      - "lesson learned"
-
-  skill-creator:
-    purpose: "Create, improve, test, and benchmark skills for InsightEngine"
-    location: ".github/skills/skill-creator/SKILL.md"
-    triggers:
-      - "create skill"
-      - "turn this into a skill"
-      - "improve skill"
-      - "test skill"
-      - "tạo skill"
-      - "cải thiện skill"
-
-  skill-forge:
+      - "lesson learned
     purpose: "Advanced skill creation with auto-review loop — creates via skill-creator, then grades on 6 criteria (A/B/C/D), analyzes alternatives, and iterates until all A or 10 loops"
     location: ".github/skills/skill-forge/SKILL.md"
     triggers:
