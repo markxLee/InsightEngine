@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 65 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE)  
+> **Total User Stories:** 77 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -838,6 +838,94 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ---
 
+## Phase 9: Central Orchestrator & Adaptive Self-Improvement
+
+> Tách orchestration khỏi tổng hợp nội dung. Agent trung tâm, tự cải thiện thích ứng, audit thang 100 điểm, resume xuyên session, chuẩn hóa agents theo VS Code custom agent standard (`.github/agents/*.agent.md`).
+
+### Epic 9.1: Central Orchestrator (`dieu-phoi`)
+
+- [ ] **US-9.1.1** — Central orchestrator agent skeleton
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-8.4.2
+
+- [ ] **US-9.1.2** — tong-hop refactor to synthesis-only
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-9.1.1
+
+- [ ] **US-9.1.3** — dieu-phoi integration with shared agents
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-9.1.1
+
+### Epic 9.2: Adaptive Self-Improvement
+
+- [ ] **US-9.2.1** — Capability gap evaluation protocol
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-9.1.1
+
+- [ ] **US-9.2.2** — Runtime agent creation with user consent
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-9.2.1
+
+- [ ] **US-9.2.3** — Runtime skill creation/upgrade
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-9.2.1
+
+### Epic 9.3: Enhanced Working State & Cross-Session Resume
+
+- [ ] **US-9.3.1** — Enhanced session state schema
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-5.2.1
+
+- [ ] **US-9.3.2** — Step-level state persistence
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-9.3.1
+
+- [ ] **US-9.3.3** — Cross-session resume
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-9.3.2
+
+### Epic 9.4: 100-Point Weighted Audit Scoring
+
+- [ ] **US-9.4.1** — 100-point audit scoring system
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-8.1.1
+
+- [ ] **US-9.4.2** — Targeted retry loop with score tracking
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-9.4.1
+
+### Epic 9.5: VS Code Custom Agent Standard Migration
+
+- [ ] **US-9.5.1** — Migrate existing agents to .agent.md format
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-8.1.1, US-8.2.1, US-8.3.1
+
+---
+
 ### Execution Order (Recommended)
 
 ```
@@ -872,6 +960,11 @@ Wave 23 (sequential): US-8.1.2 (after 8.1.1)
 Wave 24 (sequential): US-8.4.1 (after 8.1.1, 8.2.1, 8.3.1)
 Wave 25 (sequential): US-8.4.2 (after 8.4.1)
 --- Phase 8 DONE (6/6) ---
+Wave 26 (parallel): US-9.1.1, US-9.4.1, US-9.5.1
+Wave 27 (parallel): US-9.1.2, US-9.1.3, US-9.2.1, US-9.3.1
+Wave 28 (parallel): US-9.2.2, US-9.2.3, US-9.3.2
+Wave 29 (parallel): US-9.3.3, US-9.4.2
+--- Phase 9 DONE (12/12) ---
 ```
 
 ---

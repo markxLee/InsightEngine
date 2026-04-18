@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Roadmap Created:** 2026-04-16  
-> **Scope:** Milestone-based (Phase 0 → Phase 6)
+> **Scope:** Milestone-based (Phase 0 → Phase 9)
 
 ---
 
@@ -183,6 +183,24 @@ ROOT_CAUSES:
 
 ---
 
+## Phase 9 — Central Orchestrator & Adaptive Self-Improvement
+
+**Goal:** Separate orchestration from content synthesis. Introduce a central orchestrator agent that handles ALL request types—not just content synthesis—while tong-hop focuses purely on merging/structuring content. Add adaptive self-improvement (creating new agents/skills at runtime with user consent), 100-point weighted audit scoring, and full cross-session resume. Align ALL agents with VS Code custom agent standard (`.agent.md` in `.github/agents/`).
+
+> **Nguồn gốc:** Real-world usage reveals tong-hop forces all requests through "gather → synthesize → output" pattern—but many requests (creative writing, visual storytelling, design, research) don’t fit this mold. Audit PASS/FAIL is too coarse. Session state doesn’t store enough context for true cross-session resume. Agents are not aligned with VS Code standard.
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 9.1 — Central Orchestrator Agent (`dieu-phoi`)** | Create `dieu-phoi.agent.md` in `.github/agents/` as the central request handler. Classifies intent (synthesis/creation/research/design/data_collection/mixed/unknown), routes to appropriate skills and agents. tong-hop refactored to pure content synthesis skill. Uses VS Code custom agent standard with YAML frontmatter (tools, agents, handoffs). |
+| **Epic 9.2 — Adaptive Self-Improvement** | Orchestrator evaluates capability gaps before execution. Can create new specialized agents (e.g., literary author, art director) and skills (e.g., manga page layout) at runtime with user consent. Time notification at 30 min. User can "unlock" extended self-improvement. Created artifacts follow `.agent.md`/`SKILL.md` standards and are tested before use. |
+| **Epic 9.3 — Enhanced Working State & Cross-Session Resume** | Upgrade session state to store: raw_prompt, analyzed_requirements, generated_plan, step_states[], audit_test_cases[], score_history[], created_skills[]. Enable full context reconstruction and resume in a new session. Output file hash tracking for conflict detection. |
+| **Epic 9.4 — 100-Point Weighted Audit Scoring** | Replace PASS/FAIL with QA-grade weighted scoring. Auditor analyzes requirements → generates dynamic test case set (total 100 pts, weighted by importance). Pass threshold >80/100. Max 5 retries targeting specific low-scoring test cases. Score progression tracking. |
+| **Epic 9.5 — VS Code Custom Agent Standard Migration** | Migrate all agents from `runSubagent`/shared-agents pattern to `.github/agents/*.agent.md` format. YAML frontmatter: description, tools, model, agents, handoffs, user-invocable. Agents and skills are peer-level. Auditor and dieu-phoi are user-invocable; strategist and advisory are subagent-only. |
+
+---
+
 ## Skill Map theo Phase
 
 ```
@@ -195,9 +213,10 @@ Phase 5:  all skills (small model refactor)  tong-hop (session state + resume)
 Phase 6:  agents (MỚI: strategist, audit, advisory)  tong-hop (dynamic workflow)  all skills (strict rules)
 Phase 7:  tong-hop (inline critical steps + hard gates)  thu-thap (data collection hardening)  pipeline trace
 Phase 8:  shared agents (refactor → runSubagent)  all output skills (auditor integration)  tong-hop (delegate to agents)
+Phase 9:  dieu-phoi (MỚI agent)  tong-hop (refactor → synthesis-only)  all agents (→ .agent.md standard)  auditor (100-point scoring)  cai-tien (nâng cấp)  session state (enhanced)
 ```
 
-**Tổng số skills:** 10 + 3 shared Copilot agents (auditor, strategist, advisory)
+**Tổng số:** 9 skills (`.github/skills/`) + 4 custom agents (`.github/agents/`) — peer-level per VS Code standard
 
 ---
 
@@ -366,6 +385,22 @@ Phase 0 là bắt buộc — không có `cai-dat` và `tong-hop` thì các skill
 | **Epic 8.2 — Shared Strategist Agent** | Refactor strategist từ inline tong-hop → standalone `runSubagent`. Nhận request + model profile → trả workflow plan. |
 | **Epic 8.3 — Shared Advisory Agent** | Refactor advisory → standalone `runSubagent`. Bất kỳ skill nào cần tư vấn đều gọi được. Trả phân tích đa góc nhìn. |
 | **Epic 8.4 — Agent Integration Protocol** | Chuẩn hóa input/output format cho agents. Cập nhật output skills gọi auditor. Budget: auditor 5/pipeline, advisory 2, strategist 1. Bỏ AGENT_MODE flag. |
+
+---
+
+## Phase 9 — Central Orchestrator & Adaptive Self-Improvement
+
+**Mục tiêu:** Tách orchestration khỏi việc tổng hợp nội dung. Tạo agent trung tâm (`dieu-phoi`) xử lý MỌI loại yêu cầu — tong-hop chỉ làm tổng hợp thuần túy. Thêm cơ chế tự cải thiện (tạo agent/skill mới runtime với sự đồng ý user), audit thang 100 điểm, resume xuyên session, và chuẩn hóa agents theo VS Code custom agent standard (`.agent.md`).
+
+> **Nguồn gốc:** Sử dụng thực tế cho thấy tong-hop ép mọi request qua pattern "thu thập → tổng hợp → xuất" — nhưng nhiều yêu cầu (sáng tác, thiết kế, nghiên cứu) không phù hợp. Audit PASS/FAIL quá thô. Session state chưa lưu đủ context cho resume xuyên session. Agents chưa theo chuẩn VS Code.
+
+| Epic | Mô tả |
+|------|-------|
+| **Epic 9.1 — Central Orchestrator (`dieu-phoi`)** | Tạo `dieu-phoi.agent.md` trong `.github/agents/`. Phân loại intent, route đến skills/agents. tong-hop refactor thành skill tổng hợp thuần túy. |
+| **Epic 9.2 — Tự cải thiện thích ứng** | Đánh giá gap năng lực, tạo agent/skill mới với user consent. Thông báo >30 phút. Test trước khi dùng. |
+| **Epic 9.3 — Working State & Resume xuyên session** | Lưu raw_prompt, analyzed_requirements, generated_plan, step_states[], audit_test_cases[]. Resume đầy đủ ở session mới. |
+| **Epic 9.4 — Audit thang 100 điểm** | Thay PASS/FAIL bằng QA-grade scoring. Auditor tạo bộ test case động (100 điểm, trọng số theo mức quan trọng). >80/100 mới pass. Tối đa 5 lần retry nhắm vào điểm yếu. |
+| **Epic 9.5 — Chuẩn VS Code Custom Agent** | Migrate agents từ `runSubagent` sang `.github/agents/*.agent.md`. YAML frontmatter: description, tools, model, agents, handoffs, user-invocable. Agents ngang hàng với skills. |
 
 ---
 

@@ -1,8 +1,8 @@
 # InsightEngine — Idea Analysis
 
 > **Idea Slug:** insight-engine  
-> **Analysis Date:** 2026-04-16  
-> **Status:** REVIEWED — READY
+> **Analysis Date:** 2026-04-16 (Phase 9 update: 2026-04-18)  
+> **Status:** REVIEWED — READY (Phase 0-8 DONE; Phase 9 PENDING REVIEW)
 
 ---
 
@@ -78,10 +78,14 @@ InsightEngine transforms the fragmented "gather → synthesize → format" workf
 8. **Zero infrastructure**: Runs entirely within VS Code + Copilot — no servers, no API keys, no subscriptions beyond Copilot
 9. **Model-agnostic skills**: Skill prompts optimized to work consistently with smaller models (GPT-4o-mini, GPT-3.5 Turbo) — not just Claude/GPT-4
 10. **Session resilience**: Pipeline automatically saves state after each step — can resume if a Copilot session is interrupted mid-pipeline
-11. **Shared Copilot agents**: Standalone agents (auditor, strategist, advisory) invoked via `runSubagent` — any skill can call them, not just the pipeline orchestrator. Auditor verifies output quality at every generation point, not only at pipeline end
+11. **VS Code custom agents** *(Phase 9 alignment)*: Agents follow the official VS Code custom agent standard — `.agent.md` files in `.github/agents/`, peer-level with skills (`.github/skills/`). Agents have YAML frontmatter (description, tools, model, handoffs, agents), enabling native agent picker integration, handoff workflows, and subagent invocation. Auditor verifies output quality at every generation point, not only at pipeline end
 12. **Model self-awareness with decision maps**: Pipeline detects model capabilities via self-declaration + pre-built decision maps — avoids hallucination about capabilities by verifying against known benchmarks
 13. **Quality-first with audit loops**: Tiered audit system (self-review → agent audit → final audit) ensures output quality at every critical step, with automatic retry and step-level rollback
 14. **Zero-question UX**: Pipeline auto-decides technical choices, consults advisory agent before asking user — minimizes interruptions for non-technical users
+15. **Dedicated orchestrator, focused skills** *(Phase 9)*: A central orchestrator agent (`dieu-phoi`) handles ALL request types — not just content synthesis. `tong-hop` returns to its natural role as a pure content synthesis skill, doing what its name says: synthesize content. The orchestrator can route creative requests, research tasks, design projects, and mixed workflows without forcing them through the "gather → synthesize → output" pattern
+16. **Adaptive self-improvement with user consent** *(Phase 9)*: When a request exceeds current capabilities (e.g., "phóng tác Thánh Gióng thành truyện tranh manga"), the system transparently assesses the gap, proposes creating new agents/skills (literary author, manga art), and proceeds only with user's explicit consent. If self-improvement takes >30 minutes, the system notifies the user and waits for approval
+17. **QA-grade weighted audit scoring** *(Phase 9)*: Auditor analyzes each request's requirements to dynamically generate a weighted test case set (100 points total). Critical requirements get higher weight. Score >80/100 to pass. Retries target specific weak areas instead of blind regeneration — max 5 attempts
+18. **True cross-session resume** *(Phase 9)*: Working state saves the complete pipeline context — raw prompt, analyzed requirements, generated plan/workflow, and step-level state — enabling full resume in a new session when the current session becomes too heavy
 
 ### Tiếng Việt
 
@@ -97,10 +101,14 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 8. **Không cần hạ tầng**: Chạy hoàn toàn trong VS Code + Copilot
 9. **Tương thích đa model**: Skill được tối ưu để hoạt động ổn định với cả model nhỏ (GPT-4o-mini, GPT-3.5 Turbo) — không chỉ Claude/GPT-4
 10. **Độ bền session**: Pipeline tự động lưu state sau mỗi bước — có thể tiếp tục nếu session Copilot bị ngắt giữa chừng
-11. **Shared Copilot agents**: Các agent (auditor, strategist, advisory) là Copilot agent độc lập (`runSubagent`) — bất kỳ skill nào cũng gọi được, không chỉ pipeline. Auditor kiểm tra output ở mọi điểm tạo file
+11. **VS Code custom agents** *(Phase 9)*: Agents tuân thủ tiêu chuẩn custom agent của VS Code — file `.agent.md` trong `.github/agents/`, ngang hàng với skills (`.github/skills/`). YAML frontmatter (description, tools, model, handoffs, agents), tích hợp agent picker, handoff workflows, và subagent invocation. Auditor kiểm tra output ở mọi điểm tạo file
 12. **Tự nhận diện model với bản đồ quyết định**: Pipeline phát hiện năng lực model qua self-declaration + decision maps — tránh ảo giác về năng lực bằng cách đối chiếu benchmark
 13. **Chất lượng trên hết với vòng audit**: Hệ thống audit phân tầng (self-review → agent audit → final audit) đảm bảo chất lượng ở mỗi bước quan trọng, tự retry và rollback
 14. **UX không hỏi thừa**: Pipeline tự quyết định kỹ thuật, hỏi agent advisory trước khi hỏi user — giảm gián đoạn cho user nontech
+15. **Orchestrator chuyên biệt, skill đúng vai** *(Phase 9)*: Agent trung tâm (`dieu-phoi`) tiếp nhận MỌI loại yêu cầu — không chỉ tổng hợp nội dung. `tong-hop` trở về vai trò tổng hợp nội dung thuần túy. Orchestrator route yêu cầu sáng tạo, nghiên cứu, thiết kế, và mixed workflow mà không ép qua pattern "thu thập → tổng hợp → xuất"
+16. **Tự cải thiện thích ứng** *(Phase 9)*: Khi yêu cầu vượt năng lực hiện tại (ví dụ: "phóng tác Thánh Gióng thành manga"), hệ thống tự đánh giá, đề xuất tạo agent/skill mới, và tiến hành khi user đồng ý. Thông báo nếu >30 phút
+17. **Audit thang điểm 100 kiểu QA** *(Phase 9)*: Auditor phân tích yêu cầu để tạo bộ test case có trọng số (tổng 100 điểm). Yêu cầu quan trọng hơn → điểm cao hơn. >80/100 mới pass. Retry nhắm vào điểm yếu cụ thể — tối đa 5 lần
+18. **Resume xuyên session** *(Phase 9)*: State lưu đầy đủ: raw prompt, yêu cầu đã phân tích, plan/workflow, state từng step — cho phép resume hoàn chỉnh ở session mới
 
 ---
 
@@ -155,11 +163,19 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 - SKILL.md files optimized for small model compatibility (≤ 300 lines, step-by-step instructions)
 - Session state persistence: pipeline writes `.session-state.json` after each step for resume capability
 
-**Agent architecture (Phase 6 design → Phase 8 shared agents):**
-- Phase 6 designed agents as inline tong-hop instructions. Phase 8 refactors them into **shared Copilot agents** via `runSubagent`
-- 3 shared agents: auditor (quality verification), strategist (workflow generation), advisory (decision support)
-- Any skill can invoke any agent — not restricted to tong-hop pipeline
-- Auditor agent called after every file generation (tao-word, tao-excel, tao-slide, etc.) — not just at pipeline end
+**Agent architecture (Phase 6 design → Phase 8 shared → Phase 9 VS Code standard):**
+- Phase 6 designed agents as inline tong-hop instructions
+- Phase 8 refactored into shared agents via `runSubagent`
+- **Phase 9 alignment**: Agents follow the **official VS Code custom agent standard** (ref: https://code.visualstudio.com/docs/copilot/customization/custom-agents)
+- Agent files use `.agent.md` format with YAML frontmatter (description, name, tools, model, agents, handoffs, user-invocable)
+- Agents live in `.github/agents/` — **peer-level with** `.github/skills/`, NOT nested inside skills
+- 4 custom agents: `dieu-phoi` (orchestrator), `auditor` (quality), `strategist` (workflow), `advisory` (decisions)
+- Agents appear in VS Code's agent picker dropdown — user can invoke directly or via handoff
+- `handoffs` enable guided workflows between agents (e.g., dieu-phoi → auditor after output)
+- `user-invocable: false` for agents that should only be called as subagents (strategist, advisory)
+- `user-invocable: true` for agents users interact with directly (dieu-phoi, auditor)
+- Agent `tools` field restricts tool access per agent role (e.g., auditor = read-only tools)
+- Agent `agents` field controls which subagents each agent can invoke
 - Shared context file (`tmp/.agent-context.json`) for inter-agent communication
 - Model self-awareness via self-declaration + decision maps (NO hardcoded model name)
 - Decision maps per capability category: context_window, reasoning_depth, tool_use, multilingual, code_generation — each with 3 levels
@@ -187,6 +203,55 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 - If yes: allow creation with 30-minute budget, prioritize cloning from verified public repos (anthropics/skills, openclaw/skills, openai/skills)
 - MANDATORY security check before cloning any external skill
 - If advisory says not needed: use existing skills + inline instructions
+
+**Central Orchestrator Agent — `dieu-phoi.agent.md` (Phase 9):**
+- VS Code custom agent (`.github/agents/dieu-phoi.agent.md`) — user-invocable, appears in agent picker
+- YAML frontmatter: `tools: [*]`, `agents: [auditor, strategist, advisory]`, `handoffs` to auditor after output
+- Replaces tong-hop as the central request handler — tong-hop becomes a pure content synthesis skill
+- Analyzes ANY user request and classifies intent: synthesis / creation / research / design / data_collection / mixed / unknown
+- Routes to appropriate skill(s) and agent(s) based on intent — not just the gather→synthesize→output pattern
+- Integrates with strategist, auditor, and advisory agents via native `agents` field (not ad-hoc runSubagent)
+- Handles creative requests (literature, art, comics) by composing multiple skills/agents
+- Manages the full pipeline lifecycle including retry, rollback, and cross-session resume
+- Uses `handoffs` for guided transitions: dieu-phoi → auditor (verify) → dieu-phoi (retry if needed)
+
+**Adaptive Self-Improvement Protocol (Phase 9):**
+- **Gap assessment**: Before execution, orchestrator evaluates whether current skills/agents can fully satisfy the request
+- **Capability expansion**: If a gap is identified, the system can:
+  - Create new specialized agents (e.g., literary author agent for creative writing, art director agent for visual storytelling)
+  - Upgrade existing skills (e.g., enhance tao-hinh for sequential art / manga panels)
+  - Create entirely new skills (e.g., skill for comic/manga page layout, skill for literary composition)
+- **User consent required**: The system MUST explain what it plans to create/upgrade, estimated time, and why. Proceed only with user's explicit approval
+- **Time budget with notification**: If self-improvement will take >30 minutes, notify user with explanation and estimated duration. Continue only with user consent. No hard time limit if user agrees
+- **Breaking existing limits**: With user consent, the system can exceed the 30-minute skill creation budget from Phase 6. The user explicitly "unlocks" extended self-improvement
+- **Quality gate on created skills**: New skills/agents are tested before use in the current pipeline. If creation fails, fall back to best-effort with existing capabilities
+
+**Enhanced Working State & Cross-Session Resume (Phase 9):**
+- Session state (`tmp/.session-state.json`) upgraded to store complete pipeline context:
+  - `raw_prompt`: Exact user input text (preserved verbatim)
+  - `analyzed_requirements`: Orchestrator's analysis (intent, dimensions, fields, constraints)
+  - `generated_plan`: The workflow/plan created by strategist or orchestrator
+  - `step_states[]`: Per-step detail — input, output summary, status (pending/running/done/failed), retry count, audit score
+  - `audit_test_cases[]`: The weighted test case set generated by auditor for this request
+  - `created_skills[]`: Any skills/agents created during self-improvement (for persistence across sessions)
+- Cross-session resume: When a new session starts and state file exists, orchestrator can fully reconstruct context and continue from the exact checkpoint
+- State file is self-documenting: a human or a new Copilot session can read it and understand the full pipeline status
+
+**100-Point Weighted Audit Scoring System (Phase 9):**
+- **Replaces binary PASS/FAIL** with granular, requirement-specific quality measurement
+- **Dynamic test case generation**: Auditor reads the user's original requirements and generates a custom test case set — like a QA engineer creating test cases from a feature specification
+- **Weighted scoring**: Each test case gets a point value based on its importance to output quality. Total always sums to 100 points. Examples:
+  - Core requirement coverage: 15-25 points per critical aspect
+  - Data specificity and accuracy: 10-15 points
+  - Source quality and citations: 5-10 points
+  - Formatting and presentation: 5-10 points
+  - Language quality: 3-5 points
+  - Added-value insights: 2-5 points
+- **Pass threshold: >80/100** — Output must score above 80 points to proceed
+- **Max 5 retries** (up from 3 in Phase 6): Each retry targets the specific test cases that scored low, with improvement instructions derived from the scoring
+- **Targeted retry**: Instead of regenerating everything, the system identifies which step produced the low-scoring test cases and re-executes only that step with specific improvement guidance
+- **Audit report**: Each audit produces a structured report showing every test case, its score, and specific evidence/reasoning — stored in working state for cross-session visibility
+- **Score progression tracking**: Working state tracks audit scores across retries (e.g., attempt 1: 62/100, attempt 2: 78/100, attempt 3: 85/100 → PASS). If score doesn't improve between consecutive retries, stop and deliver best available
 
 ### Tiếng Việt
 
@@ -221,11 +286,16 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 - SKILL.md tối ưu tương thích model nhỏ (≤ 300 dòng, hướng dẫn từng bước)
 - Lưu state pipeline (.session-state.json) để hỗ trợ resume khi session bị ngắt
 
-**Kiến trúc agent (Phase 6 thiết kế → Phase 8 shared agents):**
-- Phase 6 thiết kế agents nhúng trong tong-hop. Phase 8 tái cấu trúc thành **shared Copilot agents** qua `runSubagent`
-- 3 shared agents: auditor (kiểm tra chất lượng), strategist (tạo workflow), advisory (tư vấn quyết định)
-- Bất kỳ skill nào cũng gọi được agent — không bị giới hạn trong tong-hop
-- Auditor được gọi sau mỗi lần tạo file (tao-word, tao-excel, tao-slide, v.v.)
+**Kiến trúc agent (Phase 6 → Phase 8 → Phase 9 chuẩn VS Code):**
+- Phase 6 nhúng trong tong-hop. Phase 8 tái cấu trúc thành shared agents
+- **Phase 9**: Tuân thủ **chuẩn VS Code custom agent** (ref: code.visualstudio.com/docs/copilot/customization/custom-agents)
+- File `.agent.md` trong `.github/agents/` — **ngang hàng** với `.github/skills/`, KHÔNG lồng trong skills
+- 4 custom agents: `dieu-phoi` (orchestrator), `auditor` (chất lượng), `strategist` (workflow), `advisory` (tư vấn)
+- YAML frontmatter: description, tools, model, agents (subagents), handoffs, user-invocable
+- Hiển thị trong agent picker của VS Code — user chọn trực tiếp hoặc qua handoff
+- `handoffs` cho workflow tuần tự: dieu-phoi → auditor → dieu-phoi
+- `user-invocable: false` cho agent chỉ gọi qua subagent (strategist, advisory)
+- Agent `tools` giới hạn quyền truy cập (auditor = read-only)
 - File context chia sẻ (`tmp/.agent-context.json`) cho giao tiếp giữa các agent
 - Model tự nhận diện qua self-declaration + bản đồ quyết định (KHÔNG hardcode model name)
 - Budget: auditor max 5 lần/pipeline, advisory max 2, strategist max 1
@@ -248,6 +318,37 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 - Kiểm tra bảo mật BẮT BUỘC trước khi clone
 - Nếu không cần: dùng skill hiện tại + inline instructions
 
+**Agent Orchestrator trung tâm — `dieu-phoi.agent.md` (Phase 9):**
+- VS Code custom agent (`.github/agents/dieu-phoi.agent.md`) — hiển thị trong agent picker
+- YAML frontmatter: `tools: [*]`, `agents: [auditor, strategist, advisory]`, có `handoffs`
+- Thay thế tong-hop làm điểm tiếp nhận mọi request — tong-hop trở thành skill tổng hợp thuần túy
+- Phân loại intent: synthesis / creation / research / design / data_collection / mixed / unknown
+- Route đến skill/agent phù hợp — không ép mọi request qua pattern thu thập → tổng hợp → xuất
+- Tích hợp với strategist, auditor, advisory qua trường `agents` chuẩn (không phải ad-hoc)
+- Xử lý yêu cầu sáng tạo (văn học, nghệ thuật, truyện tranh) bằng cách tổ hợp nhiều skill/agent
+- `handoffs` cho chuyển tiếp: dieu-phoi → auditor (kiểm tra) → dieu-phoi (retry nếu cần)
+
+**Cơ chế tự cải thiện thích ứng (Phase 9):**
+- Đánh giá năng lực hiện tại vs yêu cầu — phát hiện khoảng trống
+- Tự tạo agent mới (ví dụ: agent tác giả văn học, agent đạo diễn nghệ thuật)
+- Nâng cấp skill hiện có hoặc tạo skill mới (ví dụ: skill truyện tranh manga)
+- BẮT BUỘC có sự đồng ý user trước khi tạo. Thông báo nếu >30 phút
+- User có thể "mở khóa" tự cải thiện mở rộng — phá giới hạn Phase 6
+- Skill/agent mới phải test trước khi dùng trong pipeline hiện tại
+
+**Working State nâng cấp & Resume xuyên session (Phase 9):**
+- Lưu đầy đủ: raw_prompt, analyzed_requirements, generated_plan, step_states[], audit_test_cases[], created_skills[]
+- Session mới có thể reconstruct hoàn toàn context và tiếp tục từ checkpoint chính xác
+- File state tự mô tả — người hoặc session mới đều đọc hiểu được
+
+**Audit thang 100 điểm kiểu QA (Phase 9):**
+- Thay thế PASS/FAIL bằng đo lường chất lượng chi tiết theo yêu cầu cụ thể
+- Auditor phân tích yêu cầu → tạo bộ test case có trọng số (tổng 100 điểm)
+- Yêu cầu lõi: 15-25 điểm/mục; dữ liệu chính xác: 10-15 điểm; nguồn trích dẫn: 5-10 điểm; trình bày: 5-10 điểm
+- Ngưỡng pass: >80/100. Tối đa 5 lần retry
+- Retry nhắm vào test case điểm thấp — không tái tạo lại toàn bộ
+- Báo cáo audit chi tiết từng test case, có theo dõi tiến trình điểm qua các lần retry
+
 ---
 
 ## 5. Out-of-Scope / Non-Goals
@@ -257,7 +358,7 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 - **NOT a web application** — no server, no database, no deployment
 - **NOT a code development tool** — no governed workflow, no CI/CD, no testing pipeline
 - **NOT a real-time collaboration tool** — single-user, local execution
-- **NOT a fully autonomous agent** — agents assist within Copilot's conversational loop; user remains in control of final approval gates
+- **NOT a fully autonomous agent** — agents assist within Copilot's conversational loop; user remains in control of final approval gates. Self-improvement requires explicit user consent. User can revoke at any time
 - **NO dependency on a-z-copilot-flow at runtime** — repo must be fully self-contained
 - **NO custom LLM/AI model** — relies entirely on GitHub Copilot (Claude) as the reasoning engine
 - **NO paid API integrations** — Google search via built-in Copilot tool, no SerpAPI/custom search
@@ -268,7 +369,7 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 
 - **KHÔNG** là ứng dụng web — không server, database, deployment
 - **KHÔNG** là công cụ phát triển code — không có governed workflow, CI/CD
-- **KHÔNG** là agent tự trị hoàn toàn — agents hỗ trợ trong vòng hội thoại Copilot; user vẫn kiểm soát approval gates
+- **KHÔNG** là agent tự trị hoàn toàn — agents hỗ trợ trong vòng hội thoại Copilot; user vẫn kiểm soát approval gates. Tự cải thiện BẮT BUỘC có sự đồng ý user. User có thể thu hồi bất kỳ lúc nào
 - **KHÔNG** phụ thuộc vào a-z-copilot-flow khi sử dụng — repo hoàn toàn độc lập
 - **KHÔNG** dùng AI/LLM riêng — chỉ dùng GitHub Copilot
 - **KHÔNG** tích hợp API trả phí
@@ -288,6 +389,9 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 6. **User is comfortable with VS Code** — basic familiarity with editor and chat panel
 7. **Internet access available** — for web search and URL fetching (offline mode limited to local files)
 8. **Vietnamese is the primary language** — all user-facing text defaults to Vietnamese; English as secondary
+9. **Self-improvement stays within Copilot capabilities** *(Phase 9)*: Created skills/agents still operate within Copilot's tool set (read_file, run_in_terminal, runSubagent, etc.). Self-improvement means better instructions and organization, not new runtime capabilities
+10. **User provides creative direction for novel requests** *(Phase 9)*: For unprecedented requests (e.g., manga creation), user provides style references, examples, or creative direction. The system adapts its capabilities, but creative judgment ultimately comes from user + Copilot reasoning
+11. **Session state file is not corrupted** *(Phase 9)*: Cross-session resume assumes the state file in `tmp/.session-state.json` is intact. If file is corrupted, pipeline starts fresh
 
 ### Tiếng Việt
 
@@ -297,6 +401,9 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 4. User quen dùng VS Code cơ bản
 5. Có kết nối internet (cho search và fetch web)
 6. Tiếng Việt là ngôn ngữ chính
+7. Tự cải thiện vẫn nằm trong khả năng tool của Copilot *(Phase 9)*
+8. User cung cấp hướng sáng tạo cho yêu cầu mới lạ *(Phase 9)*
+9. File state không bị hỏng — nếu hỏng thì pipeline bắt đầu lại *(Phase 9)*
 
 ---
 
@@ -339,6 +446,13 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 8. **Pre-output validation beats post-hoc audit**: URL validation gate (Step 4.3b) catches bad URLs BEFORE they enter Excel output, rather than flagging them in kiem-tra audit afterward. This pattern should extend to other quality dimensions.
 9. **Smoke testing infrastructure is essential**: Created `scripts/smoke_test.py` to validate all 15 skills, 4 scripts, directories, and dependencies in one command. Benchmark test cases documented in `docs/reports/compatibility-matrix.md`.
 
+**New questions from Phase 9 (Central Orchestrator & Adaptive Self-Improvement):**
+10. How should dieu-phoi handle requests that don't fit any known intent category? → **OPEN**: Fallback to advisory agent consultation + user clarification. Needs Phase 9 design.
+11. What is the maximum token budget for a single self-improvement cycle? → **OPEN**: Needs benchmarking. Estimated 50K-100K tokens for skill creation + testing.
+12. Should audit test cases be reusable across similar requests? → **OPEN**: Potential optimization — cache test case templates for common request patterns.
+13. How to handle state file conflicts when user modifies output files between sessions? → **OPEN**: State file tracks output file hashes; if mismatch detected, warn user and offer re-audit.
+14. Should the 100-point audit generate different test case sets per output format? → **PROPOSED**: Yes — a Word report audit has different quality dimensions than an Excel data collection audit. Auditor adapts test cases to output type.
+
 ### Tiếng Việt
 
 **Rủi ro sản phẩm:**
@@ -368,6 +482,13 @@ InsightEngine biến quy trình rời rạc "thu thập → tổng hợp → đ�
 8. Validate trước output tốt hơn audit sau → URL validation gate (Step 4.3b).
 9. Smoke test (`scripts/smoke_test.py`) là cần thiết cho CI.
 
+**Câu hỏi mới từ Phase 9:**
+10. dieu-phoi xử lý intent không xác định? → **MỞ**: Hỏi advisory + clarify user.
+11. Token budget tối đa cho 1 vòng self-improvement? → **MỞ**: Ước tính 50K-100K tokens.
+12. Test case audit có reusable cho request tương tự? → **MỞ**: Tiềm năng cache template test case.
+13. Xử lý conflict state khi user sửa output giữa sessions? → **MỞ**: Track hash file, cảnh báo nếu khác.
+14. Audit 100 điểm tạo test case khác nhau theo format output? → **ĐỀ XUẤT**: Có — Word report vs Excel data collection cần quality dimensions khác nhau.
+
 ---
 
 ## Proposed Skill Architecture (Product-Level)
@@ -380,10 +501,15 @@ InsightEngine/
     copilot-instructions.md          # Main instructions (Vietnamese-first)
     instructions/                     # Instruction files
     prompts/                          # Prompt files
+    agents/                           # 🤖 VS Code custom agents (.agent.md format)
+      dieu-phoi.agent.md             # 🔑 Central Orchestrator — user-invocable, tiếp nhận mọi request
+      auditor.agent.md               # Quality audit — 100-point scoring, user-invocable for standalone audit
+      strategist.agent.md            # Workflow generation — user-invocable: false (subagent only)
+      advisory.agent.md              # Multi-perspective decisions — user-invocable: false (subagent only)
     skills/
-      tong-hop/                      # 🔑 Pipeline chính — orchestrator
+      tong-hop/                      # Tổng hợp nội dung đa nguồn (refactored: synthesis-only, không còn orchestrate)
       thu-thap/                      # Thu thập từ web + đọc file
-      bien-soan/                     # Tổng hợp nội dung + dịch thuật
+      bien-soan/                     # Biên soạn nội dung + dịch thuật
       tao-word/                      # Xuất Word (.docx)
       tao-excel/                     # Xuất Excel (.xlsx)
       tao-slide/                     # Xuất PowerPoint (.pptx)
@@ -392,7 +518,54 @@ InsightEngine/
       tao-hinh/                      # Biểu đồ + hình ảnh
 ```
 
-**Skill count:** 9 skills (1 pipeline + 8 sub-skills)
+**Architecture:** 4 agents (`.github/agents/`) + 9 skills (`.github/skills/`) — peer-level, per VS Code standard
+
+**Agent specification (`.agent.md` YAML frontmatter):**
+```yaml
+# dieu-phoi.agent.md
+---
+name: dieu-phoi
+description: Central InsightEngine orchestrator — analyzes intent, routes to skills/agents
+tools: ['*']                          # Full tool access for orchestration
+agents: [auditor, strategist, advisory]
+model: Claude Sonnet 4.5 (copilot)   # Preferred; falls back to available
+handoffs:
+  - label: Kiểm tra chất lượng
+    agent: auditor
+    prompt: Audit the output against the original requirements.
+    send: false
+---
+```
+```yaml
+# auditor.agent.md
+---
+name: auditor
+description: Quality audit agent — 100-point weighted scoring, targeted retry guidance
+tools: ['read_file', 'grep_search', 'semantic_search', 'fetch_webpage']
+agents: []                            # No subagents — auditor is leaf agent
+user-invocable: true                  # Can be used standalone for ad-hoc audits
+---
+```
+```yaml
+# strategist.agent.md
+---
+name: strategist
+description: Workflow generation — receives request + model profile, returns execution plan
+tools: ['read_file', 'semantic_search', 'list_dir']
+agents: []
+user-invocable: false                 # Only accessible as subagent
+---
+```
+```yaml
+# advisory.agent.md
+---
+name: advisory
+description: Multi-perspective decision support — 3-5 viewpoints + recommendation
+tools: ['read_file', 'semantic_search', 'fetch_webpage']
+agents: []
+user-invocable: false                 # Only accessible as subagent
+---
+```
 
 **Consolidation rationale:**
 - `thu-thap-web` + `doc-tai-lieu` → `thu-thap` (same ingestion group)
@@ -401,10 +574,13 @@ InsightEngine/
 - `mau-template` → embedded as `references/` in each output skill
 
 **Naming convention:**
-- Directory names: Vietnamese, lowercase, hyphenated
+- Skill directory names: Vietnamese, lowercase, hyphenated (in `.github/skills/`)
 - Skill file: `SKILL.md` (content in English for Copilot)
-- Triggers: Bilingual (Vietnamese primary, English secondary)
-- Agents/references: Split into `agents/` and `references/` subdirectories when needed
+- Skill triggers: Bilingual (Vietnamese primary, English secondary)
+- Agent file names: Vietnamese, lowercase, `.agent.md` extension (in `.github/agents/`)
+- Agent YAML frontmatter: English (for Copilot compatibility)
+- Agent body: English instructions with Vietnamese trigger phrases
+- References: In `references/` subdirectory within each skill
 
 **V1 decisions (Phase 0-3):**
 - Templates: 3-5 styles per format (corporate, academic, minimal, dark/modern, creative)
@@ -429,8 +605,65 @@ InsightEngine/
 - Budget cap: max 30 agent calls/pipeline, max 3 retries/step, max 10 total retries
 - Feature flag: `AGENT_MODE` in tong-hop for backward compatibility
 
+**V4 decisions (Phase 9 — central orchestrator, adaptive self-improvement, weighted audit):**
+
+*VS Code Custom Agent Standard Compliance:*
+- ALL agents follow `.agent.md` format in `.github/agents/` (ref: code.visualstudio.com/docs/copilot/customization/custom-agents)
+- Agents and skills are **peer-level** — agents in `.github/agents/`, skills in `.github/skills/`
+- Agent YAML frontmatter: description, name, tools, model, agents, handoffs, user-invocable
+- `handoffs` for guided sequential workflows between agents
+- `user-invocable` controls agent picker visibility (false = subagent-only)
+- Agent `tools` enforces least-privilege per role (auditor = read-only, orchestrator = full)
+- Native integration with VS Code agent picker, subagent system, and model selection
+- AGENT_MODE feature flag removed — agents are always available as first-class VS Code custom agents
+
+*Central Orchestrator:*
+- `dieu-phoi.agent.md` — primary user-facing agent, appears in VS Code agent picker
+- tong-hop refactored to pure content synthesis skill (`.github/skills/tong-hop/SKILL.md`) — doing what its name says
+- Intent taxonomy: synthesis / creation / research / design / data_collection / mixed / unknown
+- Orchestrator uses `agents: [auditor, strategist, advisory]` field for native subagent access
+- `handoffs` enable guided transitions: dieu-phoi → auditor → dieu-phoi (retry loop)
+- Created agents during self-improvement also placed in `.github/agents/` following the same standard
+
+*Adaptive Self-Improvement:*
+- System performs gap assessment: current capabilities vs request requirements
+- Can create new agents (literary author, art director, etc.) and new skills (manga layout, etc.) at runtime
+- User consent REQUIRED before any creation/upgrade. Transparent about what and why
+- Time notification at 30 minutes. User can "unlock" extended self-improvement (no hard time cap)
+- Created skills/agents tested before use. Fall back to best-effort if creation fails
+- Self-improvement is constrained to Copilot's existing tool set — better instructions, not new runtime capabilities
+
+*100-Point Weighted Audit (QA Model):*
+- Auditor dynamically generates test case set per request — like QA creating test cases from a feature spec
+- Each test case gets a weight (points) based on importance. Total = 100
+- Weight distribution principle: core requirements 50-60%, quality dimensions 20-30%, polish 10-20%
+- Pass threshold: >80/100. Max 5 retries (up from 3)
+- Targeted retry: identifies which step/test case scored low, re-executes only that step
+- Score progression tracked in working state. No-improvement detection: if score doesn't improve between consecutive retries, stop
+- Test case sets adapt to output format (Word report ≠ Excel data ≠ PowerPoint deck)
+- Example test case set for "market analysis report":
+  ```
+  TC-1: Core topic coverage                 25 pts
+  TC-2: Data specificity (numbers, dates)    15 pts
+  TC-3: Source quality and citations         10 pts
+  TC-4: Competitive analysis depth           15 pts
+  TC-5: Consumer/trend insights              10 pts
+  TC-6: Formatting (TOC, headings, charts)    8 pts
+  TC-7: Language quality (natural VN)          5 pts
+  TC-8: Actionable recommendations            7 pts
+  TC-9: Visual aids (charts, tables)           5 pts
+  TOTAL                                     100 pts
+  ```
+
+*Enhanced Working State:*
+- State file stores: raw_prompt, analyzed_requirements, generated_plan, step_states[], audit_test_cases[], score_history[], created_skills[]
+- Cross-session resume: new session reads state file → reconstructs full context → continues from checkpoint
+- State file is human-readable and self-documenting
+- Output file hash tracking for conflict detection between sessions
+
 ---
 
 *This document was produced by Idea Analysis. Updated with Phase 4 scope based on testing feedback.*
 *Updated with Phase 6 scope based on real-world usage feedback (agent architecture, quality gates, strict rules).*
 *Updated with Phase 7 learnings (2026-04-18): open questions resolved, enforcement hardening insights, compatibility matrix.*
+*Updated with Phase 9 scope (2026-04-18): central orchestrator, adaptive self-improvement, 100-point weighted audit, cross-session resume, VS Code custom agent standard alignment.*

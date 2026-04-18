@@ -3,8 +3,8 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Scope:** Phase 0 → Phase 8 (all phases)  
-> **Total User Stories:** 65 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8)
+> **Scope:** Phase 0 → Phase 9 (all phases)  
+> **Total User Stories:** 77 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9)
 
 ---
 
@@ -12,7 +12,7 @@
 
 - **Product name:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, Phase 8
+- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, Phase 8, Phase 9
 - **Total stories:** 65 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15, Phase 5: 4, Phase 6: 14, Phase 7: 5, Phase 8: 6)
 - **ID format:** `US-<phase>.<epic>.<index>`
 
@@ -890,14 +890,153 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
 
 ---
 
+## Phase 9: Central Orchestrator & Adaptive Self-Improvement
+
+> Separate orchestration from content synthesis. Introduce central orchestrator agent, adaptive self-improvement, 100-point weighted audit scoring, and full cross-session resume. Align ALL agents with VS Code custom agent standard (`.github/agents/*.agent.md`).
+
+### Epic 9.1: Central Orchestrator Agent (`dieu-phoi`)
+
+**US-9.1.1: Central orchestrator agent skeleton**
+- Description: As a user, I need a central orchestrator agent (`dieu-phoi.agent.md` in `.github/agents/`) that classifies my request intent and routes to the appropriate skills and agents, so I’m not forced through the synthesis pipeline for non-synthesis tasks.
+- Acceptance Criteria:
+  - AC1: `dieu-phoi.agent.md` exists in `.github/agents/` with valid VS Code custom agent YAML frontmatter (description, tools, agents, handoffs, user-invocable: true)
+  - AC2: Classifies intent into categories: synthesis, creation, research, design, data_collection, mixed, unknown
+  - AC3: Routes to appropriate skills/agents based on classification
+  - AC4: Falls back to asking user for clarification on `unknown` intent
+  - AC5: Logs classification + routing decision to session state
+- Blocked By: `US-8.4.2`
+
+**US-9.1.2: tong-hop refactor to synthesis-only skill**
+- Description: As a developer, I need tong-hop refactored to be a pure content synthesis skill (no orchestration logic), so the orchestration responsibility belongs solely to dieu-phoi.
+- Acceptance Criteria:
+  - AC1: tong-hop SKILL.md contains only content synthesis logic (gather → merge → structure)
+  - AC2: All intent classification, routing, and pipeline orchestration removed from tong-hop
+  - AC3: dieu-phoi calls tong-hop as one of many possible skills
+  - AC4: Standalone `/tong-hop` trigger still works (dieu-phoi intercepts and routes)
+  - AC5: No regression in synthesis quality
+- Blocked By: `US-9.1.1`
+
+**US-9.1.3: dieu-phoi integration with shared agents**
+- Description: As an orchestrator, I need dieu-phoi to invoke shared agents (strategist, auditor, advisory) via VS Code agent handoffs, so workflow planning and quality checks are orchestrated centrally.
+- Acceptance Criteria:
+  - AC1: dieu-phoi YAML frontmatter lists `agents: [strategist, auditor, advisory]`
+  - AC2: dieu-phoi calls strategist for workflow generation before execution
+  - AC3: dieu-phoi calls auditor at pipeline end for final quality gate
+  - AC4: Budget enforcement: strategist 1/pipeline, auditor 5/pipeline, advisory 2/pipeline
+- Blocked By: `US-9.1.1`
+
+---
+
+### Epic 9.2: Adaptive Self-Improvement
+
+**US-9.2.1: Capability gap evaluation protocol**
+- Description: As an orchestrator, I need dieu-phoi to evaluate whether existing skills and agents can fulfill the user’s request before execution, so capability gaps are identified early.
+- Acceptance Criteria:
+  - AC1: Before execution, dieu-phoi maps request requirements to available skills/agents
+  - AC2: Identifies specific gaps (e.g., "no skill for manga page layout")
+  - AC3: Reports gaps to user with proposed solution (create new skill/agent)
+  - AC4: Proceeds with existing capabilities if user declines creation
+- Blocked By: `US-9.1.1`
+
+**US-9.2.2: Runtime agent creation with user consent**
+- Description: As a user, I want the orchestrator to create specialized agents at runtime when a capability gap is identified, so the system adapts to my needs without manual setup.
+- Acceptance Criteria:
+  - AC1: dieu-phoi proposes new agent creation with description and purpose
+  - AC2: User must explicitly approve before creation
+  - AC3: Created agent follows `.agent.md` format in `.github/agents/`
+  - AC4: Created agent is tested with a smoke test before use
+  - AC5: Time notification at 30 min; user can "unlock" extended self-improvement
+- Blocked By: `US-9.2.1`
+
+**US-9.2.3: Runtime skill creation/upgrade**
+- Description: As a user, I want the orchestrator to create or upgrade skills at runtime when existing skills are insufficient, so the system’s capabilities grow organically.
+- Acceptance Criteria:
+  - AC1: dieu-phoi proposes skill creation/upgrade with rationale
+  - AC2: User must approve; created skill follows SKILL.md standard
+  - AC3: Skill is registered in copilot-instructions.md
+  - AC4: Created skill is smoke-tested before use in current pipeline
+- Blocked By: `US-9.2.1`
+
+---
+
+### Epic 9.3: Enhanced Working State & Cross-Session Resume
+
+**US-9.3.1: Enhanced session state schema**
+- Description: As a pipeline, I need the session state to store comprehensive context (raw_prompt, analyzed_requirements, generated_plan, step_states[], audit_test_cases[], score_history[], created_skills[]), so full context can be reconstructed for resume.
+- Acceptance Criteria:
+  - AC1: State schema documented with all required fields
+  - AC2: `save_state.py` updated to persist new schema
+  - AC3: Output file hash tracking for conflict detection
+  - AC4: Backwards-compatible with existing Phase 5 state format
+- Blocked By: `US-5.2.1`
+
+**US-9.3.2: Step-level state persistence**
+- Description: As a pipeline, I need state saved after each step (not just at checkpoints), so any interruption loses at most one step of work.
+- Acceptance Criteria:
+  - AC1: State saved after each sub-skill completes
+  - AC2: Each step’s input, output summary, and status recorded
+  - AC3: Audit test cases and scores persisted per step
+  - AC4: Resume correctly identifies last completed step
+- Blocked By: `US-9.3.1`
+
+**US-9.3.3: Cross-session resume**
+- Description: As a user, I need to resume a pipeline in a completely new Copilot session by loading the saved state, so interruptions don’t force me to start over.
+- Acceptance Criteria:
+  - AC1: dieu-phoi detects saved state on session start and offers to resume
+  - AC2: Full context reconstructed from state (no guessing or re-analysis)
+  - AC3: Output file hashes checked for conflicts (files modified externally)
+  - AC4: User can choose to resume or start fresh
+- Blocked By: `US-9.3.2`
+
+---
+
+### Epic 9.4: 100-Point Weighted Audit Scoring
+
+**US-9.4.1: 100-point audit scoring system**
+- Description: As a quality gate, I need auditor to generate dynamic test cases from requirements (total 100 pts, weighted by importance) and score output against them, replacing the binary PASS/FAIL verdict.
+- Acceptance Criteria:
+  - AC1: Auditor analyzes user requirements → generates test case set (total weight = 100)
+  - AC2: Each test case has: name, weight (pts), pass criteria, category
+  - AC3: Categories: requirement_coverage (40%), data_quality (25%), format_compliance (20%), completeness (15%)
+  - AC4: Output scored against test cases → total score /100
+  - AC5: Pass threshold: >80/100
+  - AC6: Score breakdown visible to user
+- Blocked By: `US-8.1.1`
+
+**US-9.4.2: Targeted retry loop with score tracking**
+- Description: As a pipeline, I need failed audits to trigger targeted retries that focus on specific low-scoring test cases, so retries are efficient rather than full regeneration.
+- Acceptance Criteria:
+  - AC1: On score <80, identify test cases with score 0
+  - AC2: Retry targets only the failing areas (not full regeneration)
+  - AC3: Max 5 retries per pipeline run
+  - AC4: Score progression tracked: [attempt1: 62, attempt2: 78, attempt3: 85]
+  - AC5: If score plateaus (no improvement for 2 consecutive retries), stop and report to user
+- Blocked By: `US-9.4.1`
+
+---
+
+### Epic 9.5: VS Code Custom Agent Standard Migration
+
+**US-9.5.1: Migrate existing agents to .agent.md format**
+- Description: As a developer, I need all existing shared agents (auditor, strategist, advisory) migrated from `runSubagent`/shared-agents pattern to `.github/agents/*.agent.md` files with proper YAML frontmatter.
+- Acceptance Criteria:
+  - AC1: `auditor.agent.md` exists in `.github/agents/` with frontmatter: description, tools, user-invocable: true
+  - AC2: `strategist.agent.md` exists in `.github/agents/` with frontmatter: user-invocable: false
+  - AC3: `advisory.agent.md` exists in `.github/agents/` with frontmatter: user-invocable: false
+  - AC4: Old `shared-agents/` references updated to `.github/agents/`
+  - AC5: copilot-instructions.md updated with agent registry
+- Blocked By: `US-8.1.1`, `US-8.2.1`, `US-8.3.1`
+
+---
+
 ---
 
 ## Tổng quan User Stories (Tiếng Việt)
 
 - **Tên sản phẩm:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Phạm vi:** Phase 0 → Phase 8
-- **Tổng số User Stories:** 65 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8)
+- **Phạm vi:** Phase 0 → Phase 9
+- **Tổng số User Stories:** 77 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9)
 
 ---
 
@@ -1539,6 +1678,135 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
   - AC4: tong-hop SKILL.md giảm complexity (bỏ inline agent personas)
   - AC5: Không regression — cùng user experience, chất lượng tốt hơn
 - Bị chặn bởi: `US-8.4.1`
+
+---
+
+## Phase 9: Central Orchestrator & Adaptive Self-Improvement
+
+> Tách orchestration khỏi tổng hợp nội dung. Tạo agent trung tâm, tự cải thiện thích ứng, audit thang 100 điểm, resume xuyên session, chuẩn hóa agents theo VS Code custom agent standard (`.github/agents/*.agent.md`).
+
+### Epic 9.1: Central Orchestrator (`dieu-phoi`)
+
+**US-9.1.1: Agent điều phối trung tâm**
+- Mô tả: Tạo `dieu-phoi.agent.md` trong `.github/agents/` phân loại intent và route đến skills/agents phù hợp.
+- Tiêu chí nghiệm thu:
+  - AC1: `dieu-phoi.agent.md` tồn tại với YAML frontmatter đúng chuẩn VS Code
+  - AC2: Phân loại intent: synthesis, creation, research, design, data_collection, mixed, unknown
+  - AC3: Route đúng skill/agent theo phân loại
+  - AC4: Fallback hỏi user khi intent `unknown`
+  - AC5: Log classification + routing vào session state
+- Bị chặn bởi: `US-8.4.2`
+
+**US-9.1.2: Refactor tong-hop thành skill tổng hợp thuần túy**
+- Mô tả: Loại bỏ logic orchestration khỏi tong-hop, chỉ giữ tổng hợp nội dung.
+- Tiêu chí nghiệm thu:
+  - AC1: tong-hop chỉ chứa logic tổng hợp (gather → merge → structure)
+  - AC2: Logic routing và orchestration đã chuyển sang dieu-phoi
+  - AC3: Trigger `/tong-hop` vẫn hoạt động (dieu-phoi intercept và route)
+  - AC4: Không giảm chất lượng tổng hợp
+- Bị chặn bởi: `US-9.1.1`
+
+**US-9.1.3: Tích hợp dieu-phoi với shared agents**
+- Mô tả: dieu-phoi gọi strategist, auditor, advisory qua VS Code agent handoffs.
+- Tiêu chí nghiệm thu:
+  - AC1: YAML frontmatter liệt kê `agents: [strategist, auditor, advisory]`
+  - AC2: Gọi strategist cho workflow generation
+  - AC3: Gọi auditor cho quality gate cuối pipeline
+  - AC4: Budget enforcement: strategist 1, auditor 5, advisory 2 / pipeline
+- Bị chặn bởi: `US-9.1.1`
+
+### Epic 9.2: Tự cải thiện thích ứng
+
+**US-9.2.1: Đánh giá gap năng lực**
+- Mô tả: dieu-phoi đánh giá skills/agents hiện có đủ đáp ứng yêu cầu không trước khi thực thi.
+- Tiêu chí nghiệm thu:
+  - AC1: Map yêu cầu → skills/agents có sẵn
+  - AC2: Xác định gap cụ thể
+  - AC3: Báo cáo gap cho user với giải pháp đề xuất
+  - AC4: Tiếp tục với năng lực hiện có nếu user từ chối
+- Bị chặn bởi: `US-9.1.1`
+
+**US-9.2.2: Tạo agent runtime với user consent**
+- Mô tả: Tạo agent chuyên biệt tại runtime khi phát hiện gap, với sự đồng ý user.
+- Tiêu chí nghiệm thu:
+  - AC1: Đề xuất tạo agent mới với mô tả mục đích
+  - AC2: User phải approve trước khi tạo
+  - AC3: Agent theo đúng `.agent.md` format
+  - AC4: Smoke test trước khi sử dụng
+  - AC5: Thông báo thời gian >30 phút, user có thể "unlock" để tiếp
+- Bị chặn bởi: `US-9.2.1`
+
+**US-9.2.3: Tạo/nâng cấp skill runtime**
+- Mô tả: Tạo hoặc nâng cấp skill khi skill hiện tại không đủ đáp ứng.
+- Tiêu chí nghiệm thu:
+  - AC1: Đề xuất tạo/nâng cấp với lý do
+  - AC2: User approve; skill theo SKILL.md standard
+  - AC3: Đăng ký trong copilot-instructions.md
+  - AC4: Smoke test trước khi dùng
+- Bị chặn bởi: `US-9.2.1`
+
+### Epic 9.3: Working State & Resume xuyên session
+
+**US-9.3.1: Schema session state nâng cao**
+- Mô tả: Lưu đủ context (raw_prompt, analyzed_requirements, generated_plan, step_states[], audit_test_cases[], score_history[], created_skills[]).
+- Tiêu chí nghiệm thu:
+  - AC1: Schema được tài liệu hóa đầy đủ
+  - AC2: `save_state.py` cập nhật hỗ trợ schema mới
+  - AC3: Tracking hash output file cho conflict detection
+  - AC4: Tương thích ngược với Phase 5 format
+- Bị chặn bởi: `US-5.2.1`
+
+**US-9.3.2: Lưu state sau mỗi step**
+- Mô tả: State persist sau mỗi sub-skill, không chỉ ở checkpoint.
+- Tiêu chí nghiệm thu:
+  - AC1: Lưu state sau mỗi sub-skill hoàn thành
+  - AC2: Ghi input, output summary, status từng step
+  - AC3: Audit test cases và scores persist theo step
+  - AC4: Resume xác định đúng step cuối cùng hoàn thành
+- Bị chặn bởi: `US-9.3.1`
+
+**US-9.3.3: Resume xuyên session**
+- Mô tả: Load state từ session trước và tiếp tục pipeline mà không cần làm lại.
+- Tiêu chí nghiệm thu:
+  - AC1: dieu-phoi detect state đã lưu và đề nghị resume
+  - AC2: Full context reconstructed từ state
+  - AC3: Kiểm tra hash output file cho conflict
+  - AC4: User chọn resume hoặc bắt đầu mới
+- Bị chặn bởi: `US-9.3.2`
+
+### Epic 9.4: Audit thang 100 điểm
+
+**US-9.4.1: Hệ thống chấm điểm 100**
+- Mô tả: Auditor tạo bộ test case động từ yêu cầu (100 điểm, trọng số), thay thế PASS/FAIL.
+- Tiêu chí nghiệm thu:
+  - AC1: Phân tích yêu cầu → tạo bộ test case (tổng weight = 100)
+  - AC2: Mỗi test case có: tên, weight, pass criteria, category
+  - AC3: Categories: requirement_coverage (40%), data_quality (25%), format_compliance (20%), completeness (15%)
+  - AC4: Score đầu ra /100, pass threshold >80
+  - AC5: Score breakdown hiển thị cho user
+- Bị chặn bởi: `US-8.1.1`
+
+**US-9.4.2: Vòng retry nhắm mục tiêu với score tracking**
+- Mô tả: Retry chỉ nhắm vào test case điểm thấp, không tạo lại toàn bộ.
+- Tiêu chí nghiệm thu:
+  - AC1: Score <80 → xác định test case điểm 0
+  - AC2: Retry chỉ sửa vùng lỗi
+  - AC3: Tối đa 5 retries / pipeline
+  - AC4: Score progression tracking: [lần 1: 62, lần 2: 78, lần 3: 85]
+  - AC5: Nếu điểm không tăng 2 lần liên tiếp → dừng và báo user
+- Bị chặn bởi: `US-9.4.1`
+
+### Epic 9.5: Chuẩn VS Code Custom Agent
+
+**US-9.5.1: Migrate agents sang .agent.md**
+- Mô tả: Chuyển auditor, strategist, advisory từ shared-agents sang `.github/agents/*.agent.md`.
+- Tiêu chí nghiệm thu:
+  - AC1: `auditor.agent.md` trong `.github/agents/` với user-invocable: true
+  - AC2: `strategist.agent.md` với user-invocable: false
+  - AC3: `advisory.agent.md` với user-invocable: false
+  - AC4: Cập nhật references từ shared-agents sang .github/agents
+  - AC5: Cập nhật copilot-instructions.md với agent registry
+- Bị chặn bởi: `US-8.1.1`, `US-8.2.1`, `US-8.3.1`
 
 ---
 
