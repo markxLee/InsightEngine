@@ -35,37 +35,21 @@ compatibility:
 
 ## AGENT_MODE Feature Flag
 
-**Full specification:** `references/agent-mode.md`
-
 ```yaml
-AGENT_MODE: true   # default — toggle agent-enhanced pipeline
+AGENT_MODE: true   # default — see references/agent-mode.md for full spec
 # true:  strategist → dynamic workflow → tiered audit → advisory → final audit with rollback
-# false: original static pipeline (Step 0 → Step 1 → ... → Step 4), fully backward compatible
+# false: original static pipeline (Step 0 → Step 1 → ... → Step 4)
 ```
 
-When `AGENT_MODE: true`, the pipeline wraps existing skills with agent intelligence
-(model detection → strategist → tiered audit → advisory → final audit with rollback).
-When `false`, the original static flow runs unchanged. See `references/agent-mode.md` for
-the complete pipeline flow, budget breakdown, and backward compatibility details.
-
 ---
-to a specialized sub-skill (thu-thap → bien-soan → tao-<format>). This separation matters because
-each sub-skill has deep domain expertise (e.g., tao-slide knows about 10 pptxgenjs templates),
-and the orchestrator focuses solely on planning, routing, quality control, and error recovery.
+to a specialized sub-skill (thu-thap → bien-soan → tao-<format>).
 
-**Three key mechanisms that drive quality:**
-1. **Request Deep Analysis (Step 1.5)**: Before executing, deeply analyze the user's prompt,
-   expand implicit dimensions, and confirm the expanded scope with the user. This prevents
-   executing in the wrong direction.
-2. **Auto Quality Review Loop (Step 4)**: After every sub-skill step, automatically review
-   output quality against specific criteria. If quality is insufficient, loop back with
-   targeted improvement instructions. Max 2 retries per step.
-3. **Comprehensive by Default**: Default content depth is `comprehensive` (expert-level,
-   5000-15000 words). Only downgrade to `standard` when user explicitly asks for brevity.
-   The #1 user complaint is thin, shallow output — this default eliminates it.
+**Three key quality mechanisms:**
+1. **Request Deep Analysis (Step 1.5)**: Deeply analyze prompt, expand dimensions, confirm before executing
+2. **Auto Quality Review (Step 4)**: Review after each sub-skill, retry if insufficient (max 2)
+3. **Comprehensive by Default**: 5000-15000 words, expert-level. Only `standard` when user explicitly asks for brevity
 
-All responses to the user are in Vietnamese. The pipeline presents an execution plan, waits for
-approval, then executes step-by-step with progress reporting and quality checks.
+All responses in Vietnamese. Pipeline presents plan, waits for approval, then executes with quality checks.
 
 ---
 
@@ -164,22 +148,14 @@ python3 scripts/save_state.py archive
        pipeline: thu-thap (platform search) → extract → tao-excel → bien-soan (analyze) → tao-<format>
        example: "Tìm jobs, tạo Excel tổng hợp, rồi tạo slide phân tích và xếp hạng"
 
-   CRITICAL_DIFFERENCE:
-     # Why this matters — the user's actual complaint:
-     # "research" mode: searches broadly, synthesizes into prose → fine for reports
-     # "data_collection" mode: must find INDIVIDUAL ITEMS with SPECIFIC URLs
-     #   → NOT search result pages, NOT aggregator overview pages
-     #   → Each row in output must link to a real, verifiable item page
-     # "mixed" mode: data_collection FIRST, then research/analysis on collected data
    ```
 7. **Extract REQUIRED_FIELDS** (for data_collection/mixed): scan user's prompt for specific
    output fields → create checklist for audit. Always auto-add `direct_url` and `source_platform`.
-   See `references/request-analysis.md` for full extraction protocol.
 8. Detect if request needs **visual design**:
    - Poster, cover, certificate, invitation, banner, infographic → **thiet-ke**
    - Data charts → **tao-hinh** (chart) | AI images → **tao-hinh** (image)
    - **Dual routing**: one request can need BOTH (e.g., cover + charts + doc)
-7. **Detect research complexity** — classify as standard or deep research:
+9. **Detect research complexity** — classify as standard or deep research:
    ```yaml
    DEEP_RESEARCH_SIGNALS:
      # If ANY of these are true → set research_depth: deep for thu-thap
@@ -196,7 +172,7 @@ python3 scripts/save_state.py archive
      - Specific URLs or files provided
    ```
    When deep research is detected, the execution plan must reflect this (see Step 3).
-8. **Detect content depth** — how rich should the output be?
+10. **Detect content depth** — how rich should the output be?
    ```yaml
    CONTENT_DEPTH_SIGNALS:
      standard:
@@ -227,17 +203,80 @@ python3 scripts/save_state.py archive
 
 ## Step 1.5: Request Deep Analysis (CRITICAL — DO NOT SKIP)
 
-**Full protocol:** `references/request-analysis.md`
+> **Supplementary examples:** `references/request-analysis.md`
 
-Analyze the user's prompt deeply, expand implicit dimensions, and confirm with the user
-before execution. This step prevents executing in the wrong direction.
+**YOU MUST EXECUTE THIS STEP.** Analyze the user's prompt deeply, expand implicit dimensions,
+and present the analysis to the user. DO NOT proceed to Step 2 without completing this analysis.
 
-- **Research requests**: Expand analytical dimensions (subtopics, data needs, scope boundaries)
-- **Data collection requests**: Expand collection strategy (platforms, fields, filters, quantities)
-- **Present analysis** to user and wait for confirmation before proceeding
+### 1.5.1: Expand Dimensions (by REQUEST_TYPE)
 
-Read `references/request-analysis.md` for dimension expansion templates, presentation formats,
-and user response handling.
+**If `research` request — Expand analytical dimensions:**
+
+```yaml
+DIMENSION_EXPANSION:
+  1. CORE_QUESTION: What is the user literally asking for?
+  2. IMPLICIT_SUBTOPICS: What sub-topics must be covered to make this useful?
+     # "AI trends" → current state, key players, breakthroughs, market data, risks, predictions
+  3. CONTEXT_DIMENSIONS: Audience? Decisions supported? Technical level?
+  4. DATA_NEEDS: Numbers, statistics, comparisons, timelines, case studies
+  5. ANALYTICAL_ANGLES: Comparisons, trend analysis, SWOT, recommendations
+  6. SCOPE_BOUNDARIES: What should NOT be included? (to stay focused)
+```
+
+**If `data_collection` or `mixed` request — Expand collection strategy:**
+
+```yaml
+DATA_COLLECTION_ANALYSIS:
+  1. TARGET_ENTITIES: What specific items? ("fresher JavaScript jobs" not just "jobs")
+  2. SEARCH_PLATFORMS: Where should we look?
+     # MUST identify platform-specific sources. Generic Google returns overview pages, NOT items.
+     # Jobs: ITViec.com, TopCV.vn, LinkedIn Jobs, VietnamWorks, Glassdoor
+     # Products: Shopee, Tiki, Amazon | Courses: Udemy, Coursera
+  3. FILTER_CRITERIA: Location, experience, skills, salary range, etc.
+  4. REQUIRED_FIELDS: Fields from user prompt + auto-add direct_url, source_platform
+     # direct_url = link to SPECIFIC ITEM PAGE, NEVER a search page
+  5. SEARCH_QUERIES: Generate platform-specific queries
+     # BAD:  "fresher javascript developer HCM" (generic Google)
+     # GOOD: site:itviec.com fresher javascript developer ho chi minh
+  6. QUANTITY_EXPECTATION: "tất cả" → 20-50 | "top 10" → 10 | unspecified → 15-30
+```
+
+### 1.5.2: Present Analysis to User (MANDATORY)
+
+**STOP HERE.** Show the analysis to user in Vietnamese. DO NOT proceed without user confirmation.
+
+**For research:**
+```
+🔍 Phân tích yêu cầu:
+Yêu cầu gốc: {original_request}
+Tôi đề xuất mở rộng phạm vi:
+📌 Các khía cạnh: 1. {dim_1} 2. {dim_2} ...
+📊 Dữ liệu sẽ thu thập: {data_needs}
+🎯 Góc phân tích: {analytical_angles}
+⚠️ Không bao gồm: {scope_boundaries}
+Đầu ra: {format} kiểu {style}, độ sâu: {content_depth}
+👉 Bạn đồng ý? Muốn thêm/bớt khía cạnh nào?
+```
+
+**For data_collection/mixed:**
+```
+🔍 Phân tích yêu cầu thu thập dữ liệu:
+Đối tượng: {target_entities} | Tiêu chí lọc: {filters}
+📌 Nền tảng sẽ tìm: 1. {platform_1} 2. {platform_2} ...
+📊 Thông tin/item: {field_1}, {field_2}, ..., direct_url
+🔢 Mục tiêu: ~{quantity} items
+{if mixed: "📝 Sau đó sẽ phân tích và tạo {analysis_format}"}
+👉 Bạn đồng ý? Muốn thêm/bớt trường nào?
+```
+
+### 1.5.3: Handle User Response
+
+```yaml
+USER_RESPONSE:
+  approved: ["ok", "đồng ý", "tiếp tục", "được", "yes"] → Proceed to Step 2
+  modified: User adjusts dimensions → update analysis, re-present if major changes
+  simplified: User narrows scope → respect, but keep content_depth comprehensive
+```
 
 ---
 
@@ -392,24 +431,13 @@ output against the user's original request. Full audit criteria: `references/qua
 
 ## Error Recovery
 
-Pipeline steps can fail (network timeout in thu-thap, missing font in tao-pdf, etc.).
-Without recovery, the entire pipeline stops and the user loses all progress. These rules
-ensure graceful degradation:
+1. **Retry once** — transient errors often resolve on retry
+2. **Partial delivery** — if retry fails, save completed work, offer to user
+3. **Skip non-critical** — tao-hinh is optional; deliver main doc without charts if it fails
+4. **Save state before each step** — enables resume from last completed step
+5. **Report clearly** — tell user what failed, what error, what options (retry/skip/fix)
 
-1. **Retry once** — if a sub-skill fails, retry the same step once. Transient errors (network,
-   file locks) often resolve on retry.
-2. **Partial delivery** — if retry also fails, save whatever was completed so far. For example,
-   if thu-thap succeeded but bien-soan fails, offer the raw collected content to the user:
-   "⚠️ Biên soạn gặp lỗi. Tôi đã lưu nội dung thu thập tại tmp/collected_content.md — bạn muốn thử lại hay dùng nội dung thô?"
-3. **Skip non-critical steps** — tao-hinh (charts) is often optional. If it fails, deliver
-   the main document without charts and note what's missing.
-4. **Save state before each step** — this way, if the pipeline crashes mid-way, the user can
-   resume from the last completed step via session resume (Step 0).
-5. **Report clearly** — on any failure, tell the user what step failed, what error occurred,
-   and what options they have (retry / skip / manual fix).
-
-When called from pipeline, sub-skills skip their own pre-flight checks (tong-hop already ran
-`check_deps.py` in Step 2). This avoids redundant checks that slow down execution.
+Sub-skills skip their own pre-flight checks when called from pipeline (tong-hop already ran check_deps.py).
 
 ---
 
@@ -450,34 +478,12 @@ See `references/session-summary.md` for full format and view suggestion specs.
 
 ## Examples
 
-**Example 1:**
-Input: "Tổng hợp 3 file PDF trong thư mục input/ thành báo cáo Word kiểu corporate"
-Flow: Request Analysis → Expand (xác nhận scope) → thu-thap (đọc 3 PDF + quality check) → bien-soan (comprehensive synthesis + self-review) → tao-word (thin content guard → corporate .docx)
-Output: output/bao-cao.docx (20 trang, 55 KB — comprehensive default)
-
-**Example 2:**
-Input: "Search Google về AI trends 2026, rồi làm slide thuyết trình dark-modern"
-Flow: Request Analysis → Expand 5 dimensions (trends, players, market, risks, predictions) → confirm → thu-thap (deep search 5 queries + gap analysis + supplementary) → bien-soan (comprehensive + self-review loop) → tao-slide (thin content guard → dark-gradient .pptx)
-Output: output/ai-trends-2026.pptx (22 slides — rich content from expanded research)
-
-**Example 3:**
-Input: "Đọc file Excel sales_data.xlsx, tạo biểu đồ bar chart rồi nhúng vào Word report"
-Flow: Request Analysis → thu-thap (đọc xlsx) → bien-soan → tao-hinh (bar chart PNG) → tao-word (embed chart)
-Output: 2 files output — comprehensive report with embedded charts
-
-**Example 4 (data_collection — the job search case):**
-Input: "Tìm tất cả job fresher JS ở HCM, tạo Excel có tên, lương, URL job, rồi tạo slide phân tích"
-Flow:
-  1. Step 1: request_type = mixed (data_collection + analysis)
-  2. Step 1.5: Identify platforms (ITViec, TopCV, LinkedIn), required fields (job_title, salary,
-     experience, skills, location, direct_url, company_review_url), target ~20-30 items
-  3. Step 4.1: thu-thap searches PLATFORM-SPECIFIC (site:itviec.com fresher javascript HCM, etc.)
-     → fetches INDIVIDUAL JOB PAGES (not search result pages) → extracts structured fields
-  4. Step 4.4: tao-excel with structured job data (each row = 1 job, columns = required fields)
-  5. Step 4.3: bien-soan analyzes jobs → rankings, recommendations, company comparisons
-  6. Step 4.4b: tao-slide with analysis content
-  7. Step 4.7: kiem-tra audits — checks URLs are direct job links, fields complete, quantity met
-Output: job-search.xlsx (30 jobs with direct URLs) + job-analysis.pptx (analysis & recommendations)
+| # | Input | Flow | Output |
+|---|-------|------|--------|
+| 1 | "Tổng hợp 3 file PDF thành báo cáo Word corporate" | Analysis → thu-thap → bien-soan → tao-word | output/bao-cao.docx (20pp) |
+| 2 | "Search AI trends 2026, slide dark-modern" | Analysis → Expand 5 dims → thu-thap (deep) → bien-soan → tao-slide | output/ai-trends.pptx (22 slides) |
+| 3 | "Excel sales_data.xlsx → chart → Word" | thu-thap → bien-soan → tao-hinh → tao-word | report + charts |
+| 4 | "Tìm jobs fresher JS HCM, Excel + slide phân tích" | type=mixed → thu-thap (platform) → tao-excel → bien-soan → tao-slide → kiem-tra | xlsx + pptx |
 
 ---
 
