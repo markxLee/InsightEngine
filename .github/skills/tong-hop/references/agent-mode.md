@@ -1,48 +1,54 @@
-# AGENT_MODE — Agent-Enhanced Pipeline
+# AGENT_MODE — Shared Agent Pipeline (Phase 8 Migration)
 
-> Feature flag that toggles between the static pipeline (original) and the  
-> agent-enhanced pipeline (strategist → dynamic workflow → tiered audit → advisory).  
-> Default: `AGENT_MODE: true`. Set to `false` for backward-compatible behavior.
+> **Status: ALWAYS ON.** The AGENT_MODE feature flag has been retired.  
+> All agent calls now use **shared agents** at `.github/skills/shared-agents/`.  
+> Inline agents at `tong-hop/agents/` are ARCHIVED — do not use.  
+> Calling protocol: `.github/skills/shared-agents/agent-protocol.md`
 
 ---
 
-## Feature Flag
+## Architecture (Post-Migration)
 
 ```yaml
-AGENT_MODE: true   # Toggle agent-enhanced pipeline
+SHARED_AGENTS:
+  strategist:
+    file: .github/skills/shared-agents/strategist.md
+    budget: max 1 call per pipeline
+    purpose: Generate dynamic workflow from user request + model profile
+    
+  auditor:
+    file: .github/skills/shared-agents/auditor.md
+    budget: max 5 calls per pipeline
+    purpose: Quality verification at tier-2 audit gates + final audit
+    
+  advisory:
+    file: .github/skills/shared-agents/advisory.md
+    budget: max 2 calls per pipeline
+    purpose: Multi-perspective decision support when routing is ambiguous
 
-# When AGENT_MODE: true (default)
-#   Pipeline uses the full agent architecture:
-#   1. Model detection → capability profile (references/model-detection.md)
-#   2. Shared context initialization (references/agent-context-schema.md)
-#   3. Strategist agent → dynamic workflow (agents/strategist.md)
-#   4. Tiered audit at every step (references/tiered-audit.md)
-#   5. Advisory agent for decisions (agents/advisory.md)
-#   6. Final audit with step-level rollback (references/final-audit-rollback.md)
-#   7. Conditional skill-forge if needed (references/conditional-skill-forge.md)
-#
-# When AGENT_MODE: false (backward compatible)
-#   Pipeline uses the original static flow:
-#   Step 0 → Step 1 → Step 1.5 → Step 2 → Step 3 → Step 4 (loop)
-#   No agents, no shared context, no dynamic workflow, no tiered audit.
-#   All existing skills work exactly as before.
+CALLING_CONVENTION:
+  protocol: .github/skills/shared-agents/agent-protocol.md
+  pattern: READ agent .md → BUILD prompt from template → CALL runSubagent → PARSE response
+  
+ARCHIVED_INLINE_AGENTS:
+  - tong-hop/agents/strategist.md → ARCHIVED (replaced by shared-agents/strategist.md)
+  - tong-hop/agents/advisory.md → ARCHIVED (replaced by shared-agents/advisory.md)
 ```
 
 ---
 
-## AGENT_MODE Pipeline Flow
+## Pipeline Flow (Shared Agents)
 
 ```yaml
-AGENT_MODE_FLOW:
-  # This flow WRAPS the existing pipeline — existing skills are NOT modified.
+PIPELINE_FLOW:
   # Agents provide orchestration intelligence on top of the same sub-skills.
+  # All calls use shared-agents/ via runSubagent (see agent-protocol.md).
 
   step_A1_model_detection:
     reference: references/model-detection.md
     action: |
       Detect current model's capabilities (context window, reasoning, tool_use, etc.)
       Write model_profile to shared context (tmp/.agent-context.json)
-    skip_if: AGENT_MODE == false
 
   step_A2_init_shared_context:
     reference: references/agent-context-schema.md
@@ -54,19 +60,19 @@ AGENT_MODE_FLOW:
       - audit_history: []
       - decisions: []
       - escalation_log: []
-    skip_if: AGENT_MODE == false
 
   step_A3_strategist:
-    agent: agents/strategist.md
+    agent: .github/skills/shared-agents/strategist.md
+    call_via: runSubagent (see agent-protocol.md)
     action: |
-      Strategist reads user_request + model_profile from shared context.
+      READ shared-agents/strategist.md → BUILD prompt → CALL runSubagent.
+      Strategist reads user_request + model_profile.
       Generates dynamic workflow:
       - Selects workflow template (report/presentation/data-collection/translation/comparison)
       - Chooses variant (basic/standard/advanced) based on model profile
       - Customizes steps, quality gates, budget estimates
       Writes workflow to shared context.
     budget: 1 call
-    skip_if: AGENT_MODE == false
     fallback: Use static pipeline (Step 2 → Step 3 → Step 4)
 
   step_A4_execute_workflow:
@@ -75,17 +81,17 @@ AGENT_MODE_FLOW:
       Each step:
       1. Read step config from shared context workflow.steps[i]
       2. Execute the assigned skill (thu-thap, bien-soan, tao-*, etc.)
-      3. Apply quality gate per tiered-audit.md:
-         - Tier 1 self-review: always
-         - Tier 2 agent audit: critical steps only
+      3. Apply quality gate:
+         - Tier 1 self-review: always (VERIFY-OR-LOOP in SKILL.md)
+         - Tier 2 agent audit: critical steps → call shared-agents/auditor.md via runSubagent
       4. If quality gate fails: retry with instructions (max per step)
       5. Update shared context: step status, audit_history
       6. Move to next step
     reference: references/tiered-audit.md
-    skip_if: AGENT_MODE == false (use Step 4 quality loop instead)
 
   step_A5_advisory_decisions:
-    agent: agents/advisory.md
+    agent: .github/skills/shared-agents/advisory.md
+    call_via: runSubagent (see agent-protocol.md)
     action: |
       Called DURING execution when a decision is needed:
       - Ambiguous routing (which skill to use?)
@@ -93,51 +99,42 @@ AGENT_MODE_FLOW:
       - Skill gap detected (forge new skill or use alternative?)
     budget: max 2 calls per pipeline
     reference: references/conditional-skill-forge.md, references/public-skill-clone.md
-    skip_if: AGENT_MODE == false (decisions made inline)
 
   step_A6_final_audit:
     reference: references/final-audit-rollback.md
+    agent: .github/skills/shared-agents/auditor.md
+    call_via: runSubagent
     action: |
       Compare final output against user's original request.
       If fails: identify failing step → rollback → re-execute from that step.
       Fail-fast: if score doesn't improve between retries, deliver best available.
-    budget: 1 call + retries within pipeline budget cap (30 total)
-    skip_if: AGENT_MODE == false (use Step 4.7 kiem-tra instead)
-
-AGENT_MODE_BUDGET:
-  total_agent_calls: 30 (hard cap)
-  breakdown:
-    model_detection: 0 (inline)
-    context_init: 0 (inline)
-    strategist: 1
-    advisory: 0-2
-    tier_2_audits: 0-4
-    final_audit: 1
-    retries: remaining budget
-  enforcement: references/agent-context-protocol.md (budget check before every write)
+    budget: 1 call + retries within pipeline budget cap
+    
+PIPELINE_BUDGET:
+  # Aligned with agent-protocol.md budgets
+  strategist: 1
+  advisory: max 2
+  auditor: max 5 (includes tier-2 audits + final audit)
+  total: max 8 agent calls per pipeline run
+  enforcement: Check budget before every runSubagent call
 ```
 
 ---
 
-## Backward Compatibility (AGENT_MODE: false)
+## Archived Inline Agents
 
 ```yaml
-BACKWARD_COMPATIBLE:
-  principle: |
-    When AGENT_MODE is false, the pipeline behaves EXACTLY as before v1.3.
-    No agents are called. No shared context file is created.
-    The original Step 0 → Step 1 → Step 1.5 → ... → Step 4 flow runs unchanged.
+ARCHIVED:
+  tong-hop/agents/strategist.md:
+    status: ARCHIVED — replaced by shared-agents/strategist.md
+    reason: Phase 8 migration to shared Copilot agent architecture
+    action: Do NOT read or call this file. Use shared-agents/strategist.md instead.
     
-  what_changes:
-    - No tmp/.agent-context.json created
-    - No strategist, advisory, or audit agents called
-    - Quality review uses existing Step 4 inline loop (max 2 retries)
-    - Final check uses kiem-tra skill directly (no rollback protocol)
-    - No model detection or capability profiling
-    
-  what_stays_the_same:
-    - All sub-skills (thu-thap, bien-soan, tao-*) work identically
-    - File placement rules still enforced
+  tong-hop/agents/advisory.md:
+    status: ARCHIVED — replaced by shared-agents/advisory.md
+    reason: Phase 8 migration to shared Copilot agent architecture
+    action: Do NOT read or call this file. Use shared-agents/advisory.md instead.
+```
     - Auto-escalation still works (it's per-skill, not agent-dependent)
     - Session resume via save_state.py still works
     - Request deep analysis (Step 1.5) still runs

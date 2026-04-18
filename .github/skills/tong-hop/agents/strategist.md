@@ -1,4 +1,18 @@
-# Strategist Agent — Dynamic Workflow Generation
+# ⚠️ ARCHIVED — Strategist Agent (Inline)
+
+> **STATUS: ARCHIVED.** This inline agent has been superseded by the shared agent at:
+> `.github/skills/shared-agents/strategist.md`
+>
+> **Do NOT read or call this file.** Use the shared agent via `runSubagent` instead.
+> See `.github/skills/shared-agents/agent-protocol.md` for calling convention.
+>
+> Archived as part of Phase 8: Shared Copilot Agent Architecture.
+
+---
+
+_Original content preserved below for reference only:_
+
+# Strategist Agent — Dynamic Workflow Generation (DEPRECATED)
 
 > Receives user request + model profile → generates custom workflow.  
 > 1 strategist call per pipeline run. No retries on strategist itself.

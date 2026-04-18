@@ -1,4 +1,18 @@
-# Advisory Agent — Multi-Perspective Decision Support
+# ⚠️ ARCHIVED — Advisory Agent (Inline)
+
+> **STATUS: ARCHIVED.** This inline agent has been superseded by the shared agent at:
+> `.github/skills/shared-agents/advisory.md`
+>
+> **Do NOT read or call this file.** Use the shared agent via `runSubagent` instead.
+> See `.github/skills/shared-agents/agent-protocol.md` for calling convention.
+>
+> Archived as part of Phase 8: Shared Copilot Agent Architecture.
+
+---
+
+_Original content preserved below for reference only:_
+
+# Advisory Agent — Multi-Perspective Decision Support (DEPRECATED)
 
 > Single-call agent that analyzes a decision from 3-5 perspectives.  
 > Max 2 advisory calls per pipeline run.

@@ -28,17 +28,23 @@ compatibility:
 # Tổng Hợp — InsightEngine Pipeline Orchestrator
 
 **References:** `references/pipeline-ux.md` | `references/session-summary.md` | `references/output-chaining.md` | `references/auto-escalation.md` | `references/file-placement-rules.md` | `references/agent-context-schema.md` | `references/decision-maps.md` | `references/final-audit-rollback.md` | `references/conditional-skill-forge.md` | `references/public-skill-clone.md` | `references/agent-mode.md` | `references/request-analysis.md`
-**Agents:** `agents/strategist.md` | `agents/advisory.md`
+**Agents:** `.github/skills/shared-agents/strategist.md` | `.github/skills/shared-agents/advisory.md` | `.github/skills/shared-agents/auditor.md` | `.github/skills/shared-agents/agent-protocol.md`
 **State:** `tmp/.session-state.json` (written after each step via `scripts/save_state.py`)
 
 ---
 
-## AGENT_MODE Feature Flag
+## Shared Agent Architecture
 
 ```yaml
-AGENT_MODE: true   # default — see references/agent-mode.md for full spec
-# true:  strategist → dynamic workflow → tiered audit → advisory → final audit with rollback
-# false: original static pipeline (Step 0 → Step 1 → ... → Step 4)
+AGENT_MODE: always-on   # Shared agents are now canonical (Phase 8 migration)
+# Pipeline always uses shared agent architecture:
+#   1. Strategist agent → dynamic workflow (shared-agents/strategist.md)
+#   2. Tiered audit at every step (shared-agents/auditor.md)
+#   3. Advisory agent for decisions (shared-agents/advisory.md)
+#   4. Calling protocol: shared-agents/agent-protocol.md
+#
+# Legacy inline agents (tong-hop/agents/) are ARCHIVED — do not use.
+# Budget: strategist=1, advisory=max 2, auditor=max 5 per pipeline run.
 ```
 
 ---
