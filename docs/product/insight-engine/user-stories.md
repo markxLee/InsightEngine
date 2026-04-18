@@ -3,8 +3,8 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Scope:** Phase 0 → Phase 9 (all phases)  
-> **Total User Stories:** 77 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9)
+> **Scope:** Phase 0 → Phase 10 (all phases)  
+> **Total User Stories:** 91 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10)
 
 ---
 
@@ -12,8 +12,8 @@
 
 - **Product name:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, Phase 8, Phase 9
-- **Total stories:** 65 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15, Phase 5: 4, Phase 6: 14, Phase 7: 5, Phase 8: 6)
+- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, Phase 8, Phase 9, Phase 10
+- **Total stories:** 91 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15, Phase 5: 4, Phase 6: 14, Phase 7: 5, Phase 8: 6, Phase 9: 12, Phase 10: 14)
 - **ID format:** `US-<phase>.<epic>.<index>`
 
 ### Dependency Graph (Summary)
@@ -1029,14 +1029,168 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
 
 ---
 
+## Phase 10: English Naming, Natural Language UX & Product Alignment
+
+### Epic 10.1: Rename Skills to English
+
+**US-10.1.1: Rename all skill directories from Vietnamese to English**
+- Description: As a developer, I need all 13 skill directories renamed from Vietnamese to English (tong-hop→synthesize, thu-thap→gather, bien-soan→compose, tao-word→gen-word, tao-excel→gen-excel, tao-slide→gen-slide, tao-pdf→gen-pdf, tao-html→gen-html, tao-hinh→gen-image, thiet-ke→design, kiem-tra→verify, cai-tien→improve, cai-dat→setup) so skill names are internationally consistent.
+- Acceptance Criteria:
+  - AC1: All 13 skill directories renamed under `.github/skills/`
+  - AC2: Each SKILL.md file header updated to reflect new English name
+  - AC3: All internal cross-references between skills updated
+  - AC4: No broken references after rename
+- Blocked By: `None`
+
+**US-10.1.2: Update SKILL.md triggers for renamed skills**
+- Description: As a user, I need all SKILL.md trigger lists updated so both Vietnamese and English natural language phrases work with the new English skill names.
+- Acceptance Criteria:
+  - AC1: Each SKILL.md triggers section uses natural language phrases (Vietnamese + English)
+  - AC2: Old slash commands (`/tong-hop`, `/thu-thap`, etc.) removed from triggers
+  - AC3: Copilot correctly routes to skills via natural language prompts
+- Blocked By: `US-10.1.1`
+
+---
+
+### Epic 10.2: Rename Agents to English
+
+**US-10.2.1: Rename dieu-phoi agent to orchestrator**
+- Description: As a developer, I need `dieu-phoi.agent.md` renamed to `orchestrator.agent.md` with all frontmatter and documentation references updated.
+- Acceptance Criteria:
+  - AC1: `.github/agents/orchestrator.agent.md` exists with updated frontmatter (name: orchestrator)
+  - AC2: Old `.github/agents/dieu-phoi.agent.md` removed
+  - AC3: All agent handoff references updated (auditor, strategist, advisory reference orchestrator)
+  - AC4: copilot-instructions.md agent registry updated
+- Blocked By: `None`
+
+---
+
+### Epic 10.3: Natural Language UX
+
+**US-10.3.1: Remove slash command dependency**
+- Description: As a user, I want to describe my needs in natural language without memorizing slash commands, so the orchestrator agent handles intent classification and routing automatically.
+- Acceptance Criteria:
+  - AC1: orchestrator.agent.md classifies intent from natural language (no slash command parsing)
+  - AC2: All `/command` references removed from SKILL.md trigger lists
+  - AC3: copilot-instructions.md Commands Reference table removed or replaced with natural language examples
+  - AC4: README updated with natural language usage examples
+- Blocked By: `US-10.1.2`, `US-10.2.1`
+
+**US-10.3.2: Update README for natural language UX**
+- Description: As a user reading the README, I want clear examples of natural language interaction (not slash commands) so I understand how to use InsightEngine effectively.
+- Acceptance Criteria:
+  - AC1: README shows natural language examples for all common use cases
+  - AC2: No slash command references in user-facing documentation
+  - AC3: Skill names shown in English throughout README
+- Blocked By: `US-10.3.1`
+
+---
+
+### Epic 10.4: copilot-instructions.md Refresh
+
+**US-10.4.1: Update skill registry with English names**
+- Description: As Copilot, I need copilot-instructions.md skill registry updated with English skill names, purposes, locations, and triggers so I correctly discover and invoke skills.
+- Acceptance Criteria:
+  - AC1: All skill entries use new English names (synthesize, gather, compose, gen-word, etc.)
+  - AC2: All location paths point to renamed directories
+  - AC3: All triggers use natural language (no slash commands)
+  - AC4: Agent registry uses orchestrator (not dieu-phoi)
+- Blocked By: `US-10.1.1`, `US-10.2.1`
+
+**US-10.4.2: Fix stale PIPELINE_FLOW and update Vietnamese Language Rules**
+- Description: As Copilot, I need the PIPELINE_FLOW section fixed (tong-hop no longer orchestrates — orchestrator does) and Vietnamese Language Rules updated to reflect English skill naming convention.
+- Acceptance Criteria:
+  - AC1: PIPELINE_FLOW references orchestrator agent as entry point
+  - AC2: tong-hop described as synthesis-only skill in the flow
+  - AC3: Vietnamese Language Rules updated: "Skill names and directories: **English**, lowercase, hyphenated"
+  - AC4: Commands Reference table removed
+- Blocked By: `US-10.4.1`
+
+---
+
+### Epic 10.5: Clean Up Legacy Artifacts
+
+**US-10.5.1: Remove shared-agents directory**
+- Description: As a developer, I need the legacy `shared-agents/` directory under `.github/skills/` removed since all agents now live in `.github/agents/` per Phase 9 migration.
+- Acceptance Criteria:
+  - AC1: `.github/skills/shared-agents/` directory deleted
+  - AC2: `agent-protocol.md` moved to `.github/agents/` (if still needed)
+  - AC3: No remaining references to `shared-agents/` path in any file
+- Blocked By: `None`
+
+**US-10.5.2: Remove duplicate agent files**
+- Description: As a developer, I need any duplicate agent definition files cleaned up — old `shared-agents/*.md` copies removed, only `.github/agents/*.agent.md` files remain.
+- Acceptance Criteria:
+  - AC1: No agent definitions exist in `shared-agents/` (directory deleted in US-10.5.1)
+  - AC2: All agent invocations in skills reference `.github/agents/` path
+  - AC3: No stale `runSubagent` references pointing to old agent locations
+- Blocked By: `US-10.5.1`
+
+---
+
+### Epic 10.6: Backfill Missing Skill Stories
+
+**US-10.6.1: design skill user story (formerly thiet-ke)**
+- Description: As a user, I want a `design` skill that creates professional visual designs programmatically (cover pages, posters, certificates, banners, infographic layouts) using reportlab Canvas and Pillow with 80+ bundled fonts.
+- Acceptance Criteria:
+  - AC1: `.github/skills/design/SKILL.md` exists with English name and natural language triggers
+  - AC2: Supports at least: cover pages, posters, certificates, banners
+  - AC3: Uses reportlab Canvas + Pillow for rendering
+  - AC4: Output: PNG or PDF
+  - AC5: Prints output file path + size
+- Blocked By: `US-10.1.1`
+
+**US-10.6.2: verify skill user story (formerly kiem-tra)**
+- Description: As a user, I want a `verify` skill that audits InsightEngine output against my original requirements — checking requirement coverage, URL quality, field completeness, and data specificity.
+- Acceptance Criteria:
+  - AC1: `.github/skills/verify/SKILL.md` exists with English name and natural language triggers
+  - AC2: Reads output content and opens URLs to verify accuracy
+  - AC3: Compares data against actual web pages (intelligence-driven, not just rule-based)
+  - AC4: Works standalone or as Step 4.7 in synthesize pipeline
+  - AC5: Returns structured findings with pass/fail per criterion
+- Blocked By: `US-10.1.1`
+
+**US-10.6.3: improve skill user story (formerly cai-tien)**
+- Description: As a user, I want an `improve` skill that performs session retrospective — analyzing the work session (input → process → output → gaps), identifying root causes, and proposing/executing improvements to skills and pipeline.
+- Acceptance Criteria:
+  - AC1: `.github/skills/improve/SKILL.md` exists with English name and natural language triggers
+  - AC2: Analyzes complete session: user request, intermediate steps, final output, quality gaps
+  - AC3: Identifies root causes for quality issues
+  - AC4: Proposes actionable improvements (skill modifications, new skills, process changes)
+  - AC5: Can create or modify skills based on findings (with user consent)
+- Blocked By: `US-10.1.1`
+
+---
+
+### Epic 10.7: Product Doc Alignment
+
+**US-10.7.1: Update instructions.md Vietnamese Language Rules**
+- Description: As Copilot, I need `.github/instructions/insight-engine.instructions.md` updated so the Vietnamese Language Rules section reflects English skill naming convention.
+- Acceptance Criteria:
+  - AC1: "Skill names and directories: **English**, lowercase, hyphenated" (was Vietnamese)
+  - AC2: Skill System section uses English names in the directory listing
+  - AC3: All skill descriptions reference English names
+- Blocked By: `US-10.1.1`
+
+**US-10.7.2: Final cross-document consistency check**
+- Description: As a product maintainer, I need all 4 product documents (idea.md, roadmap.md, user-stories.md, checklist.md) verified for consistent naming, counts, and references after Phase 10 updates.
+- Acceptance Criteria:
+  - AC1: idea.md ↔ roadmap.md: Phase count and epic names match
+  - AC2: roadmap.md ↔ user-stories.md: All epics have corresponding stories
+  - AC3: user-stories.md ↔ checklist.md: Story count and IDs match
+  - AC4: No Vietnamese skill names remain in product documentation (except in historical DONE story descriptions)
+- Blocked By: `US-10.7.1`
+
+---
+
 ---
 
 ## Tổng quan User Stories (Tiếng Việt)
 
 - **Tên sản phẩm:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Phạm vi:** Phase 0 → Phase 9
-- **Tổng số User Stories:** 77 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9)
+- **Phạm vi:** Phase 0 → Phase 10
+- **Tổng số User Stories:** 91 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10)
 
 ---
 

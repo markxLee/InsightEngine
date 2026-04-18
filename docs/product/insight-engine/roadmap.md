@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Roadmap Created:** 2026-04-16  
-> **Scope:** Milestone-based (Phase 0 → Phase 9)
+> **Scope:** Milestone-based (Phase 0 → Phase 10)
 
 ---
 
@@ -11,7 +11,7 @@
 
 - **Product name:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Roadmap scope:** Milestone-based — each phase delivers a usable capability increment
+- **Roadmap scope:** Milestone-based — each phase delivers a usable capability increment (Phase 0 → Phase 10)
 - **Delivery model:** Copilot skill system built incrementally; each phase is independently usable
 
 ---
@@ -201,22 +201,64 @@ ROOT_CAUSES:
 
 ---
 
+## Phase 10 — English Naming, Natural Language UX & Product Alignment
+
+**Goal:** Standardize all skill and agent names to English for international consistency. Remove slash-command dependency — users interact via natural language, the orchestrator classifies intent and routes. Clean up legacy artifacts and backfill missing skill documentation.
+
+> **Nguồn gốc:** Self-review of Phase 0-9 revealed naming inconsistency (Vietnamese skill names, mixed agent names), stale documentation references, legacy `shared-agents/` directory, and missing user stories for 3 skills that exist in code (`thiet-ke`/design, `kiem-tra`/verify, `cai-tien`/improve). Natural language UX aligns with Phase 9's orchestrator architecture.
+
+### Naming Map (Vietnamese → English)
+
+| Current | New | Purpose |
+|---------|-----|---------|
+| `tong-hop` | `synthesize` | Content synthesis pipeline |
+| `thu-thap` | `gather` | Gather content from files/URLs/web |
+| `bien-soan` | `compose` | Compose/merge multi-source content |
+| `tao-word` | `gen-word` | Generate Word documents |
+| `tao-excel` | `gen-excel` | Generate Excel spreadsheets |
+| `tao-slide` | `gen-slide` | Generate PowerPoint slides |
+| `tao-pdf` | `gen-pdf` | Generate PDF documents |
+| `tao-html` | `gen-html` | Generate HTML pages |
+| `tao-hinh` | `gen-image` | Generate charts and images |
+| `thiet-ke` | `design` | Visual design (poster, cover, certificate) |
+| `kiem-tra` | `verify` | Output verification and audit |
+| `cai-tien` | `improve` | Session retrospective and improvement |
+| `cai-dat` | `setup` | Environment setup and dependency check |
+| `dieu-phoi` | `orchestrator` | Central orchestrator agent |
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 10.1 — Rename Skills to English** | Rename all 13 skill directories from Vietnamese to English. Update SKILL.md files, triggers, and all cross-references in copilot-instructions.md and instructions.md. |
+| **Epic 10.2 — Rename Agents to English** | Rename `dieu-phoi.agent.md` → `orchestrator.agent.md`. Update frontmatter, handoff references, and all documentation references. |
+| **Epic 10.3 — Natural Language UX** | Remove slash command dependency from all skills and documentation. Update orchestrator to classify intent from natural language only. Remove `/command` table from copilot-instructions.md. Update README. |
+| **Epic 10.4 — copilot-instructions.md Refresh** | Fix stale PIPELINE_FLOW (tong-hop no longer orchestrates). Update skill registry with English names. Remove Commands Reference table. Update Vietnamese Language Rules for skill naming. |
+| **Epic 10.5 — Clean Up Legacy Artifacts** | Remove `shared-agents/` directory under `.github/skills/`. Move `agent-protocol.md` to `.github/agents/`. Delete duplicate old agent files. Fix user-stories.md overview count discrepancy. |
+| **Epic 10.6 — Backfill Missing Skill Stories** | Add User Stories for `design` (formerly thiet-ke), `verify` (formerly kiem-tra), `improve` (formerly cai-tien) — skills that exist in code but have no formal stories. |
+| **Epic 10.7 — Product Doc Alignment** | Update idea.md, roadmap.md Vietnamese Language Rules. Update Skill Map with English names. Ensure all docs use English skill names consistently. |
+
+---
+
 ## Skill Map theo Phase
 
 ```
-Phase 0:  cai-dat (MỚI)     tong-hop (skeleton)
-Phase 1:  thu-thap          bien-soan          tao-word     tao-slide
-Phase 2:  thu-thap (nâng)   tao-excel          tao-pdf      tao-html   tong-hop (chaining)
-Phase 3:  tao-hinh (MỚI)    bien-soan (nâng)   tao-slide (nâng)  tong-hop (nâng)
-Phase 4:  tao-slide (templates)  tao-html (reveal.js)  bien-soan (depth)  all skills (scripts/)
-Phase 5:  all skills (small model refactor)  tong-hop (session state + resume)
-Phase 6:  agents (MỚI: strategist, audit, advisory)  tong-hop (dynamic workflow)  all skills (strict rules)
-Phase 7:  tong-hop (inline critical steps + hard gates)  thu-thap (data collection hardening)  pipeline trace
-Phase 8:  shared agents (refactor → runSubagent)  all output skills (auditor integration)  tong-hop (delegate to agents)
-Phase 9:  dieu-phoi (MỚI agent)  tong-hop (refactor → synthesis-only)  all agents (→ .agent.md standard)  auditor (100-point scoring)  cai-tien (nâng cấp)  session state (enhanced)
+Phase 0:  setup (NEW)        synthesize (skeleton)
+Phase 1:  gather             compose              gen-word     gen-slide
+Phase 2:  gather (enhanced)  gen-excel             gen-pdf      gen-html   synthesize (chaining)
+Phase 3:  gen-image (NEW)    compose (enhanced)    gen-slide (enhanced)  synthesize (enhanced)
+Phase 4:  gen-slide (templates)  gen-html (reveal.js)  compose (depth)  all skills (scripts/)
+Phase 5:  all skills (small model refactor)  synthesize (session state + resume)
+Phase 6:  agents (NEW: strategist, audit, advisory)  synthesize (dynamic workflow)  all skills (strict rules)
+Phase 7:  synthesize (inline critical steps + hard gates)  gather (data collection hardening)  pipeline trace
+Phase 8:  shared agents (refactor → runSubagent)  all output skills (auditor integration)  synthesize (delegate to agents)
+Phase 9:  orchestrator (NEW agent)  synthesize (refactor → synthesis-only)  all agents (→ .agent.md standard)  auditor (100-point scoring)  improve (upgrade)  session state (enhanced)
+Phase 10: ALL skills (Vietnamese → English rename)  orchestrator (renamed from dieu-phoi)  natural language UX  legacy cleanup  design/verify/improve (backfill stories)
 ```
 
-**Tổng số:** 9 skills (`.github/skills/`) + 4 custom agents (`.github/agents/`) — peer-level per VS Code standard
+> Note: Phase 0-9 Skill Map shows English names for readability. Actual rename happens in Phase 10.
+
+**Tổng số:** 13 skills (`.github/skills/`) + 4 custom agents (`.github/agents/`) — peer-level per VS Code standard
 
 ---
 
@@ -401,6 +443,24 @@ Phase 0 là bắt buộc — không có `cai-dat` và `tong-hop` thì các skill
 | **Epic 9.3 — Working State & Resume xuyên session** | Lưu raw_prompt, analyzed_requirements, generated_plan, step_states[], audit_test_cases[]. Resume đầy đủ ở session mới. |
 | **Epic 9.4 — Audit thang 100 điểm** | Thay PASS/FAIL bằng QA-grade scoring. Auditor tạo bộ test case động (100 điểm, trọng số theo mức quan trọng). >80/100 mới pass. Tối đa 5 lần retry nhắm vào điểm yếu. |
 | **Epic 9.5 — Chuẩn VS Code Custom Agent** | Migrate agents từ `runSubagent` sang `.github/agents/*.agent.md`. YAML frontmatter: description, tools, model, agents, handoffs, user-invocable. Agents ngang hàng với skills. |
+
+---
+
+## Phase 10 — Đặt tên tiếng Anh, UX ngôn ngữ tự nhiên & Căn chỉnh sản phẩm
+
+**Mục tiêu:** Chuẩn hóa tên skill và agent sang tiếng Anh cho tính nhất quán quốc tế. Bỏ phụ thuộc slash command — user tương tác bằng ngôn ngữ tự nhiên, orchestrator phân loại intent và route. Dọn dẹp artifact cũ và bổ sung tài liệu skill còn thiếu.
+
+> **Nguồn gốc:** Self-review Phase 0-9 phát hiện: tên skill tiếng Việt gây nhầm lẫn, tài liệu stale, thư mục `shared-agents/` cũ, thiếu user stories cho 3 skills đang có trong code (`thiet-ke`/design, `kiem-tra`/verify, `cai-tien`/improve). UX ngôn ngữ tự nhiên phù hợp với kiến trúc orchestrator Phase 9.
+
+| Epic | Mô tả |
+|------|-------|
+| **Epic 10.1 — Đổi tên Skills sang tiếng Anh** | Đổi tên 13 thư mục skill từ tiếng Việt sang tiếng Anh. Cập nhật SKILL.md, triggers, và cross-references. |
+| **Epic 10.2 — Đổi tên Agents sang tiếng Anh** | Đổi `dieu-phoi.agent.md` → `orchestrator.agent.md`. Cập nhật frontmatter, handoffs, tài liệu. |
+| **Epic 10.3 — UX ngôn ngữ tự nhiên** | Bỏ phụ thuộc slash command. Orchestrator phân loại intent từ ngôn ngữ tự nhiên. Xóa bảng `/command` trong copilot-instructions.md. Cập nhật README. |
+| **Epic 10.4 — Làm mới copilot-instructions.md** | Sửa PIPELINE_FLOW stale. Cập nhật skill registry với tên tiếng Anh. Xóa Commands Reference. Cập nhật Vietnamese Language Rules. |
+| **Epic 10.5 — Dọn dẹp artifact cũ** | Xóa `shared-agents/` trong `.github/skills/`. Di chuyển `agent-protocol.md`. Xóa file agent trùng lặp. Sửa lỗi số lượng user-stories. |
+| **Epic 10.6 — Bổ sung User Stories thiếu** | Thêm stories cho `design`, `verify`, `improve` — skills có trong code nhưng chưa có stories. |
+| **Epic 10.7 — Căn chỉnh tài liệu sản phẩm** | Cập nhật idea.md, roadmap.md. Cập nhật Skill Map. Đảm bảo tên tiếng Anh nhất quán. |
 
 ---
 

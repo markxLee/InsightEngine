@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 77 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 PLANNED)  
+> **Total User Stories:** 91 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 14 Phase 10 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -926,6 +926,82 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ---
 
+## Phase 10: English Naming, Natural Language UX & Product Alignment
+
+> Chuẩn hóa tên skill/agent sang tiếng Anh, UX ngôn ngữ tự nhiên, dọn dẹp legacy, bổ sung stories thiếu. **14 stories PLANNED.**
+
+### Epic 10.1: Rename Skills to English
+
+- [ ] **US-10.1.1** — Rename all skill directories from Vietnamese to English
+  - Status: PLANNED
+  - Blocked By: None
+
+- [ ] **US-10.1.2** — Update SKILL.md triggers for renamed skills
+  - Status: PLANNED
+  - Blocked By: US-10.1.1
+
+### Epic 10.2: Rename Agents to English
+
+- [ ] **US-10.2.1** — Rename dieu-phoi agent to orchestrator
+  - Status: PLANNED
+  - Blocked By: None
+
+### Epic 10.3: Natural Language UX
+
+- [ ] **US-10.3.1** — Remove slash command dependency
+  - Status: PLANNED
+  - Blocked By: US-10.1.2, US-10.2.1
+
+- [ ] **US-10.3.2** — Update README for natural language UX
+  - Status: PLANNED
+  - Blocked By: US-10.3.1
+
+### Epic 10.4: copilot-instructions.md Refresh
+
+- [ ] **US-10.4.1** — Update skill registry with English names
+  - Status: PLANNED
+  - Blocked By: US-10.1.1, US-10.2.1
+
+- [ ] **US-10.4.2** — Fix stale PIPELINE_FLOW and update Vietnamese Language Rules
+  - Status: PLANNED
+  - Blocked By: US-10.4.1
+
+### Epic 10.5: Clean Up Legacy Artifacts
+
+- [ ] **US-10.5.1** — Remove shared-agents directory
+  - Status: PLANNED
+  - Blocked By: None
+
+- [ ] **US-10.5.2** — Remove duplicate agent files
+  - Status: PLANNED
+  - Blocked By: US-10.5.1
+
+### Epic 10.6: Backfill Missing Skill Stories
+
+- [ ] **US-10.6.1** — design skill user story (formerly thiet-ke)
+  - Status: PLANNED
+  - Blocked By: US-10.1.1
+
+- [ ] **US-10.6.2** — verify skill user story (formerly kiem-tra)
+  - Status: PLANNED
+  - Blocked By: US-10.1.1
+
+- [ ] **US-10.6.3** — improve skill user story (formerly cai-tien)
+  - Status: PLANNED
+  - Blocked By: US-10.1.1
+
+### Epic 10.7: Product Doc Alignment
+
+- [ ] **US-10.7.1** — Update instructions.md Vietnamese Language Rules
+  - Status: PLANNED
+  - Blocked By: US-10.1.1
+
+- [ ] **US-10.7.2** — Final cross-document consistency check
+  - Status: PLANNED
+  - Blocked By: US-10.7.1
+
+---
+
 ### Execution Order (Recommended)
 
 ```
@@ -965,6 +1041,11 @@ Wave 27 (parallel): US-9.1.2, US-9.1.3, US-9.2.1, US-9.3.1
 Wave 28 (parallel): US-9.2.2, US-9.2.3, US-9.3.2
 Wave 29 (parallel): US-9.3.3, US-9.4.2
 --- Phase 9 DONE (12/12) ---
+Wave 30 (parallel): US-10.1.1, US-10.2.1, US-10.5.1
+Wave 31 (parallel): US-10.1.2, US-10.4.1, US-10.5.2, US-10.6.1, US-10.6.2, US-10.6.3, US-10.7.1
+Wave 32 (parallel): US-10.3.1, US-10.4.2, US-10.7.2
+Wave 33 (sequential): US-10.3.2 (after 10.3.1)
+--- Phase 10 PLANNED (14/14) ---
 ```
 
 ---
