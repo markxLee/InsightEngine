@@ -231,6 +231,11 @@ SKILLS:
       location: ".github/skills/shared-agents/auditor.md"
       invocation: "runSubagent with prompt built from auditor.md template"
       budget: "max 5 calls per pipeline run"
+    strategist:
+      purpose: "Workflow generation agent — receives user request + model profile, returns optimized step-by-step execution plan with skill assignments and quality gates."
+      location: ".github/skills/shared-agents/strategist.md"
+      invocation: "runSubagent with prompt built from strategist.md template"
+      budget: "max 1 call per pipeline run"
 ```
 
 ---
