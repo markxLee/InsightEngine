@@ -383,6 +383,28 @@ After thu-thap returns, **always** analyze the gathered content quality:
 Key checks: depth (≥300 words/section comprehensive), specificity (≥3 data points/section),
 structure (H2/H3 hierarchy, tables, takeaways), analytical depth (insights, not just facts).
 
+### 4.3b: Pre-Output URL Validation (data_collection/mixed ONLY — HARD GATE)
+
+**Run BEFORE tao-excel generates the output file, NOT after.**
+
+```bash
+python3 scripts/validate_urls.py --urls "url1" "url2" ... --json
+```
+
+```yaml
+URL_VALIDATION_GATE:
+  1. Extract all collected direct_url values from thu-thap output
+  2. Run validate_urls.py → classify each as DIRECT/SEARCH/LISTING/AMBIGUOUS
+  3. For SEARCH or LISTING URLs:
+     a. Auto re-fetch: search for specific item on the same platform
+     b. Replace invalid URL with valid item page URL
+  4. After re-fetch, re-validate remaining URLs
+  5. Report: "🔗 URL validation: {valid}/{total} URLs verified as direct links"
+  6. IF >50% URLs still invalid after re-fetch:
+     ⚠️ STOP — ask user: "Chỉ {X}% URLs là link trực tiếp. Bạn muốn tiếp tục hay tìm lại?"
+  7. Flag remaining invalid URLs with ⚠️ in Excel output
+```
+
 ### 4.4: tao-\<format\> (with quality gate)
 
 **Execute:**
@@ -400,37 +422,15 @@ size sanity (docx ≥15KB, pptx ≥50KB, pdf ≥20KB, html ≥5KB).
 - Report: "✅ Tạo {N} biểu đồ hoàn tất"
 - Save state: `python3 scripts/save_state.py update --step tao-hinh --output-file "<chart_path>"`
 
-### 4.6: thiet-ke (conditional — if visual design requested: poster, cover, certificate, etc.)
-- Input: content from bien-soan (titles, key phrases) + user design intent
-- Output: PNG or PDF visual composition
-- Route here instead of tao-hinh when the user wants a **designed composition** with
-  typography and layout (poster, cover page, certificate, invitation, banner, infographic)
-  rather than a data chart or AI-generated image
-- Report: "✅ Thiết kế hoàn tất — {path} ({size})"
-- Save state: `python3 scripts/save_state.py update --step thiet-ke --output-file "<path>"`
+### 4.6: thiet-ke (conditional — visual design: poster, cover, certificate, banner)
+- Input: content + user design intent | Output: PNG/PDF | Save state after completion
 
 ### 4.7: Output Audit — kiem-tra (ALWAYS RUN)
 
-**This step closes the #1 gap in the previous pipeline: outputs that are well-formatted
-but don't actually match what the user asked for.**
-
-After ALL output files are generated, run the audit sub-skill (kiem-tra) to verify the
-output against the user's original request. Full audit criteria: `references/quality-gates.md`.
-
-**Inputs to kiem-tra:**
-- `original_request`: User's full original prompt (verbatim)
-- `required_fields`: From Step 1 extraction (if data_collection/mixed)
-- `expanded_analysis`: From Step 1.5 (dimensions or collection plan)
-- `output_files`: Generated file paths
-- `output_content`: Content that was put into the files
-
-**Key checks:**
-- Requirement coverage: every user requirement ✅/⚠️/❌
-- For data_collection: URL quality (direct links, not search pages), field completeness, quantity
-- Specificity: sample 5 claims — are they specific or vague?
-
-**On failure:** Report specifics → propose remediation → re-run if approved (max 1 fix cycle).
-**On pass:** Report coverage stats → proceed to final report.
+After ALL output files generated, run kiem-tra to verify against user's original request.
+Inputs: `original_request`, `required_fields`, `expanded_analysis`, `output_files`.
+Checks: requirement coverage, URL quality (data_collection), specificity (5-claim sample).
+On failure: report → propose fix → re-run (max 1 cycle). On pass: proceed to final report.
 
 ---
 
