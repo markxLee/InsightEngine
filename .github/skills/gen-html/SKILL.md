@@ -7,7 +7,7 @@ description: |
   Note: presentation mode requires internet connection for reveal.js CDN.
   Always use this skill when the user wants a webpage, HTML report, or browser-based presentation
   — even casual requests like "tạo trang web", "làm slide trình chiếu trong trình duyệt",
-  "xuất HTML", or "tạo cái gì đó mở được bằng Chrome" — even without saying "/tao-html".
+  "xuất HTML", or "tạo cái gì đó mở được bằng Chrome" — even without saying "gen-html".
 argument-hint: "[content] [style: corporate|academic|minimal|dark-modern|creative|warm-earth|dark-neon|dark-elegant] [mode: page|presentation]"
 version: 1.1
 compatibility:
@@ -249,5 +249,5 @@ AUDITOR_GATE:
 
 - Does NOT create multi-page websites (single .html file only)
 - Does NOT synthesize content — that is bien-soan
-- Does NOT install dependencies — redirects to /cai-dat
+- Does NOT install dependencies — redirects to setup
 - Presentation mode requires internet on first load (CDN for reveal.js)

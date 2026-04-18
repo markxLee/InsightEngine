@@ -5,7 +5,7 @@ description: |
   Uses reportlab Platypus for complex multi-section layouts, Canvas for simple single-page PDFs.
   Always use this skill when the user wants a PDF output — even casual requests like "xuất PDF",
   "tạo file pdf", "lưu thành PDF để in", "tôi cần file pdf", or "cho tôi file không chỉnh sửa
-  được" (read-only document implies PDF) — even without saying "/tao-pdf" or ".pdf".
+  được" (read-only document implies PDF) — even without saying "gen-pdf" or ".pdf".
 argument-hint: "[content from bien-soan or direct text] [output path]"
 version: 1.1
 compatibility:
@@ -210,4 +210,4 @@ AUDITOR_GATE:
 - Does NOT read existing PDFs — that is thu-thap
 - Does NOT create charts — that is tao-hinh
 - Does NOT synthesize content — that is bien-soan
-- Does NOT install dependencies — redirects to /cai-dat
+- Does NOT install dependencies — redirects to setup

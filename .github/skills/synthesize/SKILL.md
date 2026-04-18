@@ -2,7 +2,7 @@
 name: synthesize
 description: |
   Content synthesis skill for InsightEngine — gathers, merges, and structures multi-source content
-  into coherent documents. Called by the orchestrator orchestrator agent or directly via /tong-hop.
+  into coherent documents. Called by the orchestrator orchestrator agent or directly via synthesize.
   Handles the core content pipeline: thu-thap → bien-soan → tao-[format] with auto quality review.
   Default content depth is COMPREHENSIVE (expert-level, rich content).
   Supports session resume via save_state.py and chained outputs (e.g., Excel data → chart → slide).
@@ -24,7 +24,7 @@ compatibility:
 # Tổng Hợp — Content Synthesis Skill
 
 > **Role:** Pure content synthesis. Orchestration is handled by `orchestrator` agent.
-> When user says `/tong-hop`, orchestrator intercepts, classifies as synthesis, and routes here.
+> When user says `synthesize`, orchestrator intercepts, classifies as synthesis, and routes here.
 
 **References:** `references/pipeline-ux.md` | `references/session-summary.md` | `references/output-chaining.md` | `references/auto-escalation.md` | `references/file-placement-rules.md` | `references/agent-context-schema.md` | `references/decision-maps.md` | `references/final-audit-rollback.md` | `references/conditional-skill-forge.md` | `references/public-skill-clone.md` | `references/agent-mode.md` | `references/request-analysis.md`
 **Agents:** `.github/agents/auditor.agent.md` (quality gate)
@@ -140,7 +140,7 @@ USER_RESPONSE:
 
 1. Run: `python3 scripts/check_deps.py --silent`
 2. If exit 0 → continue to Step 3
-3. If exit 1 → respond in Vietnamese: "⚠️ Một số thư viện chưa được cài đặt. Gõ /cai-dat để cài đặt tự động." — STOP
+3. If exit 1 → respond in Vietnamese: "⚠️ Một số thư viện chưa được cài đặt. Gõ setup để cài đặt tự động." — STOP
 
 ---
 
@@ -389,5 +389,5 @@ See `references/session-summary.md` for full format and view suggestion specs.
 ## What This Skill Does NOT Do
 
 - Does NOT generate content — delegates to sub-skills
-- Does NOT install deps — redirects to /cai-dat
+- Does NOT install deps — redirects to setup
 - Does NOT skip execution plan — always shows plan first

@@ -6,7 +6,7 @@ description: |
   Always use this skill when the user wants any Word or .docx output — even casual requests like
   "lưu vào file word", "tạo tài liệu", "làm cái báo cáo word", "export text ra file", or
   "cho tôi file để gửi sếp" where a Word document is clearly the right format, even without
-  saying "/tao-word" or ".docx".
+  saying "gen-word" or ".docx".
 argument-hint: "[content from bien-soan or direct text] [style: corporate|academic|minimal]"
 version: 1.1
 compatibility:
@@ -236,4 +236,4 @@ AUDITOR_GATE:
 - Does NOT read input files — that's thu-thap
 - Does NOT synthesize content — that's bien-soan
 - Does NOT generate PDF/HTML/PPT — use respective tao-* skills
-- Does NOT install dependencies — redirects to /cai-dat
+- Does NOT install dependencies — redirects to setup

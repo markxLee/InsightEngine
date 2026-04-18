@@ -10,7 +10,7 @@ description: |
   Always use this skill when the user has multiple pieces of content to combine, wants to translate,
   wants to expand brief notes into a full document, or says things like "gộp lại", "tổng hợp nội
   dung", "dịch sang tiếng Anh/Việt", "viết lại đầy đủ hơn", "biên soạn", "synthesize",
-  "merge content" — even if they don't say "/bien-soan" explicitly.
+  "merge content" — even if they don't say "compose" explicitly.
 argument-hint: "[content from thu-thap or direct text] [mode: standard|comprehensive]"
 version: 1.1
 compatibility:
@@ -413,5 +413,5 @@ Output: English translation preserving structure, headings, and formatting
 
 - Does NOT read files — that's thu-thap
 - Does NOT generate output files — that's tao-* skills
-- Does NOT install dependencies — redirects to /cai-dat
+- Does NOT install dependencies — redirects to setup
 - Does NOT search the web — delegates to thu-thap

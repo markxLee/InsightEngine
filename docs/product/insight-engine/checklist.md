@@ -938,8 +938,10 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Branch: feature/insight-engine-us-10.1.1
   - Blocked By: None
 
-- [ ] **US-10.1.2** — Update SKILL.md triggers for renamed skills
-  - Status: PLANNED
+- [x] **US-10.1.2** — Update SKILL.md triggers for renamed skills
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-10.1.2
   - Blocked By: ~~US-10.1.1~~ ✅
 
 ### Epic 10.2: Rename Agents to English
@@ -954,7 +956,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 - [ ] **US-10.3.1** — Remove slash command dependency
   - Status: PLANNED
-  - Blocked By: US-10.1.2, ~~US-10.2.1~~ ✅
+  - Blocked By: ~~US-10.1.2~~ ✅, ~~US-10.2.1~~ ✅
 
 - [ ] **US-10.3.2** — Update README for natural language UX
   - Status: PLANNED

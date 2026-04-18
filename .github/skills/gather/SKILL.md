@@ -10,7 +10,7 @@ description: |
   Always use this skill when the user mentions any file to read, URL to fetch, or topic to search
   online — even casual requests like "đọc file này", "lấy thông tin từ trang web đó", "tìm hiểu
   về X", "search Google giúp tôi", or when a file path or URL is dropped into the chat, even
-  without saying "/thu-thap". For bot-protected sites (Cloudflare, CAPTCHA walls, JS-heavy SPAs),
+  without saying "gather". For bot-protected sites (Cloudflare, CAPTCHA walls, JS-heavy SPAs),
   automatically escalates to Playwright with anti-detection stealth mode.
 argument-hint: "[file paths or URLs]"
 version: 1.3
@@ -495,4 +495,4 @@ Output: Fetched page content → cleaned Markdown (~3,000 ký tự), nav/footer 
 - Does NOT synthesize or merge content — that's bien-soan
 - Does NOT translate content — that's bien-soan
 - Does NOT generate output files — that's tao-* skills
-- Does NOT install dependencies — redirects to /cai-dat
+- Does NOT install dependencies — redirects to setup

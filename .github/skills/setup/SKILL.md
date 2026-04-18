@@ -5,7 +5,7 @@ description: |
   missing packages. Creates utility scripts (recalc.py, save_state.py) if not present.
   Always use this skill when the user gets an import error, ModuleNotFoundError, or says the tool
   isn't working — even casual requests like "bị lỗi import", "thư viện chưa cài", "lần đầu chạy",
-  "không chạy được", "cài lại đi", or "setup môi trường" — even without saying "/cai-dat".
+  "không chạy được", "cài lại đi", or "setup môi trường" — even without saying "setup".
 argument-hint: "[none]"
 version: 1.2
 compatibility:
@@ -98,7 +98,7 @@ exit code 0, all items show ✅.
 ### Step 9: Final report
 ```
 ✅ Cài đặt hoàn tất! InsightEngine sẵn sàng sử dụng.
-Gõ /tong-hop để bắt đầu tổng hợp nội dung.
+Gõ synthesize để bắt đầu tổng hợp nội dung.
 ```
 On failure: list which packages failed and suggest manual install commands.
 
@@ -136,7 +136,7 @@ Method: opens workbook with `data_only=False`, iterates all sheets, touches form
 to mark them dirty, then saves. Full recalc happens when the user opens the file in
 Excel/LibreOffice.
 
-Created during `/cai-dat` setup or the first time tao-excel runs.
+Created during `setup` setup or the first time tao-excel runs.
 
 ---
 
@@ -150,7 +150,7 @@ font issues, Apple Silicon problems), see `references/troubleshooting.md`.
 ## Examples
 
 **Example 1 — Fresh install:**
-Input: User runs /cai-dat for the first time
+Input: User runs setup for the first time
 Output: check_deps.py → 12 missing packages → pip install → npm install pptxgenjs → all ✅
 
 **Example 2 — Partial install:**

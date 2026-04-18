@@ -7,7 +7,7 @@ description: |
   Always use this skill when the user needs a spreadsheet, table with calculations, or data export
   — even casual requests like "làm cái bảng tính", "tạo file excel", "xuất ra bảng", "tính toán
   và lưu thành file", or "cho tôi bảng so sánh" where tabular data with formulas fits, even
-  without saying "/tao-excel" or ".xlsx".
+  without saying "gen-excel" or ".xlsx".
 argument-hint: "[data from bien-soan or direct input] [output path]"
 version: 1.1
 compatibility:
@@ -321,4 +321,4 @@ AUDITOR_GATE:
 - Does NOT read/parse existing Excel files — that's thu-thap's job
 - Does NOT create charts from data — that's tao-hinh's job
 - Does NOT synthesize content — that's bien-soan's job
-- Does NOT install dependencies — redirects to /cai-dat
+- Does NOT install dependencies — redirects to setup

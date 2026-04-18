@@ -9,7 +9,7 @@ description: |
   background images for slides, characters or scenes for documents, slide frames, or anything
   visual to make content look more professional — even casual requests like "tạo hình nền",
   "vẽ nhân vật", "cần ảnh minh họa", "làm slide đẹp hơn", "tạo background", "vẽ cái gì đó",
-  "tạo biểu đồ", "vẽ chart", or "/tao-hinh", even without naming a specific skill.
+  "tạo biểu đồ", "vẽ chart", or "gen-image", even without naming a specific skill.
 argument-hint: "[mode: chart|image] [chart type: bar|line|pie|radar|scatter] [image type: character|background|landscape|slide-bg|slide-frame]"
 version: 1.1
 compatibility:
@@ -253,4 +253,4 @@ Output: 1280×720 PNG (slide-bg), generated via SD-Turbo on MPS, ~3 seconds, 180
 - Does NOT display charts or images interactively (headless only — no plt.show())
 - Does NOT render text inside AI images (SD-Turbo cannot reliably render text)
 - Does NOT do face preservation or image-to-image restyling — use `gen-image` skill for that
-- Does NOT install dependencies — redirects to /cai-dat
+- Does NOT install dependencies — redirects to setup

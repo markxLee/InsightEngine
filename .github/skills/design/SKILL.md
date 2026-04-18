@@ -8,7 +8,7 @@ description: |
   Always use this skill when the user wants a designed visual composition with typography,
   layout, and artistic intent — "tạo poster", "thiết kế bìa", "làm certificate", "tạo thiệp",
   "thiết kế cover page", "tạo bằng khen", "tạo banner", "design a poster", "make a cover",
-  "tạo infographic", "tạo hình bìa báo cáo" — even without saying "/thiet-ke".
+  "tạo infographic", "tạo hình bìa báo cáo" — even without saying "design".
   Do NOT use for data charts (use tao-hinh) or AI-generated illustrations (use tao-hinh image mode).
 argument-hint: "[type: poster|cover|certificate|infographic|invitation|banner|artistic] [style hints]"
 version: 1.1
@@ -281,5 +281,5 @@ Output: Custom script `tmp/gen_design.py` → infographic.pdf (A4, 45 KB), follo
 - Does NOT create data-driven charts — use tao-hinh (matplotlib)
 - Does NOT generate AI images from prompts — use tao-hinh (diffusers/torch)
 - Does NOT create interactive or animated content — use tao-html
-- Does NOT install dependencies — redirects to /cai-dat
+- Does NOT install dependencies — redirects to setup
 - Does NOT copy existing artists' work — all designs are original compositions

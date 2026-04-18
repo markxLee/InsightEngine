@@ -9,7 +9,7 @@ description: |
   Always use this skill when the user wants a PowerPoint, deck, or .pptx file — even casual
   requests like "làm bài thuyết trình", "tạo slide", "tôi cần deck để present", "xuất ra
   PowerPoint", "cho tôi file pptx", "tạo bài slide chuyên nghiệp" — even without saying
-  "/tao-slide". Use Pro mode when user says "slide chuyên nghiệp", "consulting-grade",
+  "gen-slide". Use Pro mode when user says "slide chuyên nghiệp", "consulting-grade",
   "slide đẹp thật sự", "dùng ppt-master", or has source docs (PDF/DOCX/URL) to convert.
 argument-hint: "[content] [mode: quick|pro] [template: corporate-blue|...|mckinsey|google-style|...]"
 version: 2.0
@@ -333,5 +333,5 @@ AUDITOR_GATE:
 - Does NOT read input files — that's thu-thap
 - Does NOT synthesize content — that's bien-soan
 - Does NOT generate Word/PDF/HTML — use respective tao-* skills
-- Does NOT install dependencies — redirects to /cai-dat
+- Does NOT install dependencies — redirects to setup
 - Does NOT generate chart images — that's tao-hinh (receives chart PNGs as input)
