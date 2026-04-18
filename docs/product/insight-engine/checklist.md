@@ -817,7 +817,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 ### Epic 8.3: Shared Advisory Agent
 
 - [ ] **US-8.3.1** — Advisory as standalone Copilot agent
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
   - Branch: feature/insight-engine-us-8.3.1
   - Blocked By: None
