@@ -224,3 +224,68 @@ GAP_EVALUATION:
     - strategist: workflow planning
     - advisory: decision support
 ```
+
+---
+
+## Runtime Agent Creation
+
+When a capability gap identifies the need for a new agent (not a skill), dieu-phoi can
+create one at runtime with explicit user consent.
+
+```yaml
+RUNTIME_AGENT_CREATION:
+  trigger: Gap evaluation identifies missing agent capability
+  
+  protocol:
+    1. DETECT gap type:
+       - Decision domain not covered by existing agents
+       - Specialized reasoning needed (e.g., legal review, compliance check)
+       - Cross-domain coordination not handled by current agents
+       
+    2. PROPOSE to user (Vietnamese, always ask first):
+       "🤖 Phát hiện cần agent mới: {agent_name}
+        Mục đích: {purpose}
+        Sẽ xử lý: {responsibility}
+        
+        Tôi sẽ tạo file .github/agents/{agent_name}.agent.md
+        Bạn đồng ý không? (y/n)"
+       
+    3. IF user approves:
+       a. Create .github/agents/{name}.agent.md with VS Code standard:
+          - YAML frontmatter: name, description, tools, agents, user-invocable
+          - Capability description in markdown body
+          - Budget limit (max calls per pipeline)
+       b. Register in copilot-instructions.md agents section
+       c. Update agent-protocol.md AGENTS list
+       d. Log creation in session state (created_skills[])
+       e. Confirm: "✅ Agent {name} đã tạo. Đang tiếp tục pipeline..."
+       
+    4. IF user declines:
+       → Skip, proceed with best available alternative
+       → Log recommendation for future cai-tien session
+
+  constraints:
+    - ALWAYS ask user before creating
+    - Never create agents that duplicate existing capabilities
+    - Max 2 runtime agent creations per pipeline run
+    - Each agent must have a budget limit
+    - Follow VS Code .agent.md standard (YAML frontmatter)
+    
+  template: |
+    ---
+    name: {agent_name}
+    description: |
+      {one_paragraph_description}
+    tools:
+      - read_file
+      - run_in_terminal
+    agents: []
+    user-invocable: {true_if_standalone}
+    ---
+    # {Agent Title}
+    > {purpose}
+    ## Capabilities
+    {capabilities_list}
+    ## Budget
+    max {N} calls per pipeline run
+```
