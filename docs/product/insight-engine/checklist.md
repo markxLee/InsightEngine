@@ -738,10 +738,10 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ### Epic 6.7: Pipeline Integration
 
-- [ ] **US-6.7.1** — tong-hop integration with AGENT_MODE feature flag
-  - Status: PLANNED
-  - Assignee: —
-  - Branch: —
+- [x] **US-6.7.1** — tong-hop integration with AGENT_MODE feature flag
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-6.7.1
   - Blocked By: ~~US-6.4.1~~ ✅, ~~US-6.5.1~~ ✅, ~~US-6.6.1~~ ✅
 
 ---
