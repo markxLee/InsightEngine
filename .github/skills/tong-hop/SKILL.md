@@ -1,19 +1,15 @@
 ---
 name: tong-hop
 description: |
-  Main InsightEngine pipeline — analyzes user intent deeply, orchestrates all sub-skills end-to-end,
-  and auto-reviews quality at every step. Before execution, expands user prompts into comprehensive
-  dimensions and confirms analysis. After each step, reviews output quality — if insufficient, loops
-  and retries with specific improvement instructions (max 2 retries). Default content depth is
-  COMPREHENSIVE (expert-level, rich content) — not standard or brief.
-  Handles any content task: research → synthesis → output in Word/Excel/PPT/PDF/HTML/chart format.
+  Content synthesis skill for InsightEngine — gathers, merges, and structures multi-source content
+  into coherent documents. Called by the dieu-phoi orchestrator agent or directly via /tong-hop.
+  Handles the core content pipeline: thu-thap → bien-soan → tao-[format] with auto quality review.
+  Default content depth is COMPREHENSIVE (expert-level, rich content).
   Supports session resume via save_state.py and chained outputs (e.g., Excel data → chart → slide).
-  Always use this skill whenever the user describes any content creation, reporting, or presentation
-  task — even casual requests like "làm cái báo cáo", "tổng hợp giúp tôi", "tạo slide từ mấy cái
-  file này", "search rồi tạo file", or simply describes what they need without naming a specific
-  skill. Also triggers on resume requests: "tiếp tục", "resume", "tiếp tục từ", "/resume".
+  NOTE: Orchestration (intent classification, routing) is handled by dieu-phoi agent.
+  This skill focuses purely on content synthesis workflows.
 argument-hint: "[content request in Vietnamese or English]"
-version: 1.4
+version: 2.0
 compatibility:
   requires:
     - Python >= 3.10
@@ -25,27 +21,17 @@ compatibility:
     - vscode-websearchforcopilot_webSearch (for thu-thap)
 ---
 
-# Tổng Hợp — InsightEngine Pipeline Orchestrator
+# Tổng Hợp — Content Synthesis Skill
+
+> **Role:** Pure content synthesis. Orchestration is handled by `dieu-phoi` agent.
+> When user says `/tong-hop`, dieu-phoi intercepts, classifies as synthesis, and routes here.
 
 **References:** `references/pipeline-ux.md` | `references/session-summary.md` | `references/output-chaining.md` | `references/auto-escalation.md` | `references/file-placement-rules.md` | `references/agent-context-schema.md` | `references/decision-maps.md` | `references/final-audit-rollback.md` | `references/conditional-skill-forge.md` | `references/public-skill-clone.md` | `references/agent-mode.md` | `references/request-analysis.md`
-**Agents:** `.github/agents/strategist.agent.md` | `.github/agents/advisory.agent.md` | `.github/agents/auditor.agent.md` | `.github/skills/shared-agents/agent-protocol.md`
+**Agents:** `.github/agents/auditor.agent.md` (quality gate)
 **State:** `tmp/.session-state.json` (written after each step via `scripts/save_state.py`)
 
----
-
-## Shared Agent Architecture
-
-```yaml
-AGENT_MODE: always-on   # Shared agents are now canonical (Phase 8 migration)
-# Pipeline always uses shared agent architecture:
-#   1. Strategist agent → dynamic workflow (shared-agents/strategist.md)
-#   2. Tiered audit at every step (shared-agents/auditor.md)
-#   3. Advisory agent for decisions (shared-agents/advisory.md)
-#   4. Calling protocol: shared-agents/agent-protocol.md
-#
-# Legacy inline agents (tong-hop/agents/) are ARCHIVED — do not use.
-# Budget: strategist=1, advisory=max 2, auditor=max 5 per pipeline run.
-```
+> **Note:** Orchestration agents (strategist, advisory) are called by dieu-phoi, not by this skill.
+> This skill receives a pre-classified synthesis request and executes the content pipeline.
 
 ---
 
