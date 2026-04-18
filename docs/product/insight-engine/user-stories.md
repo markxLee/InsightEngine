@@ -4,7 +4,7 @@
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
 > **Scope:** Phase 0 → Phase 5 (all phases)  
-> **Total User Stories:** 40 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5)
+> **Total User Stories:** 54 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6)
 
 ---
 
@@ -13,7 +13,7 @@
 - **Product name:** InsightEngine
 - **Product slug:** `insight-engine`
 - **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5
-- **Total stories:** 40 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15, Phase 5: 4)
+- **Total stories:** 54 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15, Phase 5: 4, Phase 6: 14)
 - **ID format:** `US-<phase>.<epic>.<index>`
 
 ### Dependency Graph (Summary)
@@ -567,14 +567,186 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
 
 ---
 
+## Phase 6: Agent Architecture & Quality Gates
+
+> **Nguồn gốc:** Phản hồi từ real-world usage — pipeline thiếu linh hoạt, thiếu kiểm tra chất lượng tự động, hỏi user quá nhiều, file output nằm rải rác.
+
+---
+
+### Epic 6.1: Strict File Rules & Auto-escalation
+
+**US-6.1.1: Strict file location rules enforcement**
+- Description: As a user, I want all InsightEngine output to follow strict file placement rules (scripts in `/scripts`, temp in `/tmp`, output in `/output`), so files are always predictable regardless of which model runs the pipeline.
+- Acceptance Criteria:
+  - AC1: All skills updated with explicit file placement rules
+  - AC2: Scripts MUST be saved to `/scripts` directory
+  - AC3: Temporary/intermediate files MUST be saved to `/tmp` directory
+  - AC4: Final output files MUST be saved to `/output` directory
+  - AC5: Rules enforced via validation check at pipeline start and after each step
+- Blocked By: `None`
+
+**US-6.1.2: Auto-escalation protocol**
+- Description: As a non-technical user, I want the pipeline to automatically escalate to more powerful tools when the current approach fails, without asking me technical questions I don't understand.
+- Acceptance Criteria:
+  - AC1: Each skill defines escalation tiers (e.g., thu-thap: fetch_webpage → httpx → Playwright)
+  - AC2: On failure, skill automatically tries the next tier without user interaction
+  - AC3: User is only asked when ALL escalation tiers have been exhausted
+  - AC4: Technical tool names are never exposed to user (e.g., don't mention "Playwright tier 3")
+  - AC5: Escalation attempts are logged in shared context for audit trail
+- Blocked By: `US-6.1.1`
+
+---
+
+### Epic 6.2: Shared Context Protocol
+
+**US-6.2.1: Shared context file design**
+- Description: As a pipeline component, I need a standardized shared context file (`tmp/.agent-context.json`) that all agents can read and write to, so inter-agent communication works despite subagent statelessness.
+- Acceptance Criteria:
+  - AC1: `tmp/.agent-context.json` schema defined with fields: user_request, model_profile, workflow, audit_history, decisions
+  - AC2: File is human-readable JSON (pretty-printed, UTF-8)
+  - AC3: Write operation is atomic (temp file + rename)
+  - AC4: Schema documented in `references/agent-context-schema.md`
+- Blocked By: `None`
+
+**US-6.2.2: Agent context read/write API**
+- Description: As an agent, I need a consistent protocol for reading context before my task and writing results after, so no information is lost between agent calls.
+- Acceptance Criteria:
+  - AC1: Every agent call starts by reading shared context file
+  - AC2: Every agent call ends by writing results to shared context file
+  - AC3: Protocol handles concurrent access gracefully (file locking or sequential execution)
+  - AC4: Protocol documented with examples in references/
+- Blocked By: `US-6.2.1`
+
+---
+
+### Epic 6.3: Model Profile & Decision Maps
+
+**US-6.3.1: Decision maps per capability category**
+- Description: As a pipeline strategist, I need pre-built decision maps for each model capability category (context_window, reasoning_depth, tool_use, multilingual, code_generation), so I can choose the right workflow without trusting model self-reports blindly.
+- Acceptance Criteria:
+  - AC1: Decision maps created for 5 capability categories
+  - AC2: Each category has 3 levels: basic, standard, advanced
+  - AC3: Each level has corresponding workflow recommendations
+  - AC4: Maps stored in `references/decision-maps.md`
+  - AC5: Maps are model-name-agnostic (based on capabilities, not brand)
+- Blocked By: `None`
+
+**US-6.3.2: Model self-declaration with fallback**
+- Description: As a pipeline, I need to determine the current model's capabilities at startup via self-declaration + decision map verification, falling back to a medium/conservative profile if detection fails.
+- Acceptance Criteria:
+  - AC1: Pipeline asks model to self-declare name and capabilities at startup
+  - AC2: Self-declared capabilities are verified against decision maps (not blindly trusted)
+  - AC3: If model cannot self-identify: fallback to conservative/medium profile (context 32K, clear instructions needed, small steps)
+  - AC4: Model name is NOT hardcoded in copilot-instructions.md
+  - AC5: Model profile is written to shared context file for all agents to use
+- Blocked By: `US-6.3.1`, `US-6.2.1`
+
+**US-6.3.3: Pre-built workflow templates**
+- Description: As a strategist agent, I need pre-built workflow templates for common scenarios × model capability levels, so I can quickly generate a custom workflow instead of building from scratch.
+- Acceptance Criteria:
+  - AC1: At least 5 workflow templates covering common scenarios (report, presentation, data collection, translation, comparison)
+  - AC2: Each template has variants for basic/standard/advanced model capabilities
+  - AC3: Templates stored in `references/workflow-templates/`
+  - AC4: Strategist can customize templates based on specific request
+- Blocked By: `US-6.3.1`
+
+---
+
+### Epic 6.4: Agent Strategist
+
+**US-6.4.1: Strategist agent — dynamic workflow generation**
+- Description: As a user, I want the pipeline to generate a custom workflow tailored to my specific request AND the current model's capabilities, so the process is optimized for the best possible output.
+- Acceptance Criteria:
+  - AC1: Strategist agent receives: user request + model profile (from shared context)
+  - AC2: Generates a step-by-step workflow with skill assignments and quality checkpoints
+  - AC3: Selects and customizes from pre-built workflow templates
+  - AC4: Budget: 1 strategist call per pipeline run (no retries on strategist itself)
+  - AC5: Generated workflow is written to shared context and presented to user before execution
+- Blocked By: `US-6.3.2`, `US-6.3.3`, `US-6.2.1`
+
+---
+
+### Epic 6.5: Tiered Audit System
+
+**US-6.5.1: Tiered audit implementation**
+- Description: As a pipeline, I need a tiered quality audit system that applies the right level of scrutiny to each step, so quality is ensured without wasting resources on trivial checks.
+- Acceptance Criteria:
+  - AC1: Tier 1 (self-review): Applied to ALL steps — inline quality check, 0 extra agent calls
+  - AC2: Tier 2 (agent audit): Applied to CRITICAL steps (bien-soan, output generation) — 1 agent call per step
+  - AC3: Tier 3 (final audit): Applied to final output — full comparison against user requirements
+  - AC4: Max 5 audit agent calls per pipeline run
+  - AC5: Audit results written to shared context `audit_history`
+- Blocked By: `US-6.2.1`
+
+**US-6.5.2: Final output audit with step-level rollback**
+- Description: As a user, I want the pipeline to automatically audit the final output against my original request, and if it doesn't meet requirements, go back to the specific step that failed instead of restarting everything.
+- Acceptance Criteria:
+  - AC1: Final audit compares output against user's original request (extracted from shared context)
+  - AC2: If audit fails: identifies which step produced insufficient quality
+  - AC3: Pipeline re-executes from the failed step (not from beginning)
+  - AC4: Max 3 attempts per step, max 10 total retries across pipeline
+  - AC5: Fail-fast: if quality score doesn't improve between retry 1 and retry 2, stop retrying and deliver best available
+  - AC6: Budget cap: max 30 agent calls per pipeline run
+- Blocked By: `US-6.5.1`, `US-6.4.1`
+
+---
+
+### Epic 6.6: Advisory Agent & Conditional Skill Creation
+
+**US-6.6.1: Advisory agent — multi-perspective single-call**
+- Description: As a pipeline, I need an advisory agent that can analyze a decision from 3-5 perspectives in a single call, so I get expert guidance without excessive token overhead.
+- Acceptance Criteria:
+  - AC1: Advisory agent receives a question + context → returns analysis from 3-5 perspectives + final recommendation
+  - AC2: Single call format (not 5 separate calls)
+  - AC3: Max 2 advisory calls per pipeline run
+  - AC4: Decision severity routing: trivial → auto-decide, moderate → 1 advisory, critical → advisory + user
+  - AC5: Advisory decisions logged in shared context `decisions` array
+- Blocked By: `US-6.2.1`
+
+**US-6.6.2: Conditional skill-forge runtime**
+- Description: As a pipeline, I want the ability to create new skills at runtime when they are absolutely required to complete the user's request, with a 30-minute budget and advisory approval.
+- Acceptance Criteria:
+  - AC1: Advisory agent evaluates: is a new skill REQUIRED? (cannot complete without it)
+  - AC2: If advisory says not needed: use existing skills + inline instructions
+  - AC3: If advisory approves: skill creation with 30-minute budget
+  - AC4: Created skills follow InsightEngine conventions (Vietnamese naming, scripts/, references/)
+  - AC5: Created skills are tested before use in the current pipeline
+- Blocked By: `US-6.6.1`
+
+**US-6.6.3: Public skill clone with security check**
+- Description: As a pipeline creating a new skill, I want to prioritize cloning from verified public repositories to save time, with mandatory security review before adoption.
+- Acceptance Criteria:
+  - AC1: Clone sources whitelist: github.com/anthropics/skills, github.com/openclaw/openclaw/tree/main/skills, github.com/openai/skills
+  - AC2: Clone priority: (1) clone + adapt from public repos → (2) build from scratch
+  - AC3: Security check MANDATORY before using any cloned skill: no malware, no data exfiltration, no dangerous commands
+  - AC4: Security check results logged in shared context
+  - AC5: If security check fails: fall back to building from scratch
+- Blocked By: `US-6.6.2`
+
+---
+
+### Epic 6.7: Pipeline Integration
+
+**US-6.7.1: tong-hop integration with AGENT_MODE feature flag**
+- Description: As a developer, I want the agent architecture to be toggleable via a feature flag in tong-hop, so I can switch between the current pipeline and the agent-enhanced pipeline.
+- Acceptance Criteria:
+  - AC1: `AGENT_MODE` flag in tong-hop SKILL.md (default: true)
+  - AC2: When `AGENT_MODE: true`: strategist → dynamic workflow → tiered audit → advisory
+  - AC3: When `AGENT_MODE: false`: current static pipeline (backward compatible)
+  - AC4: User experience unchanged — user still says request → gets output
+  - AC5: Existing skills NOT modified — agents wrap around them
+- Blocked By: `US-6.4.1`, `US-6.5.1`, `US-6.6.1`
+
+---
+
 ---
 
 ## Tổng quan User Stories (Tiếng Việt)
 
 - **Tên sản phẩm:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Phạm vi:** Phase 0 → Phase 5
-- **Tổng số User Stories:** 40 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5)
+- **Phạm vi:** Phase 0 → Phase 6
+- **Tổng số User Stories:** 54 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6)
 
 ---
 
@@ -983,5 +1155,107 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
 
 ---
 
-*Backlog này không bao gồm task-level detail hoặc trạng thái thực hiện.*  
+## Phase 5: Tối ưu & Độ bền
+
+### Epic 5.1: Small Model Optimization
+
+**US-5.1.1: Nghiên cứu tương thích model nhỏ**
+- Mô tả: Xác định tại sao skills hoạt động kém với model nhỏ.
+- Tiêu chí nghiệm thu:
+  - AC1: Mỗi SKILL.md test với model nhỏ
+  - AC2: Document failure patterns
+  - AC3: Xác định top 3 nguyên nhân gốc
+- Bị chặn bởi: `None`
+
+**US-5.1.2: Refactor SKILL.md cho model nhỏ**
+- Mô tả: SKILL.md ≤ 300 dòng, instructions rõ ràng, nội dung dài chuyển sang references/.
+- Bị chặn bởi: `US-5.1.1`
+
+### Epic 5.2: Session State Persistence
+
+**US-5.2.1: Lưu state sau mỗi bước pipeline**
+- Mô tả: Pipeline lưu `tmp/.session-state.json` sau mỗi sub-skill hoàn thành.
+- Bị chặn bởi: `None`
+
+**US-5.2.2: Resume pipeline từ state đã lưu**
+- Mô tả: User nói "tiếp tục" / "resume" → pipeline khôi phục từ checkpoint.
+- Bị chặn bởi: `US-5.2.1`
+
+---
+
+## Phase 6: Agent Architecture & Quality Gates
+
+### Epic 6.1: Strict File Rules & Auto-escalation
+
+**US-6.1.1: Enforce quy tắc vị trí file bắt buộc**
+- Mô tả: Scripts → `/scripts`, file tạm → `/tmp`, output → `/output`. Áp dụng tất cả skills.
+- Bị chặn bởi: `None`
+
+**US-6.1.2: Auto-escalation protocol**
+- Mô tả: Khi tool fail → tự nâng tool mạnh hơn, không hỏi user câu hỏi kỹ thuật.
+- Bị chặn bởi: `US-6.1.1`
+
+### Epic 6.2: Shared Context Protocol
+
+**US-6.2.1: Thiết kế shared context file**
+- Mô tả: `tmp/.agent-context.json` cho giao tiếp giữa các agent.
+- Bị chặn bởi: `None`
+
+**US-6.2.2: Protocol đọc/ghi context cho agent**
+- Mô tả: Mỗi agent đọc context trước, ghi kết quả sau.
+- Bị chặn bởi: `US-6.2.1`
+
+### Epic 6.3: Model Profile & Decision Maps
+
+**US-6.3.1: Bản đồ quyết định theo category năng lực**
+- Mô tả: Decision maps cho 5 categories, mỗi category 3 levels, có workflow recommendations.
+- Bị chặn bởi: `None`
+
+**US-6.3.2: Model tự nhận diện + fallback**
+- Mô tả: Model self-declare → verify bằng decision maps → fallback medium nếu không nhận diện được.
+- Bị chặn bởi: `US-6.3.1`, `US-6.2.1`
+
+**US-6.3.3: Workflow templates sẵn có**
+- Mô tả: Ít nhất 5 templates cho scenarios phổ biến × mức năng lực model.
+- Bị chặn bởi: `US-6.3.1`
+
+### Epic 6.4: Agent Strategist
+
+**US-6.4.1: Strategist tạo dynamic workflow**
+- Mô tả: Nhận request + model profile → tạo workflow tùy chỉnh. 1 call/pipeline.
+- Bị chặn bởi: `US-6.3.2`, `US-6.3.3`, `US-6.2.1`
+
+### Epic 6.5: Tiered Audit System
+
+**US-6.5.1: Triển khai audit phân tầng**
+- Mô tả: Tier 1 self-review (mọi step) → Tier 2 agent audit (critical) → Tier 3 final audit. Max 5 audit calls.
+- Bị chặn bởi: `US-6.2.1`
+
+**US-6.5.2: Final audit với step-level rollback**
+- Mô tả: Audit final → nếu fail → xác định step lỗi → redo từ đó. Max 3 retries/step, 10 total, fail-fast.
+- Bị chặn bởi: `US-6.5.1`, `US-6.4.1`
+
+### Epic 6.6: Advisory Agent & Skill Creation
+
+**US-6.6.1: Advisory agent đa góc nhìn**
+- Mô tả: 1 call phân tích 3-5 perspectives → recommendation. Max 2 calls/pipeline.
+- Bị chặn bởi: `US-6.2.1`
+
+**US-6.6.2: Tạo skill runtime có điều kiện**
+- Mô tả: Advisory đánh giá cần thiết → nếu bắt buộc → cho phép tạo (30 phút).
+- Bị chặn bởi: `US-6.6.1`
+
+**US-6.6.3: Clone skill từ public repos + security check**
+- Mô tả: Ưu tiên clone từ repos public → kiểm tra bảo mật BẮT BUỘC → dùng nếu an toàn.
+- Bị chặn bởi: `US-6.6.2`
+
+### Epic 6.7: Pipeline Integration
+
+**US-6.7.1: Tích hợp tong-hop với feature flag AGENT_MODE**
+- Mô tả: AGENT_MODE true → agent pipeline, false → current pipeline. User experience không đổi.
+- Bị chặn bởi: `US-6.4.1`, `US-6.5.1`, `US-6.6.1`
+
+---
+
+*Backlog này không bao gồm task-level detail hoặc trạng thái thực hiện.*
 *Bước tiếp theo: `/roadmap-to-user-stories-review` hoặc `/product-checklist`*

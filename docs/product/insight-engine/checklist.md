@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 40 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 PLANNED)  
+> **Total User Stories:** 54 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -642,6 +642,110 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ---
 
+## Phase 6: Agent Architecture & Quality Gates
+
+> **Nguồn gốc:** Phản hồi từ real-world usage. **14 stories PLANNED.**
+
+### Epic 6.1: Strict File Rules & Auto-escalation
+
+- [ ] **US-6.1.1** — Strict file location rules enforcement
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: None
+
+- [ ] **US-6.1.2** — Auto-escalation protocol
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.1.1
+
+### Epic 6.2: Shared Context Protocol
+
+- [ ] **US-6.2.1** — Shared context file design
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: None
+
+- [ ] **US-6.2.2** — Agent context read/write API
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.2.1
+
+### Epic 6.3: Model Profile & Decision Maps
+
+- [ ] **US-6.3.1** — Decision maps per capability category
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: None
+
+- [ ] **US-6.3.2** — Model self-declaration with fallback
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.3.1, US-6.2.1
+
+- [ ] **US-6.3.3** — Pre-built workflow templates
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.3.1
+
+### Epic 6.4: Agent Strategist
+
+- [ ] **US-6.4.1** — Strategist agent — dynamic workflow generation
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.3.2, US-6.3.3, US-6.2.1
+
+### Epic 6.5: Tiered Audit System
+
+- [ ] **US-6.5.1** — Tiered audit implementation
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.2.1
+
+- [ ] **US-6.5.2** — Final output audit with step-level rollback
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.5.1, US-6.4.1
+
+### Epic 6.6: Advisory Agent & Conditional Skill Creation
+
+- [ ] **US-6.6.1** — Advisory agent — multi-perspective single-call
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.2.1
+
+- [ ] **US-6.6.2** — Conditional skill-forge runtime
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.6.1
+
+- [ ] **US-6.6.3** — Public skill clone with security check
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.6.2
+
+### Epic 6.7: Pipeline Integration
+
+- [ ] **US-6.7.1** — tong-hop integration with AGENT_MODE feature flag
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: US-6.4.1, US-6.5.1, US-6.6.1
+
+---
+
 ### Execution Order (Recommended)
 
 ```
@@ -662,6 +766,12 @@ Wave 13 (parallel): US-4.3.3, US-4.5.2
 --- Phase 4 DONE (15/15) ---
 Wave 14 (parallel): US-5.1.1, US-5.2.1
 Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
+--- Phase 5 DONE (4/4) ---
+Wave 16 (parallel): US-6.1.1, US-6.2.1, US-6.3.1
+Wave 17 (parallel): US-6.1.2, US-6.2.2, US-6.3.3, US-6.5.1, US-6.6.1
+Wave 18 (parallel): US-6.3.2, US-6.4.1, US-6.6.2
+Wave 19 (parallel): US-6.5.2, US-6.6.3, US-6.7.1
+--- Phase 6 DONE (14/14) ---
 ```
 
 ---

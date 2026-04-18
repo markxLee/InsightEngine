@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Roadmap Created:** 2026-04-16  
-> **Scope:** Milestone-based (Phase 0 → Phase 3)
+> **Scope:** Milestone-based (Phase 0 → Phase 6)
 
 ---
 
@@ -107,7 +107,25 @@
 |------|-------------|
 | **Epic 5.1 — Small Model Optimization** | Research nguyên nhân skills hoạt động kém với model nhỏ. Refactor SKILL.md files để giảm complexity (≤ 300 lines), tối ưu instruction clarity, kiểm tra compatibility với GPT-4o-mini / GPT-3.5 Turbo. |
 | **Epic 5.2 — Session State Persistence** | `tong-hop` lưu `.session-state.json` sau mỗi bước. Skill detect và resume session chưa hoàn thành. User nói "tiếp tục" / "resume" để khôi phục pipeline từ checkpoint. |
+---
 
+## Phase 6 — Agent Architecture & Quality Gates
+
+**Goal:** Transform InsightEngine from a skill-only system into an agent + skill hybrid. Specialized agents handle workflow generation, quality auditing, and decision-making — adapting dynamically to each model’s capabilities and each user’s request.
+
+> **Nguồn gốc:** Phản hồi từ real-world usage — pipeline không đủ linh hoạt cho nhiều model khác nhau, thiếu kiểm tra chất lượng tự động, hỏi user quá nhiều câu hỏi kỹ thuật, file output nằm rải rác.
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 6.1 — Strict File Rules & Auto-escalation** | Enforce `/scripts`, `/tmp`, `/output` rules trong tất cả skills. Thêm auto-escalation protocol (tự nâng tool mạnh hơn thay vì hỏi user). |
+| **Epic 6.2 — Shared Context Protocol** | Thiết kế `tmp/.agent-context.json` format + read/write protocol cho inter-agent communication. Giải quyết subagent statelessness. |
+| **Epic 6.3 — Model Profile & Decision Maps** | Model self-declaration + decision maps per capability category (context_window, reasoning_depth, tool_use, multilingual, code_generation). Fallback medium profile. KHÔNG hardcode model name. |
+| **Epic 6.4 — Agent Strategist (`xay-dung-quy-trinh`)** | Agent nhận request + model profile → tạo dynamic workflow. Pre-built workflow templates cho scenarios phổ biến × model capabilities. |
+| **Epic 6.5 — Tiered Audit System (`kiem-dinh`)** | Self-review tier 1 (mọi step) → agent audit tier 2 (critical steps) → final audit tier 3 (output vs requirements). Max 3 retries/step, 10 total, fail-fast. |
+| **Epic 6.6 — Advisory Agent & Conditional Skill Creation (`tu-van`)** | Agent tư vấn đa góc nhìn (1 call, max 2/pipeline). Conditional skill-forge runtime (30-min budget, clone-first từ verified public repos, mandatory security check). |
+| **Epic 6.7 — Pipeline Integration** | Tích hợp agent architecture vào `tong-hop` với feature flag `AGENT_MODE`. Step-level rollback trên final audit fail. Budget cap 30 agent calls/pipeline. |
 ---
 
 ## Skill Map theo Phase
@@ -119,9 +137,10 @@ Phase 2:  thu-thap (nâng)   tao-excel          tao-pdf      tao-html   tong-hop
 Phase 3:  tao-hinh (MỚI)    bien-soan (nâng)   tao-slide (nâng)  tong-hop (nâng)
 Phase 4:  tao-slide (templates)  tao-html (reveal.js)  bien-soan (depth)  all skills (scripts/)
 Phase 5:  all skills (small model refactor)  tong-hop (session state + resume)
+Phase 6:  agents (MỚI: strategist, audit, advisory)  tong-hop (dynamic workflow)  all skills (strict rules)
 ```
 
-**Tổng số skills:** 10 (không thêm skill mới — nâng cấp skills hiện tại)
+**Tổng số skills:** 10 + 3 agents (strategist, audit, advisory)
 
 ---
 
@@ -246,6 +265,21 @@ Phase 0 là bắt buộc — không có `cai-dat` và `tong-hop` thì các skill
 |------|-------|
 | **Epic 5.1 — Small Model Optimization** | Research tại sao skills hoạt động kém với model nhỏ. Refactor SKILL.md giảm complexity, tối ưu instruction clarity |
 | **Epic 5.2 — Session State Persistence** | Pipeline lưu state sau mỗi bước. `tong-hop` detect và resume session chưa hoàn thành |
+---
+
+## Phase 6 — Agent Architecture & Quality Gates
+
+**Mục tiêu:** Chuyển InsightEngine từ hệ thống skill-only sang agent + skill hybrid. Agents chuyên biệt xử lý workflow, kiểm tra chất lượng, và tư vấn quyết định.
+
+| Epic | Mô tả |
+|------|-------|
+| **Epic 6.1 — Strict File Rules & Auto-escalation** | Enforce `/scripts`, `/tmp`, `/output`. Auto-escalation khi tool fail |
+| **Epic 6.2 — Shared Context Protocol** | `tmp/.agent-context.json` cho giao tiếp giữa các agent |
+| **Epic 6.3 — Model Profile & Decision Maps** | Self-declaration + decision maps, fallback profile trung bình |
+| **Epic 6.4 — Agent Strategist** | Tạo dynamic workflow từ request + model profile |
+| **Epic 6.5 — Tiered Audit System** | Self-review → agent audit (critical) → final audit. Max 3 retries/step |
+| **Epic 6.6 — Advisory Agent & Skill Creation** | Tư vấn đa góc nhìn. Tạo skill có điều kiện (30 phút, clone-first, security check) |
+| **Epic 6.7 — Pipeline Integration** | Tích hợp agents vào tong-hop với feature flag AGENT_MODE |
 ---
 
 *Roadmap này không bao gồm task-level breakdown. Xem User Stories để biết chi tiết triển khai.*  
