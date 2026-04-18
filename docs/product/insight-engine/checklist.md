@@ -752,8 +752,8 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ### Epic 7.1: Inline Critical Steps & Hard Gates
 
-- [ ] **US-7.1.1** — Inline request analysis and REQUEST_TYPE detection
-  - Status: IN_PROGRESS
+- [x] **US-7.1.1** — Inline request analysis and REQUEST_TYPE detection
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-7.1.1
   - Blocked By: None
@@ -762,7 +762,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Status: PLANNED
   - Assignee: copilot
   - Branch: feature/insight-engine-us-7.1.2
-  - Blocked By: US-7.1.1
+  - Blocked By: ~~US-7.1.1~~ ✅
 
 ### Epic 7.2: Data Collection Enforcement
 
