@@ -52,7 +52,7 @@ applyTo: "**"
 ## Vietnamese Language Rules
 
 - All Copilot responses to user: **tiếng Việt**
-- Skill names and directories: **tiếng Việt**, lowercase, hyphenated
+- Skill names and directories: **English**, lowercase, hyphenated
 - Skill triggers: **bilingual** (Vietnamese primary, English secondary)
 - Skill SKILL.md content (instructions to Copilot): **English**
 - Scripts: comments in English; CLI help text in English
@@ -63,18 +63,18 @@ applyTo: "**"
 
 ```
 .github/skills/
-  tong-hop/      # 🔑 Pipeline chính — phân tích prompt → mở rộng → route → orchestrate + auto-review loop
-  thu-thap/      # Thu thập từ web (search + fetch) và đọc file + auto quality check + data collection mode
-  bien-soan/     # Tổng hợp nội dung comprehensive (default) + self-review loop + dịch thuật
-  tao-word/      # Xuất Word (.docx) + thin content guard
-  tao-excel/     # Xuất Excel (.xlsx)
-  tao-slide/     # Xuất PowerPoint (.pptx) + thin content guard
-  tao-pdf/       # Xuất PDF + thin content guard
-  tao-html/      # Xuất HTML + thin content guard
-  tao-hinh/      # Biểu đồ + hình ảnh
-  thiet-ke/      # Thiết kế visual (poster, bìa, certificate, banner)
-  kiem-tra/      # Audit output vs yêu cầu user (Step 4.7 trong pipeline + standalone)
-  cai-tien/      # Session retrospective + continuous improvement
+  synthesize/      # 🔑 Pipeline chính — phân tích prompt → mở rộng → route → orchestrate + auto-review loop
+  gather/      # Thu thập từ web (search + fetch) và đọc file + auto quality check + data collection mode
+  compose/     # Tổng hợp nội dung comprehensive (default) + self-review loop + dịch thuật
+  gen-word/      # Xuất Word (.docx) + thin content guard
+  gen-excel/     # Xuất Excel (.xlsx)
+  gen-slide/     # Xuất PowerPoint (.pptx) + thin content guard
+  gen-pdf/       # Xuất PDF + thin content guard
+  gen-html/      # Xuất HTML + thin content guard
+  gen-image/      # Biểu đồ + hình ảnh
+  design/      # Thiết kế visual (poster, bìa, certificate, banner)
+  verify/      # Audit output vs yêu cầu user (Step 4.7 trong pipeline + standalone)
+  improve/      # Session retrospective + continuous improvement
   skill-creator/ # Tạo, cải thiện, test, benchmark skill
   skill-forge/   # Auto-review loop nâng cao — grade 6 tiêu chí (A/B/C/D), iterate đến khi all A
 ```
