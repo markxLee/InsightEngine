@@ -2,11 +2,11 @@
 name: synthesize
 description: |
   Content synthesis skill for InsightEngine — gathers, merges, and structures multi-source content
-  into coherent documents. Called by the dieu-phoi orchestrator agent or directly via /tong-hop.
+  into coherent documents. Called by the orchestrator orchestrator agent or directly via /tong-hop.
   Handles the core content pipeline: thu-thap → bien-soan → tao-[format] with auto quality review.
   Default content depth is COMPREHENSIVE (expert-level, rich content).
   Supports session resume via save_state.py and chained outputs (e.g., Excel data → chart → slide).
-  NOTE: Orchestration (intent classification, routing) is handled by dieu-phoi agent.
+  NOTE: Orchestration (intent classification, routing) is handled by orchestrator agent.
   This skill focuses purely on content synthesis workflows.
 argument-hint: "[content request in Vietnamese or English]"
 version: 2.0
@@ -23,14 +23,14 @@ compatibility:
 
 # Tổng Hợp — Content Synthesis Skill
 
-> **Role:** Pure content synthesis. Orchestration is handled by `dieu-phoi` agent.
-> When user says `/tong-hop`, dieu-phoi intercepts, classifies as synthesis, and routes here.
+> **Role:** Pure content synthesis. Orchestration is handled by `orchestrator` agent.
+> When user says `/tong-hop`, orchestrator intercepts, classifies as synthesis, and routes here.
 
 **References:** `references/pipeline-ux.md` | `references/session-summary.md` | `references/output-chaining.md` | `references/auto-escalation.md` | `references/file-placement-rules.md` | `references/agent-context-schema.md` | `references/decision-maps.md` | `references/final-audit-rollback.md` | `references/conditional-skill-forge.md` | `references/public-skill-clone.md` | `references/agent-mode.md` | `references/request-analysis.md`
 **Agents:** `.github/agents/auditor.agent.md` (quality gate)
 **State:** `tmp/.session-state.json` (written after each step via `scripts/save_state.py`)
 
-> **Note:** Orchestration agents (strategist, advisory) are called by dieu-phoi, not by this skill.
+> **Note:** Orchestration agents (strategist, advisory) are called by orchestrator, not by this skill.
 > This skill receives a pre-classified synthesis request and executes the content pipeline.
 
 ---

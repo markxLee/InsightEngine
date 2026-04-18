@@ -1,9 +1,9 @@
 ---
-name: dieu-phoi
+name: orchestrator
 description: |
   Central orchestrator agent for InsightEngine. Classifies user intent (synthesis, creation,
   research, design, data_collection, mixed, unknown), routes to appropriate skills and agents.
-  Replaces tong-hop's orchestration role — tong-hop now handles synthesis only.
+  Replaces synthesize's orchestration role was here — tong-hop now handles synthesis only.
   Manages pipeline lifecycle: planning → execution → quality gate → delivery.
 tools:
   - read_file
@@ -143,7 +143,7 @@ PERSISTENCE_RULES:
 
 ## Resume Detection
 
-On every session start, dieu-phoi checks for in-progress state and offers
+On every session start, orchestrator checks for in-progress state and offers
 intelligent resume that works across chat sessions, context resets, and crashes.
 
 ```yaml
@@ -207,7 +207,7 @@ CROSS_SESSION_RESUME:
 
 ```yaml
 SEPARATION:
-  dieu-phoi (this agent):
+  orchestrator (this agent):
     - Classifies ALL request types (not just synthesis)
     - Generates workflow via strategist
     - Manages pipeline lifecycle
@@ -216,10 +216,10 @@ SEPARATION:
 
   tong-hop (skill):
     - Pure content synthesis (gather → merge → structure)
-    - Called BY dieu-phoi as one of many possible workflows
+    - Called BY orchestrator as one of many possible workflows
     - No orchestration logic
     - No intent classification
-    - /tong-hop trigger → dieu-phoi intercepts and routes
+    - /tong-hop trigger → orchestrator intercepts and routes
 ```
 
 ---
@@ -246,7 +246,7 @@ FALLBACK:
 
 ## Capability Gap Evaluation
 
-Before executing any workflow, dieu-phoi evaluates whether existing skills and agents
+Before executing any workflow, orchestrator evaluates whether existing skills and agents
 can fulfill the request. This prevents silent failures and enables adaptive improvement.
 
 ```yaml
@@ -307,7 +307,7 @@ GAP_EVALUATION:
 
 ## Runtime Agent Creation
 
-When a capability gap identifies the need for a new agent (not a skill), dieu-phoi can
+When a capability gap identifies the need for a new agent (not a skill), orchestrator can
 create one at runtime with explicit user consent.
 
 ```yaml
@@ -373,7 +373,7 @@ RUNTIME_AGENT_CREATION:
 ## Runtime Skill Creation & Upgrade
 
 When a capability gap identifies the need for a new skill, or an existing skill needs
-a new mode/feature, dieu-phoi can create or upgrade skills at runtime.
+a new mode/feature, orchestrator can create or upgrade skills at runtime.
 
 ```yaml
 RUNTIME_SKILL_MANAGEMENT:

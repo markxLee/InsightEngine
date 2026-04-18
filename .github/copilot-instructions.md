@@ -227,9 +227,9 @@ SKILLS:
   # Custom Agents (VS Code standard — .github/agents/*.agent.md)
   # Agents are peer-level with skills. User-invocable agents can be called directly.
   agents:
-    dieu-phoi:
+    orchestrator:
       purpose: "Central orchestrator — classifies intent, routes to skills/agents, manages pipeline"
-      location: ".github/agents/dieu-phoi.agent.md"
+      location: ".github/agents/orchestrator.agent.md"
       user-invocable: true
     auditor:
       purpose: "Quality verification agent — 100-point weighted scoring, any skill can invoke after generation"

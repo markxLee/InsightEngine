@@ -944,15 +944,17 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ### Epic 10.2: Rename Agents to English
 
-- [ ] **US-10.2.1** — Rename dieu-phoi agent to orchestrator
-  - Status: PLANNED
+- [x] **US-10.2.1** — Rename dieu-phoi agent to orchestrator
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-10.2.1
   - Blocked By: None
 
 ### Epic 10.3: Natural Language UX
 
 - [ ] **US-10.3.1** — Remove slash command dependency
   - Status: PLANNED
-  - Blocked By: US-10.1.2, US-10.2.1
+  - Blocked By: US-10.1.2, ~~US-10.2.1~~ ✅
 
 - [ ] **US-10.3.2** — Update README for natural language UX
   - Status: PLANNED
@@ -962,7 +964,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 - [ ] **US-10.4.1** — Update skill registry with English names
   - Status: PLANNED
-  - Blocked By: ~~US-10.1.1~~ ✅, US-10.2.1
+  - Blocked By: ~~US-10.1.1~~ ✅, ~~US-10.2.1~~ ✅
 
 - [ ] **US-10.4.2** — Fix stale PIPELINE_FLOW and update Vietnamese Language Rules
   - Status: PLANNED

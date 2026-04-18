@@ -204,7 +204,7 @@ AUDITOR_AGENT vs KIEM_TRA_SKILL:
 
 ## Targeted Retry Loop
 
-When audit returns FAIL, dieu-phoi executes a targeted retry loop that re-generates
+When audit returns FAIL, orchestrator executes a targeted retry loop that re-generates
 ONLY the failing areas — not the entire output. Tracks score improvement across attempts.
 
 ```yaml

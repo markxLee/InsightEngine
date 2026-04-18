@@ -10,8 +10,8 @@
 
 ```yaml
 AGENTS:   # Located in .github/agents/*.agent.md (VS Code custom agent standard)
-  dieu-phoi:
-    file: .github/agents/dieu-phoi.agent.md
+  orchestrator:
+    file: .github/agents/orchestrator.agent.md
     purpose: Central orchestrator — classifies intent, routes to skills/agents
     user-invocable: true
 
@@ -33,7 +33,7 @@ AGENTS:   # Located in .github/agents/*.agent.md (VS Code custom agent standard)
     budget: max 2 calls per pipeline run
     user-invocable: false
 
-TOTAL_BUDGET: max 8 agent calls per pipeline run (excluding dieu-phoi)
+TOTAL_BUDGET: max 8 agent calls per pipeline run (excluding orchestrator)
 ```
 
 ---
