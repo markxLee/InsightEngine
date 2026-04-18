@@ -218,9 +218,18 @@ DATA_COLLECTION_ANALYSIS:
   6. QUANTITY_EXPECTATION: "tất cả" → 20-50 | "top 10" → 10 | unspecified → 15-30
 ```
 
-### 1.5.2: Present Analysis to User (MANDATORY)
+### 1.5.2: Present Analysis to User (MANDATORY — HARD GATE)
 
-**STOP HERE.** Show the analysis to user in Vietnamese. DO NOT proceed without user confirmation.
+```
+╔══════════════════════════════════════════════════════════════╗
+║  🛑 HARD GATE: YOU MUST STOP HERE AND WAIT FOR USER INPUT  ║
+║  Do NOT proceed to Step 2, 3, or 4.                        ║
+║  Do NOT skip this step. Do NOT summarize and continue.      ║
+║  SHOW the analysis below. WAIT for user response.           ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+Display the analysis output in Vietnamese. The format depends on REQUEST_TYPE:
 
 **For research:**
 ```
@@ -246,13 +255,16 @@ Tôi đề xuất mở rộng phạm vi:
 👉 Bạn đồng ý? Muốn thêm/bớt trường nào?
 ```
 
-### 1.5.3: Handle User Response
+**Analysis MUST include:** request_type, detected dimensions/fields, planned steps, content_depth.
+**Then STOP. WAIT. Do not generate any further output until user responds.**
+
+### 1.5.3: Handle User Response (ONLY after user replies)
 
 ```yaml
 USER_RESPONSE:
   approved: ["ok", "đồng ý", "tiếp tục", "được", "yes"] → Proceed to Step 2
-  modified: User adjusts dimensions → update analysis, re-present if major changes
-  simplified: User narrows scope → respect, but keep content_depth comprehensive
+  modified: User adjusts → update analysis, re-present if major changes
+  no_response: DO NOT PROCEED. The pipeline is paused until user confirms.
 ```
 
 ---
@@ -267,20 +279,17 @@ USER_RESPONSE:
 
 ## Step 3: Present Execution Plan
 
-Present the plan in Vietnamese with sources, processing type, output format, and steps.
-For deep research, show research dimensions and multi-round search plan.
+Present the plan in Vietnamese with sources, processing, output format, and steps.
 
 ```yaml
-ROUTING:
+ROUTING: # Choose based on Step 1 parse results
   single_output:    thu-thap → bien-soan → tao-<format>
   translation_only: thu-thap → bien-soan (translation mode)
   chained_output:   thu-thap → bien-soan → tao-excel → tao-hinh → tao-slide
   search_and_out:   thu-thap (web search) → bien-soan → tao-<format>
-  design_output:    thu-thap → bien-soan → thiet-ke (poster/cover/certificate/banner)
-  design_chained:   thu-thap → bien-soan → thiet-ke (cover) + tao-<format> (content)
-  dual_visual:      thu-thap → bien-soan → thiet-ke + tao-hinh (charts) + tao-<format>
+  design:           thu-thap → bien-soan → thiet-ke (poster/cover/certificate/banner)
   data_collection:  thu-thap (platform-specific) → extract → tao-excel → kiem-tra
-  mixed_collection: thu-thap → extract → tao-excel → bien-soan (analyze) → tao-<format> → kiem-tra
+  mixed_collection: thu-thap → extract → tao-excel → bien-soan → tao-<format> → kiem-tra
 ```
 
 After user approves, save state: `python3 scripts/save_state.py save '<json>'`
@@ -299,9 +308,7 @@ be visible throughout execution — update each step as it completes.
   5. ⬜ Kiểm tra đầu ra
 ```
 
-Adapt steps to match the actual routing plan (add/remove steps for chained output, charts, etc.).
-
-**After each step completes, print the UPDATED trace:**
+Adapt steps to match the actual routing. After each step, print updated trace:
 - Completed: `✅ {step_name} — {one-line summary}` (e.g., "✅ Thu thập — 12 nguồn, 25K ký tự")
 - Skipped: `⏭️ {step_name} — {reason}` (e.g., "⏭️ Biểu đồ — không có dữ liệu số")
 - Failed: `❌ {step_name} — {error}` (e.g., "❌ Thu thập URL — timeout sau 3 lần thử")
