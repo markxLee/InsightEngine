@@ -42,9 +42,9 @@ COPILOT_MUST:
 
 ```yaml
 SKILLS:
-  tong-hop:
+  synthesize:
     purpose: "Main pipeline — deeply analyzes user intent, expands prompt dimensions, orchestrates sub-skills with auto-quality-review loops. Default content depth is COMPREHENSIVE (expert-level, rich). Auto-reviews each step's output and loops if quality is insufficient."
-    location: ".github/skills/tong-hop/SKILL.md"
+    location: ".github/skills/synthesize/SKILL.md"
     triggers:
       - "tổng hợp nội dung"
       - "làm báo cáo"
@@ -53,11 +53,10 @@ SKILLS:
       - "synthesize content"
       - "create report"
       - "create presentation"
-      - "/tong-hop"
 
-  thu-thap:
+  gather:
     purpose: "Gather content from web (Google search + fetch URL) and read local files. Auto-reviews gathered content quality and expands search if insufficient."
-    location: ".github/skills/thu-thap/SKILL.md"
+    location: ".github/skills/gather/SKILL.md"
     triggers:
       - "tìm kiếm thông tin"
       - "đọc file"
@@ -65,11 +64,10 @@ SKILLS:
       - "fetch URL"
       - "search web"
       - "read file"
-      - "/thu-thap"
 
-  bien-soan:
+  compose:
     purpose: "Synthesize multi-source content into expert-level documents (comprehensive by default). Self-reviews each section for depth, specificity, and analysis — auto-rewrites thin sections. Supports Vietnamese ↔ English translation."
-    location: ".github/skills/bien-soan/SKILL.md"
+    location: ".github/skills/compose/SKILL.md"
     triggers:
       - "tổng hợp"
       - "gộp nội dung"
@@ -78,11 +76,10 @@ SKILLS:
       - "synthesize"
       - "translate"
       - "merge content"
-      - "/bien-soan"
 
-  tao-word:
+  gen-word:
     purpose: "Create professional Word (.docx) documents from synthesized content, with 3 style templates"
-    location: ".github/skills/tao-word/SKILL.md"
+    location: ".github/skills/gen-word/SKILL.md"
     triggers:
       - "tạo file word"
       - "xuất word"
@@ -90,11 +87,10 @@ SKILLS:
       - "tạo file .docx"
       - "create word document"
       - "export to word"
-      - "/tao-word"
 
-  tao-excel:
+  gen-excel:
     purpose: "Create Excel (.xlsx) files with data, formulas, and professional formatting"
-    location: ".github/skills/tao-excel/SKILL.md"
+    location: ".github/skills/gen-excel/SKILL.md"
     triggers:
       - "tạo file excel"
       - "xuất excel"
@@ -102,11 +98,10 @@ SKILLS:
       - "tạo file .xlsx"
       - "create excel"
       - "export to excel"
-      - "/tao-excel"
 
-  tao-slide:
+  gen-slide:
     purpose: "Create professional PowerPoint (.pptx) presentations. Default: Pro mode (ppt-master SVG→PPTX, native DrawingML, 20+ layouts, 50+ charts, 6700+ icons, embedded in repo). Quick mode (pptxgenjs) only when user explicitly asks for simple/fast deck"
-    location: ".github/skills/tao-slide/SKILL.md"
+    location: ".github/skills/gen-slide/SKILL.md"
     triggers:
       - "tạo slide"
       - "làm thuyết trình"
@@ -117,23 +112,20 @@ SKILLS:
       - "make presentation"
       - "slide chuyên nghiệp"
       - "consulting-grade slides"
-      - "dùng ppt-master"
-      - "/tao-slide"
 
-  tao-pdf:
+  gen-pdf:
     purpose: "Create PDF documents from synthesized content or converted from other formats"
-    location: ".github/skills/tao-pdf/SKILL.md"
+    location: ".github/skills/gen-pdf/SKILL.md"
     triggers:
       - "tạo file pdf"
       - "xuất pdf"
       - "tạo file .pdf"
       - "create pdf"
       - "export to pdf"
-      - "/tao-pdf"
 
-  tao-html:
+  gen-html:
     purpose: "Create professional static HTML pages OR reveal.js presentations with 8 styles (corporate, academic, minimal, dark-modern, creative, warm-earth, dark-neon, dark-elegant)"
-    location: ".github/skills/tao-html/SKILL.md"
+    location: ".github/skills/gen-html/SKILL.md"
     triggers:
       - "tạo trang web"
       - "tạo file html"
@@ -141,11 +133,10 @@ SKILLS:
       - "create html page"
       - "create website"
       - "static site"
-      - "/tao-html"
 
-  tao-hinh:
+  gen-image:
     purpose: "Generate charts from data and illustration images (Apple Silicon). Supports: bar, line, pie, radar, scatter"
-    location: ".github/skills/tao-hinh/SKILL.md"
+    location: ".github/skills/gen-image/SKILL.md"
     triggers:
       - "tạo biểu đồ"
       - "vẽ chart"
@@ -153,11 +144,10 @@ SKILLS:
       - "create chart"
       - "generate image"
       - "visualize data"
-      - "/tao-hinh"
 
-  thiet-ke:
+  design:
     purpose: "Create professional visual designs programmatically — cover pages, posters, certificates, infographic layouts, banners"
-    location: ".github/skills/thiet-ke/SKILL.md"
+    location: ".github/skills/design/SKILL.md"
     triggers:
       - "tạo poster"
       - "thiết kế bìa"
@@ -169,11 +159,10 @@ SKILLS:
       - "tạo infographic"
       - "design a poster"
       - "make a cover"
-      - "/thiet-ke"
 
-  kiem-tra:
-    purpose: "Audit any InsightEngine output against user's original requirements. Checks requirement coverage, URL quality, field completeness, data specificity. Runs automatically as Step 4.7 in tong-hop pipeline, or standalone when user wants to verify output."
-    location: ".github/skills/kiem-tra/SKILL.md"
+  verify:
+    purpose: "Audit any InsightEngine output against user's original requirements. Checks requirement coverage, URL quality, field completeness, data specificity. Runs automatically as Step 4.7 in synthesize pipeline, or standalone when user wants to verify output."
+    location: ".github/skills/verify/SKILL.md"
     triggers:
       - "kiểm tra đầu ra"
       - "audit output"
@@ -183,11 +172,10 @@ SKILLS:
       - "output có đúng không"
       - "sai ở đâu"
       - "thiếu gì"
-      - "/kiem-tra"
 
-  cai-tien:
+  improve:
     purpose: "Session retrospective and continuous improvement. Analyzes entire work session (input → process → output → gaps), identifies root causes, proposes and executes improvements to skills and pipeline. Creates new skills if needed."
-    location: ".github/skills/cai-tien/SKILL.md"
+    location: ".github/skills/improve/SKILL.md"
     triggers:
       - "cải tiến"
       - "retrospective"
@@ -197,7 +185,6 @@ SKILLS:
       - "improve pipeline"
       - "nâng cấp skill"
       - "lesson learned"
-      - "/cai-tien"
 
   skill-creator:
     purpose: "Create, improve, test, and benchmark skills for InsightEngine"

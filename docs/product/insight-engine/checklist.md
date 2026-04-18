@@ -964,13 +964,15 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ### Epic 10.4: copilot-instructions.md Refresh
 
-- [ ] **US-10.4.1** — Update skill registry with English names
-  - Status: PLANNED
+- [x] **US-10.4.1** — Update skill registry with English names
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-10.4.1
   - Blocked By: ~~US-10.1.1~~ ✅, ~~US-10.2.1~~ ✅
 
 - [ ] **US-10.4.2** — Fix stale PIPELINE_FLOW and update Vietnamese Language Rules
   - Status: PLANNED
-  - Blocked By: US-10.4.1
+  - Blocked By: ~~US-10.4.1~~ ✅
 
 ### Epic 10.5: Clean Up Legacy Artifacts
 
