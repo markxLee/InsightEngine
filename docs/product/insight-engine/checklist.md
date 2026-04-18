@@ -710,10 +710,10 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Branch: feature/insight-engine-us-6.5.1
   - Blocked By: ~~US-6.2.1~~ ✅
 
-- [ ] **US-6.5.2** — Final output audit with step-level rollback
-  - Status: PLANNED
-  - Assignee: —
-  - Branch: —
+- [x] **US-6.5.2** — Final output audit with step-level rollback
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-6.5.2
   - Blocked By: ~~US-6.5.1~~ ✅, ~~US-6.4.1~~ ✅
 
 ### Epic 6.6: Advisory Agent & Conditional Skill Creation

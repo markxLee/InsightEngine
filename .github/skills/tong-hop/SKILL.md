@@ -27,7 +27,7 @@ compatibility:
 
 # Tổng Hợp — InsightEngine Pipeline Orchestrator
 
-**References:** `references/pipeline-ux.md` | `references/session-summary.md` | `references/output-chaining.md` | `references/auto-escalation.md` | `references/file-placement-rules.md` | `references/agent-context-schema.md` | `references/decision-maps.md`
+**References:** `references/pipeline-ux.md` | `references/session-summary.md` | `references/output-chaining.md` | `references/auto-escalation.md` | `references/file-placement-rules.md` | `references/agent-context-schema.md` | `references/decision-maps.md` | `references/final-audit-rollback.md`
 **State:** `tmp/.session-state.json` (written after each step via `scripts/save_state.py`)
 
 This is the central orchestrator — it never generates content itself, but delegates each phase
