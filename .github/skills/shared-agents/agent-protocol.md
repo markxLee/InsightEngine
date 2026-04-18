@@ -1,31 +1,39 @@
-# Shared Agent Calling Protocol — InsightEngine
+# Agent Calling Protocol — InsightEngine
 
-> **Version:** 1.0
-> **Purpose:** Standardized input/output format, budget enforcement, and calling conventions for all shared Copilot agents.
-> **Applies to:** Any skill invoking `runSubagent` with agents in `shared-agents/`.
+> **Version:** 2.0 (Phase 9 — VS Code Custom Agent Standard)
+> **Purpose:** Standardized input/output format, budget enforcement, and calling conventions for all agents.
+> **Applies to:** All agents in `.github/agents/` and any skill that interacts with them.
 
 ---
 
 ## Architecture Overview
 
 ```yaml
-SHARED_AGENTS:
+AGENTS:   # Located in .github/agents/*.agent.md (VS Code custom agent standard)
+  dieu-phoi:
+    file: .github/agents/dieu-phoi.agent.md
+    purpose: Central orchestrator — classifies intent, routes to skills/agents
+    user-invocable: true
+
   auditor:
-    file: .github/skills/shared-agents/auditor.md
-    purpose: Quality verification — PASS/FAIL verdict
+    file: .github/agents/auditor.agent.md
+    purpose: Quality verification — 100-point weighted scoring
     budget: max 5 calls per pipeline run
-    
+    user-invocable: true
+
   strategist:
-    file: .github/skills/shared-agents/strategist.md
+    file: .github/agents/strategist.agent.md
     purpose: Workflow generation — execution plan
     budget: max 1 call per pipeline run
-    
+    user-invocable: false
+
   advisory:
-    file: .github/skills/shared-agents/advisory.md
+    file: .github/agents/advisory.agent.md
     purpose: Multi-perspective decision support
     budget: max 2 calls per pipeline run
+    user-invocable: false
 
-TOTAL_BUDGET: max 8 agent calls per pipeline run
+TOTAL_BUDGET: max 8 agent calls per pipeline run (excluding dieu-phoi)
 ```
 
 ---
