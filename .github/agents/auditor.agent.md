@@ -199,3 +199,63 @@ AUDITOR_AGENT vs KIEM_TRA_SKILL:
 
   COEXISTENCE: They complement each other — not replacements
 ```
+
+---
+
+## Targeted Retry Loop
+
+When audit returns FAIL, dieu-phoi executes a targeted retry loop that re-generates
+ONLY the failing areas — not the entire output. Tracks score improvement across attempts.
+
+```yaml
+RETRY_LOOP:
+  trigger: Audit score < 80/100
+  max_attempts: 3   # Original + 2 retries (budgeted under auditor's 5-call max)
+  
+  protocol:
+    1. RECEIVE audit verdict with FAILING_TESTS
+    
+    2. EXTRACT targeted fix instructions:
+       - Which test cases failed
+       - What specific content needs improvement
+       - Which sections/areas are affected
+    
+    3. RE-GENERATE targeting only failing areas:
+       - Pass failing_tests as explicit instructions to the skill
+       - Skill modifies only affected sections, preserves passing content
+       - Example: "Section 3 lacks specific data → add 5+ real examples with sources"
+    
+    4. RE-AUDIT with same test cases:
+       - Use identical test cases for fair comparison
+       - Pass previous_score and attempt_number to auditor
+       - Auditor evaluates same criteria, generates updated scores
+    
+    5. TRACK score progression:
+       score_history:
+         - {attempt: 1, score: 62, failing_tests: ["TC-01", "TC-04", "TC-06"]}
+         - {attempt: 2, score: 78, failing_tests: ["TC-04"]}
+         - {attempt: 3, score: 89, failing_tests: []}
+       
+       Save to session state via:
+       python3 scripts/save_state.py save '{...score_history...}'
+    
+    6. EXIT CONDITIONS:
+       pass: Score >= 80 → deliver to user
+       max_attempts: After 3 attempts → deliver best version with disclaimer:
+         "⚠️ Đã thử {N} lần, điểm tốt nhất: {best_score}/100
+          Vẫn chưa đạt yêu cầu ở: {remaining_failures}
+          Giao bản tốt nhất. Bạn muốn thử thêm hay chấp nhận?"
+       no_improvement: Score didn't improve between attempts → stop early:
+         "⚠️ Điểm không cải thiện sau retry (lần {N-1}: {prev}, lần {N}: {curr})
+          Có thể cần thay đổi approach. Giao bản hiện tại?"
+       
+  score_tracking_integration:
+    - score_history saved to session state after each attempt
+    - Available for cross-session resume (pick up retry from where it stopped)
+    - Available for cai-tien retrospective analysis
+
+  budget_impact:
+    - Original audit: 1 call
+    - Per retry: 1 re-generation + 1 re-audit = 2 calls
+    - Max 3 attempts = 1 + 2 + 2 = 5 auditor calls (fits 5-call budget)
+```
