@@ -229,12 +229,9 @@ SKILLS:
 ```yaml
 PIPELINE_FLOW:
   1. User describes request (in Vietnamese)
-  2. tong-hop skill analyzes intent:
-     - What input sources need to be gathered?
-     - What processing is required?
-     - What output format is desired?
-  3. tong-hop calls sub-skills in order:
-     thu-thap → bien-soan → tao-[format]
+  2. orchestrator agent classifies intent and routes to skills
+  3. synthesize skill orchestrates sub-skills in order:
+     gather → compose → gen-[format]
   4. Copilot executes scripts via run_in_terminal
   5. Confirm result (output file path + size)
 
@@ -270,17 +267,20 @@ url_fetch: Copilot fetch_webpage tool
 
 ## Commands Reference
 
-| Command | Description |
-|---------|-------------|
-| `/tong-hop` | Start content synthesis pipeline |
-| `/thu-thap` | Gather content from sources |
-| `/bien-soan` | Synthesize / translate content |
-| `/tao-word` | Create Word file |
-| `/tao-excel` | Create Excel file |
-| `/tao-slide` | Create PowerPoint presentation |
-| `/tao-pdf` | Create PDF file |
-| `/tao-html` | Create HTML page |
-| `/tao-hinh` | Create charts / images |
+| Skill | Description |
+|-------|-------------|
+| synthesize | Start content synthesis pipeline |
+| gather | Gather content from sources |
+| compose | Synthesize / translate content |
+| gen-word | Create Word file |
+| gen-excel | Create Excel file |
+| gen-slide | Create PowerPoint presentation |
+| gen-pdf | Create PDF file |
+| gen-html | Create HTML page |
+| gen-image | Create charts / images |
+| design | Create visual designs (posters, covers) |
+| verify | Audit output vs requirements |
+| improve | Session retrospective + pipeline improvement |
 
 ---
 

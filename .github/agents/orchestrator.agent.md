@@ -219,7 +219,7 @@ SEPARATION:
     - Called BY orchestrator as one of many possible workflows
     - No orchestration logic
     - No intent classification
-    - /tong-hop trigger → orchestrator intercepts and routes
+    - Natural language synthesis requests → orchestrator intercepts and routes
 ```
 
 ---
