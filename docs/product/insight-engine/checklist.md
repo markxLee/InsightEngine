@@ -759,7 +759,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Blocked By: None
 
 - [ ] **US-7.1.2** — Hard confirmation gate before execution
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
   - Branch: feature/insight-engine-us-7.1.2
   - Blocked By: ~~US-7.1.1~~ ✅
