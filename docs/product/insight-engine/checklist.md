@@ -688,10 +688,10 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Branch: —
   - Blocked By: ~~US-6.3.1~~ ✅, ~~US-6.2.1~~ ✅
 
-- [ ] **US-6.3.3** — Pre-built workflow templates
-  - Status: PLANNED
-  - Assignee: —
-  - Branch: —
+- [x] **US-6.3.3** — Pre-built workflow templates
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-6.3.3
   - Blocked By: ~~US-6.3.1~~ ✅
 
 ### Epic 6.4: Agent Strategist
