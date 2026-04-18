@@ -130,27 +130,67 @@ RESULT:
 
 ## Data Collection Protocol (when mode = data_collection)
 
-When tong-hop passes `mode: data_collection`, the entire search workflow changes.
-Instead of searching for knowledge, we're searching for specific items on specific platforms.
-See `references/data-collection.md` for the full protocol.
+> **Advanced examples:** `references/data-collection.md`
 
-### DC-1: Platform-Specific Search
+When tong-hop passes `mode: data_collection`, the workflow changes fundamentally.
+**Key principle: every item in output MUST have a direct_url to its detail page.**
+A search result URL or listing page URL is NEVER acceptable as a final output URL.
 
-**Do NOT use generic Google search.** Target specific platforms where individual items live:
+### DC-1: Platform-Specific Search (MANDATORY — DO NOT USE GENERIC GOOGLE)
 
-1. For each platform identified in tong-hop's Step 1.5:
-   - Construct platform-specific search: `site:{platform} {keywords} {filters}`
-   - Also construct direct platform search URLs if known
-2. Execute searches and collect individual item URLs from results
-3. Report: "🔍 Tìm kiếm trên {N} nền tảng: {platform_list}"
+**Why not generic Google:** Searching "fresher javascript developer HCM" on Google returns
+overview articles and platform homepages — NOT individual job pages. You MUST use:
 
-### DC-2: Fetch Individual Item Pages
+**Option A: Site-specific search** (primary)
+```
+vscode-websearchforcopilot_webSearch: "site:itviec.com fresher javascript HCM 2026"
+```
 
-For each item URL found:
-1. Fetch the individual item page (NOT the search/listing page)
-2. Extract required fields from the page content
-3. Validate URL is an item page (has specific ID/slug, not a search URL)
-4. Report: "📋 Thu thập {N}/{total} items — đang trích xuất dữ liệu..."
+**Option B: Platform search URL** (supplementary)
+```
+fetch_webpage: url="https://itviec.com/it-jobs?query=javascript&city=ho-chi-minh&level=fresher"
+```
+
+**URL pattern recognition — use to distinguish listing vs item pages:**
+
+| Platform | Listing (Phase 1 only) | Item page (needed for Phase 2) |
+|----------|----------------------|-------------------------------|
+| ITViec | itviec.com/it-jobs?query=... | itviec.com/it-jobs/title-at-company-123 |
+| TopCV | topcv.vn/tim-viec-lam-... | topcv.vn/viec-lam/title-123456 |
+| LinkedIn | linkedin.com/jobs/search/... | linkedin.com/jobs/view/1234567 |
+| VietnamWorks | vietnamworks.com/tim-viec/... | vietnamworks.com/viec-lam/title-123 |
+| Shopee | shopee.vn/search?keyword=... | shopee.vn/product-name-i.123.456 |
+
+Steps:
+1. For each platform from tong-hop Step 1.5: construct `site:{platform}` search
+2. Execute searches and collect individual item URLs
+3. Also fetch platform listing pages directly → extract item links
+4. Deduplicate by URL
+5. Report: "🔍 Tìm kiếm trên {N} nền tảng: {platform_list}"
+
+### DC-2: Two-Phase Fetch — Discover URLs, Then Extract Fields
+
+**Phase 1: Discover item URLs** from search results and listing pages.
+**Phase 2: Fetch each item's detail page** and extract structured fields.
+
+For each item URL:
+1. Fetch the item detail page (NOT search/listing page) using 3-tier fallback
+2. Extract required fields using these patterns:
+   ```yaml
+   FIELD_EXTRACTION:
+     job_title: First <h1>, page title, "Tuyển dụng {title}"
+     company_name: "at {company}", employer section
+     salary: "Lương:", "Salary:", numbers with "triệu" | "Thương lượng" if hidden
+     experience: "Kinh nghiệm:", normalize to "< 1 năm" | "1-2 năm" etc.
+     skills: "Yêu cầu:", "Requirements:", tech stack lists → comma-separated
+     location: "Địa điểm:", city names or "Remote"
+     direct_url: THE URL YOU FETCHED (item page) — NEVER a search/listing URL
+   ```
+3. Validate URL is item page (has specific ID/slug, not ?q= or /search?)
+4. If field can't be extracted → mark "Không rõ" (not blank)
+5. Report: "📋 Thu thập {N}/{total} items — đang trích xuất dữ liệu..."
+
+**Efficiency:** Stop at target quantity. Prioritize items matching filter criteria.
 
 ### DC-3: Company/Entity Research (if supplementary data requested)
 
