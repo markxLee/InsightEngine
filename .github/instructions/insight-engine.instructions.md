@@ -45,6 +45,7 @@ applyTo: "**"
 - markitdown first; if empty/garbled → format-specific fallback library
 - **Default content depth is COMPREHENSIVE** — expert-level, rich content. Only use standard when user explicitly asks for brevity.
 - **Auto-review every pipeline step** — check quality after each sub-skill, loop back if insufficient (max 2 retries)
+- **Strict file placement**: Scripts → `/scripts`, temp files → `/tmp`, output → `/output`, input → `/input`. Validated at pipeline start and after each step.
 
 ---
 

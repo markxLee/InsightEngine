@@ -51,6 +51,29 @@ approval, then executes step-by-step with progress reporting and quality checks.
 
 ---
 
+## Strict File Placement Rules (ENFORCED)
+
+**Reference:** `references/file-placement-rules.md`
+
+```yaml
+FILE_RULES:
+  /scripts:  All generated scripts (.py, .js) — NEVER in tmp/ or output/
+  /tmp:      Temporary/intermediate files, session state, agent context
+  /output:   All final deliverables (.docx, .xlsx, .pptx, .pdf, .html, .png)
+  /input:    User-provided source files (read-only)
+
+VALIDATION:
+  when: Pipeline start (Step 0) + after each sub-skill (Step 4 quality loop)
+  on_violation: Log warning → auto-move to correct directory → continue
+  
+SKILL_OUTPUT_MAP:
+  tao-word → /output/*.docx    | tao-excel → /output/*.xlsx
+  tao-slide → /output/*.pptx   | tao-pdf → /output/*.pdf
+  tao-html → /output/*.html    | tao-hinh → /output/images/*.png
+  thiet-ke → /output/*.png     | thu-thap → /tmp/raw_*.md
+  bien-soan → /tmp/synthesized_*.md
+```
+
 ---
 
 ## Step 0: Resume Check (run on every startup)
