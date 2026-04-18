@@ -125,8 +125,10 @@ a formatted text dump.
 
 ### Step 3: Save & Verify
 
-1. Write UTF-8 file; verify: file exists, contains `<!DOCTYPE html>`, `<meta charset="UTF-8">`, no external refs
-2. Report: "✅ File HTML: {path} ({size}) | Style: {style} | {section_count} phần | Portable: Yes"
+1. Write UTF-8 file; verify: file exists, contains `<!DOCTYPE html>`, `<meta charset="UTF-8">`
+2. **READ BACK (mandatory)**: `read_file` the HTML → verify all sections present, content not empty,
+   styles applied. For presentation mode: verify slide count matches plan. If broken → re-generate.
+3. Report: "✅ File HTML: {path} ({size}) | Style: {style} | {section_count} phần | Verified ✓"
 
 ---
 

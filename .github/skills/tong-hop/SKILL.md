@@ -51,29 +51,12 @@ AGENT_MODE: true   # default — see references/agent-mode.md for full spec
 
 ## Step 0: Resume Check (run on every startup)
 
-```bash
-python3 scripts/save_state.py check
-```
-
-| Output | Action |
-|--------|--------|
-| `NO_STATE` or `COMPLETED` | Skip to Step 1 (normal start) |
-| `IN_PROGRESS` + summary | Show summary to user in Vietnamese (see below), ask "⚡ Tiếp tục hay bắt đầu lại?" |
-
-**If user says tiếp tục / resume / "1" / "tiếp":**
-```bash
-python3 scripts/save_state.py resume-plan
-# Returns JSON list of pending steps
-# Skip completed steps — execute ONLY pending steps (from Step 4)
-```
-
-**If user says bắt đầu lại / fresh / "2" / "mới":**
-```bash
-python3 scripts/save_state.py archive
-# Then proceed from Step 1 as normal
-```
-
-**If no state file OR trigger was NOT a resume keyword:** skip to Step 1 silently.
+Run `python3 scripts/save_state.py check`.
+- `NO_STATE`/`COMPLETED` → skip to Step 1
+- `IN_PROGRESS` → show summary, ask "Tiếp tục hay bắt đầu lại?"
+  - Tiếp tục: `save_state.py resume-plan` → skip completed steps
+  - Bắt đầu lại: `save_state.py archive` → Step 1
+- No state file or non-resume trigger: skip to Step 1 silently.
 
 ---
 
@@ -188,22 +171,8 @@ After user approves, save state: `python3 scripts/save_state.py save '<json>'`
 
 ### Step 3.5: Print Pipeline Step Trace (MANDATORY)
 
-**Immediately after user approves the plan**, print the numbered step list. This trace MUST
-be visible throughout execution — update each step as it completes.
-
-```
-📋 Pipeline steps:
-  1. ⬜ Phân tích yêu cầu (Step 1.5)
-  2. ⬜ Thu thập dữ liệu
-  3. ⬜ Biên soạn nội dung
-  4. ⬜ Xuất file {format}
-  5. ⬜ Kiểm tra đầu ra
-```
-
-Adapt steps to match the actual routing. After each step, print updated trace:
-- Completed: `✅ {step_name} — {one-line summary}` (e.g., "✅ Thu thập — 12 nguồn, 25K ký tự")
-- Skipped: `⏭️ {step_name} — {reason}` (e.g., "⏭️ Biểu đồ — không có dữ liệu số")
-- Failed: `❌ {step_name} — {error}` (e.g., "❌ Thu thập URL — timeout sau 3 lần thử")
+**After user approves**, print numbered step list. Update after each step:
+`✅ {name} — {summary}` | `⏭️ {name} — {reason}` | `❌ {name} — {error}`
 
 ---
 
@@ -217,10 +186,44 @@ the orchestrator reviews the output against quality criteria. If quality is insu
 step is re-executed with specific improvement instructions. Maximum 2 retries per step —
 if quality is still poor after 2 retries, proceed with a warning to the user.
 
-### Auto Quality Review Protocol
+### VERIFY-OR-LOOP Protocol (applies to EVERY sub-skill below)
 
-After each sub-skill step, review output against quality criteria (see `references/quality-gates.md`
-for full criteria). If quality fails, re-execute with improvement instructions. Max 2 retries.
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║  🔴 AFTER EVERY SCRIPT/SUB-SKILL: YOU MUST READ THE ACTUAL OUTPUT     ║
+║                                                                        ║
+║  Script exit code 0 ≠ success. A script can "succeed" but produce:    ║
+║  • Empty/thin content (500 words instead of 5000)                      ║
+║  • Broken URLs (404, search pages, wrong items)                        ║
+║  • Generic text (no names, numbers, dates, specifics)                  ║
+║  • Missing sections (3 of 8 headings present)                          ║
+║                                                                        ║
+║  YOU MUST: read_file the output → CHECK content → LOOP if bad          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+**After EVERY sub-skill completes, execute this sequence:**
+
+1. **READ the output file** with `read_file` — not just the terminal log
+2. **COUNT**: words, sections, rows, slides (depending on format)
+3. **SAMPLE**: read 3-5 actual data points/paragraphs — are they specific or generic?
+4. **VERIFY URLs** (if any): pick 2-3 URLs → `fetch_webpage` → is it the right page?
+5. **JUDGE**: does output genuinely satisfy user's request? (not just "file exists")
+6. **If quality fails** → re-run sub-skill with specific fix instructions (max 2 retries)
+7. **If still fails after 2 retries** → report honestly to user, proceed with warning
+
+**Minimum quality thresholds:**
+
+| Sub-skill | Verify | Minimum | Fail action |
+|-----------|--------|---------|-------------|
+| thu-thap | Read collected content | ≥5K chars (standard), ≥15K (deep) | Re-search with expanded queries |
+| thu-thap (DC) | Open 3 URLs with fetch_webpage | URLs are item pages, not search | Re-fetch from platform |
+| bien-soan | Read synthesized text | ≥300 words/section, ≥3 data points each | Re-synthesize with depth flag |
+| tao-word | `read_file` the .docx (via markitdown) | ≥1000 words, all sections present | Re-generate |
+| tao-excel | Read output rows + open 2 URLs | Data in cells, URLs work, formulas correct | Re-generate + re-fetch bad URLs |
+| tao-slide | Read slide JSON/content | ≥8 slides, each has ≥3 bullet points with data | Re-generate |
+| tao-pdf | Read content | Matches source, Vietnamese renders | Re-generate |
+| tao-html | Read HTML source | All sections, reveal.js works, styles applied | Re-generate |
 
 ---
 
@@ -244,10 +247,8 @@ for full criteria). If quality fails, re-execute with improvement instructions. 
 - Report: "✅ Thu thập hoàn tất — {N} nguồn, {total_chars} ký tự"
 - Save state: `python3 scripts/save_state.py update --step thu-thap`
 
-**Quality Gate — THU-THAP:** See `references/quality-gates.md` for full criteria.
-Key checks: volume (≥5K chars standard, ≥15K deep), coverage of all dimensions, source diversity,
-specificity. For data_collection: URL specificity (no search links), field extraction completeness,
-item quantity vs target.
+**⚠️ VERIFY (mandatory):** Read the collected content. For data_collection: open 3 URLs with
+`fetch_webpage` — are they real item pages? Do titles match? If search/listing pages → re-fetch.
 
 ### 4.2: Analysis loop (ALWAYS — not just deep research)
 
@@ -271,9 +272,8 @@ After thu-thap returns, **always** analyze the gathered content quality:
 - Report: "✅ Biên soạn hoàn tất — {sections} phần, {total_words} từ"
 - Save state: `python3 scripts/save_state.py update --step bien-soan`
 
-**Quality Gate — BIEN-SOAN (MOST CRITICAL):** See `references/quality-gates.md`.
-Key checks: depth (≥300 words/section comprehensive), specificity (≥3 data points/section),
-structure (H2/H3 hierarchy, tables, takeaways), analytical depth (insights, not just facts).
+**⚠️ VERIFY (mandatory):** Read the synthesized content. Count words per section. Are there
+specific numbers, names, examples? If any section is < 200 words or purely generic → re-synthesize.
 
 ### 4.3b: Pre-Output URL Validation (data_collection/mixed ONLY — HARD GATE)
 
@@ -306,9 +306,9 @@ URL_VALIDATION_GATE:
 - Report: "✅ Xuất file hoàn tất — {path} ({size})"
 - Save state: `python3 scripts/save_state.py update --step tao-<format> --output-file "<path>"`
 
-**Quality Gate — OUTPUT:** See `references/quality-gates.md`.
-Key checks: completeness (all sections present), formatting (no broken tables/headings),
-size sanity (docx ≥15KB, pptx ≥50KB, pdf ≥20KB, html ≥5KB).
+**⚠️ VERIFY (mandatory):** `read_file` the output file. For Excel: are rows populated with real
+data? Open 2 URLs — do pages match? For Word: ≥1000 words? For Slides: ≥8 slides with content?
+For any format: if output is thin/empty/broken → re-generate. Do NOT move on just because script exited 0.
 
 ### 4.5: tao-hinh (conditional — if charts requested OR output is slides with data)
 - Report: "✅ Tạo {N} biểu đồ hoàn tất"

@@ -208,7 +208,7 @@ Then verify no formula errors (#REF!, #DIV/0!, #NAME?, #VALUE!) in the output.
 
 ---
 
-## Step 5: Save & Verify
+## Step 5: Save, Verify & Read-Back
 
 ```yaml
 SAVE_AND_VERIFY:
@@ -217,29 +217,36 @@ SAVE_AND_VERIFY:
     
   2_RECALC:
     command: python3 scripts/recalc.py "{output_path}"
-    purpose: Force Excel to recalculate all formulas on next open
     
-  3_VERIFY:
-    script: |
-      wb = openpyxl.load_workbook("{output_path}")
-      for ws in wb.worksheets:
-        for row in ws.iter_rows():
-          for cell in row:
-            if isinstance(cell.value, str) and cell.value.startswith("="):
-              # Check formula is valid syntax
-              pass
-      print(f"✅ {ws.title}: {ws.max_row} rows × {ws.max_column} cols")
-    
-  4_REPORT:
-    format: |
-      ✅ File Excel đã tạo:
-      - Đường dẫn: {output_path}
-      - Kích thước: {file_size}
-      - Số sheet: {sheet_count}
-      - Tổng hàng: {total_rows}
-      - Công thức: {formula_count} ô
-      - Màu sắc: 🔵 inputs, ⚫ formulas, 🟢 cross-sheet
+  3_FORMULA_CHECK:
+    verify: No #REF!, #DIV/0!, #NAME?, #VALUE! in any cell
+    report: "✅ {ws.title}: {ws.max_row} rows × {ws.max_column} cols"
 ```
+
+### Step 5.5: Post-Generation Content Verification (MANDATORY)
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║  🔴 DO NOT SKIP: Read the generated .xlsx BEFORE reporting     ║
+║  Script exit code 0 does NOT mean data is correct.             ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+1. **READ**: `read_file` the .xlsx (via markitdown or openpyxl in script)
+2. **CHECK DATA**: Are cells populated with real data? (not empty rows, not "N/A" everywhere)
+3. **VERIFY URLs**: If output contains URLs → `fetch_webpage` on 2-3 random URLs:
+   - Is it the right page? (title matches expected item)
+   - Is it accessible? (not 404, 403, or generic search page)
+   - If URL is broken → fix in data → re-generate that cell/row
+4. **VERIFY FORMULAS**: Do SUM/AVERAGE produce plausible numbers? (not 0, not #REF!)
+5. **If issues found** → fix data/URLs → re-save → re-verify (max 2 retries)
+6. **Report**:
+   ```
+   ✅ File Excel đã tạo:
+   - Đường dẫn: {output_path}  |  📏 {file_size}
+   - {sheet_count} sheets, {total_rows} hàng, {formula_count} công thức
+   - Verified: URLs checked ✓, formulas valid ✓, data populated ✓
+   ```
 
 ---
 

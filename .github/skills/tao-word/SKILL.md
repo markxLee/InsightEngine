@@ -168,10 +168,27 @@ and looks professional for formal reports.
 1. Prepare JSON → save to tmp file
 2. Run: `python3 .github/skills/tao-word/scripts/gen_docx.py --input <json> --output <path> --style <style>`
 3. On error: read traceback, fix script, retry (max 2)
-4. Report:
+
+### Step 4.5: Post-Generation Verification (MANDATORY)
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║  🔴 DO NOT SKIP: Read the generated .docx BEFORE reporting     ║
+║  Script exit code 0 does NOT mean quality is acceptable.       ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+1. **READ**: `read_file` the .docx output (markitdown or direct)
+2. **COUNT**: total words, number of headings/sections
+3. **CHECK**: Are paragraphs substantial? (not just 1-2 sentences per section)
+4. **VERIFY**: All expected sections from the input are present in the output
+5. **If thin** (< 1000 words for report, missing sections, or > 30% sections have < 100 words):
+   → Fix the content JSON → re-generate (max 2 retries)
+6. **If OK** → report:
    ```
    ✅ File Word đã tạo:
    📄 {output_path}  |  📏 {file_size}  |  🎨 {style}  |  📊 {N} phần
+   Verified: {word_count} từ, {section_count} phần đầy đủ
    ```
 
 ---

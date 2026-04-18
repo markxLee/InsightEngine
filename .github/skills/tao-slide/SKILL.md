@@ -264,14 +264,28 @@ Bạn muốn điều chỉnh gì không?
 
 ---
 
-## Step 4: Verify & Report
+## Step 4: Post-Generation Verification & Report
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║  🔴 DO NOT SKIP: Read the generated .pptx BEFORE reporting     ║
+║  A "successful" script can produce slides with no real content. ║
+╚══════════════════════════════════════════════════════════════════╝
+```
 
 1. Check exit code; on error: read traceback, fix data, retry (max 2)
-2. Clean up tmp JSON file
-3. Report:
+2. **READ**: `read_file` the .pptx (via markitdown) or re-read the input JSON
+3. **COUNT**: slides generated, bullets per slide, total words across all slides
+4. **CHECK DEPTH**: Each content slide should have ≥ 3 bullet points with specific data/examples.
+   Slides with only a title and 1 generic bullet = THIN → re-generate with richer content.
+5. **CHECK COVERAGE**: Compare slide topics vs input sections — any section missing?
+6. **If thin/missing** → enrich the JSON data → re-run script (max 2 retries)
+7. Clean up tmp JSON file
+8. Report:
    ```
    ✅ File PowerPoint đã tạo:
    📄 {output_path}  |  📏 {file_size}  |  🎨 {style}  |  📊 {slide_count} slides
+   Verified: {total_words} từ across slides, {thin_count} thin slides fixed
    ```
 
 ---

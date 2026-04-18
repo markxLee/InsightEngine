@@ -354,6 +354,25 @@ For error messages and URL error types, see `references/code-patterns.md`.
 For Playwright anti-detection details, see `references/playwright-stealth.md`.
 For web search workflow, see `references/web-search-enrichment.md`.
 
+### Step 4.5: Post-Fetch Content Verification (MANDATORY)
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║  🔴 "Fetched" ≠ "Useful". READ the content after each fetch.  ║
+║  Do NOT accept: error pages, login walls, empty stubs, or      ║
+║  search/listing pages when you need item detail pages.          ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+After fetching each URL, **READ the first 200-500 chars** and verify:
+1. **Not an error page**: no "403 Forbidden", "404 Not Found", "Access Denied"
+2. **Not a login/paywall**: no "Please log in", "Subscribe to continue"
+3. **Not empty/boilerplate**: content has > 200 chars of actual text (not nav/footer)
+4. **Correct page type**: if you need item detail, verify URL has item ID/slug (not ?q= search)
+5. **Content relevance**: does the text relate to the user's query?
+
+**If bad**: mark as failed, try next tier or alternative URL. Do NOT pass garbage to bien-soan.
+
 ---
 
 ## Step 5: Quality Review & Auto-Expansion

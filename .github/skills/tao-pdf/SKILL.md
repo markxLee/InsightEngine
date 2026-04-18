@@ -126,13 +126,13 @@ the first time. Analyze the content before building:
 ## Step 5: Verify & Report
 
 1. Verify with pypdf: `len(reader.pages)` and sample text extraction
-2. Report:
+2. **READ BACK (mandatory)**: Extract text from 2-3 pages with pypdf — verify content is present,
+   Vietnamese renders correctly (not garbled), and sections match input. If empty/broken → re-generate.
+3. Report:
    ```
    ✅ File PDF:
-   - Đường dẫn: {output_path}
-   - Kích thước: {file_size}
-   - Số trang: {page_count}
-   - Số phần: {section_count}
+   - Đường dẫn: {output_path}  |  📏 {file_size}  |  📄 {page_count} trang
+   Verified: text extracted ✓, sections present ✓
    ```
 
 ---
