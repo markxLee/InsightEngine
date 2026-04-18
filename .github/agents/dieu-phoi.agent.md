@@ -163,3 +163,64 @@ FALLBACK:
     action: Retry once, then report error to user
     partial_delivery: Save completed work, deliver what's available
 ```
+
+---
+
+## Capability Gap Evaluation
+
+Before executing any workflow, dieu-phoi evaluates whether existing skills and agents
+can fulfill the request. This prevents silent failures and enables adaptive improvement.
+
+```yaml
+GAP_EVALUATION:
+  trigger: After intent classification, before workflow execution
+  
+  steps:
+    1. MAP request requirements to available skills/agents:
+       - For each step in the workflow plan, verify a matching skill exists
+       - Check if skill has the required mode/capability (e.g., data_collection mode)
+       
+    2. IDENTIFY specific gaps:
+       - Missing skill for a required step
+       - Existing skill lacks a needed mode or feature
+       - No agent available for a required decision type
+       
+    3. CLASSIFY gap severity:
+       critical: Workflow cannot proceed without this capability
+       moderate: Workflow can proceed but quality will suffer
+       minor: Nice-to-have, not blocking
+       
+    4. REPORT to user (Vietnamese):
+       "⚠️ Phát hiện thiếu khả năng:
+        - {gap_1}: {description} (mức: {severity})
+        - {gap_2}: {description} (mức: {severity})
+        
+        Đề xuất: {solution — create new skill/agent}
+        Bạn muốn tôi tạo {skill/agent} mới? (Ước tính: ~{time})"
+       
+    5. IF user approves creation:
+       → Route to self-improvement protocol (US-9.2.2 / US-9.2.3)
+       
+    6. IF user declines:
+       → Proceed with existing capabilities
+       → Log gap for future improvement
+       
+  available_skills:
+    - thu-thap: gather content (files, URLs, web search, data collection)
+    - bien-soan: synthesize content (standard, comprehensive, translate, summary)
+    - tao-word: generate .docx
+    - tao-excel: generate .xlsx
+    - tao-slide: generate .pptx
+    - tao-pdf: generate .pdf
+    - tao-html: generate .html / reveal.js
+    - tao-hinh: charts + AI images
+    - thiet-ke: visual design (poster, cover, certificate)
+    - cai-dat: environment setup
+    - kiem-tra: output audit
+    - cai-tien: retrospective + improvement
+    
+  available_agents:
+    - auditor: quality scoring
+    - strategist: workflow planning
+    - advisory: decision support
+```
