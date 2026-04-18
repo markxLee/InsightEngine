@@ -781,7 +781,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 ### Epic 7.3: Visible Pipeline Trace
 
 - [ ] **US-7.3.1** — Numbered step trace with live progress
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
   - Branch: feature/insight-engine-us-7.3.1
   - Blocked By: None
