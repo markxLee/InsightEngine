@@ -662,17 +662,17 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ### Epic 6.2: Shared Context Protocol
 
-- [ ] **US-6.2.1** — Shared context file design
-  - Status: PLANNED
-  - Assignee: —
-  - Branch: —
+- [x] **US-6.2.1** — Shared context file design
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-6.2.1
   - Blocked By: None
 
 - [ ] **US-6.2.2** — Agent context read/write API
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: US-6.2.1
+  - Blocked By: ~~US-6.2.1~~ ✅
 
 ### Epic 6.3: Model Profile & Decision Maps
 
@@ -686,7 +686,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: US-6.3.1, US-6.2.1
+  - Blocked By: US-6.3.1, ~~US-6.2.1~~ ✅
 
 - [ ] **US-6.3.3** — Pre-built workflow templates
   - Status: PLANNED
@@ -700,7 +700,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: US-6.3.2, US-6.3.3, US-6.2.1
+  - Blocked By: US-6.3.2, US-6.3.3, ~~US-6.2.1~~ ✅
 
 ### Epic 6.5: Tiered Audit System
 
@@ -708,7 +708,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: US-6.2.1
+  - Blocked By: ~~US-6.2.1~~ ✅
 
 - [ ] **US-6.5.2** — Final output audit with step-level rollback
   - Status: PLANNED
@@ -722,7 +722,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: US-6.2.1
+  - Blocked By: ~~US-6.2.1~~ ✅
 
 - [ ] **US-6.6.2** — Conditional skill-forge runtime
   - Status: PLANNED
