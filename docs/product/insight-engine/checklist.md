@@ -800,8 +800,8 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
   - Branch: feature/insight-engine-us-8.1.1
   - Blocked By: None
 
-- [ ] **US-8.1.2** — Auditor integration into output skills
-  - Status: IN_PROGRESS
+- [x] **US-8.1.2** — Auditor integration into output skills
+  - Status: DONE
   - Assignee: copilot
   - Branch: feature/insight-engine-us-8.1.2
   - Blocked By: ~~US-8.1.1~~ ✅
