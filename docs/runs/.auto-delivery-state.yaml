@@ -1,0 +1,23 @@
+pipeline:
+  product_slug: insight-engine
+  max_iterations: 14
+  current_iteration: 0
+  started_at: "2026-04-18T00:00:00Z"
+  status: running
+  completed_stories: []
+  failed_stories: []
+  story_order:
+    - US-10.1.1
+    - US-10.2.1
+    - US-10.5.1
+    - US-10.1.2
+    - US-10.4.1
+    - US-10.7.1
+    - US-10.5.2
+    - US-10.6.1
+    - US-10.6.2
+    - US-10.6.3
+    - US-10.3.1
+    - US-10.4.2
+    - US-10.7.2
+    - US-10.3.2

@@ -932,13 +932,15 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ### Epic 10.1: Rename Skills to English
 
-- [ ] **US-10.1.1** — Rename all skill directories from Vietnamese to English
-  - Status: PLANNED
+- [x] **US-10.1.1** — Rename all skill directories from Vietnamese to English
+  - Status: DONE
+  - Assignee: copilot
+  - Branch: feature/insight-engine-us-10.1.1
   - Blocked By: None
 
 - [ ] **US-10.1.2** — Update SKILL.md triggers for renamed skills
   - Status: PLANNED
-  - Blocked By: US-10.1.1
+  - Blocked By: ~~US-10.1.1~~ ✅
 
 ### Epic 10.2: Rename Agents to English
 
@@ -960,7 +962,7 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 - [ ] **US-10.4.1** — Update skill registry with English names
   - Status: PLANNED
-  - Blocked By: US-10.1.1, US-10.2.1
+  - Blocked By: ~~US-10.1.1~~ ✅, US-10.2.1
 
 - [ ] **US-10.4.2** — Fix stale PIPELINE_FLOW and update Vietnamese Language Rules
   - Status: PLANNED
@@ -980,21 +982,21 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 - [ ] **US-10.6.1** — design skill user story (formerly thiet-ke)
   - Status: PLANNED
-  - Blocked By: US-10.1.1
+  - Blocked By: ~~US-10.1.1~~ ✅
 
 - [ ] **US-10.6.2** — verify skill user story (formerly kiem-tra)
   - Status: PLANNED
-  - Blocked By: US-10.1.1
+  - Blocked By: ~~US-10.1.1~~ ✅
 
 - [ ] **US-10.6.3** — improve skill user story (formerly cai-tien)
   - Status: PLANNED
-  - Blocked By: US-10.1.1
+  - Blocked By: ~~US-10.1.1~~ ✅
 
 ### Epic 10.7: Product Doc Alignment
 
 - [ ] **US-10.7.1** — Update instructions.md Vietnamese Language Rules
   - Status: PLANNED
-  - Blocked By: US-10.1.1
+  - Blocked By: ~~US-10.1.1~~ ✅
 
 - [ ] **US-10.7.2** — Final cross-document consistency check
   - Status: PLANNED
