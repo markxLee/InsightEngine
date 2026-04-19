@@ -37,12 +37,62 @@ execute → self-review → [pivot if needed] → auditor gate → [re-execute i
 
 - **Max pivot attempts:** 3 per delivery step
 - **Auditor gate threshold:** >80/100 to pass
-- **Pivot strategies** (change at least one on each retry):
-  - gather/search: different query, different source, different search angle
-  - compose: different structure, different depth, different analytical angle
-  - gen-*: different template, restructure sections, add/remove content blocks
 - **No single-attempt delivery.** After first execution, self-review MUST run before delivery.
 - If auditor gate fails after max pivots: deliver with quality score + explicit gap report.
+
+### Per-Skill Pivot Strategies
+
+Each pivot attempt MUST change at least one strategy — never retry with identical approach:
+
+```yaml
+search:
+  pivot_1: different query formulation (rephrase, add year, switch language)
+  pivot_2: different source domain (switch to alternative platform)
+  pivot_3: broaden or narrow scope, switch to deep research mode
+
+gather:
+  pivot_1: fallback reader (markitdown → format-specific library)
+  pivot_2: different URL fetch tier (fetch_webpage → httpx → Playwright)
+  pivot_3: request user to provide alternative file/URL
+
+compose:
+  pivot_1: different document structure (reorder sections, merge/split)
+  pivot_2: different depth level (expand thin sections with more data points)
+  pivot_3: different analytical angle (change framework, add comparison dimension)
+
+gen-word:
+  pivot_1: different style template (corporate → academic → minimal)
+  pivot_2: restructure sections (TOC depth, heading levels, table layout)
+  pivot_3: adjust content density (split long sections, add visual breaks)
+
+gen-excel:
+  pivot_1: restructure data layout (pivot table, different column grouping)
+  pivot_2: different formula approach (simpler or more robust)
+  pivot_3: change formatting (conditional formats, chart types)
+
+gen-slide:
+  pivot_1: different layout template (change slide structure)
+  pivot_2: different content density per slide (split or merge)
+  pivot_3: switch engine (pptxgenjs ↔ ppt-master)
+
+gen-pdf:
+  pivot_1: different layout engine (Platypus vs Canvas)
+  pivot_2: restructure page layout (margins, columns, font sizes)
+  pivot_3: adjust content flow (page break placement, section ordering)
+
+gen-html:
+  pivot_1: different style theme
+  pivot_2: different layout structure (sections, grid, sidebar)
+  pivot_3: switch mode (page ↔ presentation)
+```
+
+### Self-Review Checklist (run after every execution)
+
+Before calling auditor, the executing skill MUST check:
+1. **Output exists** — file was created, non-empty, correct format
+2. **Requirements covered** — cross-check against RULE-6 requirements list
+3. **No placeholders** — no "TODO", "TBD", "[insert here]", lorem ipsum
+4. **No fabrication** — all data points traceable to gathered sources
 
 ---
 
