@@ -487,6 +487,93 @@ session_state:
 
 ---
 
+### SD-3: Verified Source Plan Output (US-14.3.1)
+
+After scoring and ranking sources, present the **verified source plan** to the user as
+factual INFORMATION — not a question. The user should see what was found, understand the
+plan, and have the option to override if desired. The pipeline then **auto-proceeds** to
+data collection without waiting for explicit user confirmation.
+
+**Key design principle:** This is a status update, not a decision request. The pipeline
+has already done the work (discovery + testing + scoring). The user is informed, not blocked.
+
+**SD-3 Execution:**
+
+1. **Check viability** from SD-2 results:
+   ```yaml
+   IF sd2_collection_viable == false:
+     → Present failure message (see Failure Format below)
+     → STOP collection, return empty result to synthesize
+     → Do NOT proceed to data collection
+   ```
+
+2. **Format and present the verified source plan (auto-proceed):**
+
+   **Success format (Tier 1 or 2 sources available):**
+   ```
+   📋 Kế hoạch thu thập dữ liệu cho {domain} tại {country}:
+   
+   ✅ Nguồn chính (sẽ dùng trước):
+     • {name_1} ({domain_1}) — {source_type}
+     • {name_2} ({domain_2}) — {source_type}
+   
+   ⚠️ Nguồn dự phòng (dùng nếu nguồn chính không đủ):
+     • {name_3} ({domain_3}) — cần trình duyệt đặc biệt
+   
+   ❌ Đã bỏ qua ({skip_count} nguồn):
+     • {name_4} — {friendly_reason}
+   
+   → Bắt đầu thu thập từ {total_active} nguồn...
+   ```
+
+   **Failure format (no viable sources):**
+   ```
+   ❌ Không tìm được nguồn dữ liệu phù hợp cho {domain} tại {country}.
+   
+   Đã kiểm tra {total_tested} nguồn — tất cả không truy cập được hoặc không có dữ liệu.
+   
+   Bạn có thể:
+   • Cung cấp URL trực tiếp của nền tảng bạn muốn dùng
+   • Thay đổi phạm vi tìm kiếm (ví dụ: dùng nền tảng quốc tế như LinkedIn, Glassdoor)
+   ```
+
+3. **Handle user override (if user responds before pipeline proceeds):**
+   ```yaml
+   IF user provides feedback within a few seconds of the plan display:
+     - "thêm {site}" → add site to SD-1 candidates and re-test it, then re-run SD-3
+     - "bỏ {site}" → exclude that source from plan
+     - "dùng {site} thôi" → restrict to that source only
+     - No response → auto-proceed immediately after presenting the plan
+   ```
+
+4. **Save plan to session state and proceed to data collection:**
+   ```yaml
+   session_state:
+     sd3_source_plan:
+       tier1_sources: [{ name, url, source_type }]
+       tier2_sources: [{ name, url, source_type, playwright_needed: true }]
+       viable: true | false
+     sd3_complete: true
+   ```
+
+5. **Proceed immediately to SD-4 / DC-0 data collection** using `sd3_source_plan.tier1_sources`
+   as the verified source list (replaces model-assumed sources in DC-0).
+
+**Jargon shield rules for this section:**
+- "trình duyệt đặc biệt" not "Playwright"
+- "không truy cập được" not "HTTP 403 / blocked"
+- "nguồn dự phòng" not "Tier 2"
+- "nguồn chính" not "Tier 1"
+
+**What SD-3 does NOT do:**
+- Does NOT ask "which sources do you want to use?" (that's the old broken behavior)
+- Does NOT wait indefinitely for user response — auto-proceeds
+- Does NOT start data collection (that's SD-4 / DC-0)
+
+→ After SD-3: auto-proceed to **DC-0** (per-step search planning) with verified source list.
+
+---
+
 ### DC-0: Per-Step Search Planning (MANDATORY for complex data collection)
 
 Before any search step, call the **strategist agent** to generate a specialized search sub-flow
