@@ -1319,9 +1319,11 @@ Wave 49 (sequential): US-13.4.3 (after 13.4.2)
 ### Epic 14.4: Retry Loop for Data Collection
 
 - [ ] **US-14.4.1** — Verify-retry data collection loop per source
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - AI: copilot
   - Branch: `feature/insight-engine-us-14.4.1`
+  - Locked: 2026-04-19T00:05:00Z
   - Blocked By: ~~US-14.3.1~~ ✅
 
 ```
