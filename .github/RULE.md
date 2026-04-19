@@ -14,10 +14,16 @@ On receiving ANY user prompt that triggers a pipeline (synthesis, creation, rese
    python3 scripts/save_state.py --raw-prompt "<full user prompt>"
    ```
    This creates `tmp/session_state.json` with: `raw_prompt`, `timestamp`, `session_id`, `status: started`.
-2. **SECOND action** — begin intent analysis AND output template creation in parallel.
-3. **NEVER** invoke any skill before step 1 completes.
+   If `save_state.py` does not exist: run `setup` skill to create it, then retry.
+2. **SECOND action (parallel):**
+   - **Intent analysis** — classify what user wants (synthesis, creation, research, design, data_collection, mixed)
+   - **Output template creation** — prepare file structure based on expected format (.docx, .xlsx, .pptx, .pdf, .html)
+   These two run simultaneously. Both must complete before step 3.
+3. **THIRD action** — extract structured requirements (RULE-6) + call strategist for workflow plan.
+4. **FOURTH action** — present workflow plan summary to user (information, not a question) and begin execution.
 
-No exceptions. No shortcuts. If `save_state.py` fails, log a warning and continue — but always attempt it first.
+**No exceptions.** No skill may be invoked before step 1 completes.
+If `save_state.py` fails and setup cannot fix it: log a warning and continue — but always attempt it first.
 
 ---
 
