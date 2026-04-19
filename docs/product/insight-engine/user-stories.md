@@ -3,8 +3,8 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Scope:** Phase 0 → Phase 14 (all phases)
-> **Total User Stories:** 120 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10 + 6 Phase 11 + 8 Phase 12 + 9 Phase 13 + 6 Phase 14)
+> **Scope:** Phase 0 → Phase 15 (all phases)
+> **Total User Stories:** 132 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10 + 6 Phase 11 + 8 Phase 12 + 9 Phase 13 + 6 Phase 14 + 12 Phase 15)
 
 ---
 
@@ -2332,3 +2332,122 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
   - AC5: Pipeline completes with partial results if some sources fail — final summary includes: total sources attempted, succeeded, failed (with reasons)
   - AC6: User receives summary in friendly format: "Collected from 3 out of 4 sources. [Site D] had no accessible data and was skipped."
 - Blocked By: `US-14.3.1`
+
+---
+
+## Phase 15: Pipeline Hardening & Skill Decomposition
+
+> **Origin:** Real-world feedback reveals four systemic gaps: `gather` too broad; automation too low (Copilot still asks unnecessary questions); execute-test-pivot-audit loop missing; hard workflow and state compliance too low. Phase 15 fixes these at the architectural level.
+
+### Epic 15.1: gather / search Skill Split
+
+**US-15.1.1: Create new `search` skill with internet discovery logic**
+- Description: As a pipeline that needs to find information on the internet, I want a dedicated `search` skill that handles web search, source discovery, and platform-specific searching, so that responsibilities are cleanly separated from file reading.
+- Acceptance Criteria:
+  - AC1: `.github/skills/search/SKILL.md` created with complete skill frontmatter
+  - AC2: Skill handles: web search (vscode-websearchforcopilot_webSearch), source discovery (runtime platform discovery), deep research protocol, data collection mode with Source Intelligence Protocol
+  - AC3: Skill description clearly states scope: internet-only, no local file reading
+  - AC4: References updated to point to `search` skill from `data-collection.md`
+  - AC5: All jargon shield and language rules applied
+- Blocked By: `None`
+
+**US-15.1.2: Refactor `gather` skill — file and URL only**
+- Description: As a pipeline reading local files and explicit URLs, I want `gather` to handle only file reading and URL fetching (no web search logic), so that the skill is focused and reliable.
+- Acceptance Criteria:
+  - AC1: `gather` SKILL.md updated: remove web-search sections, Source Intelligence Protocol, Data Collection Protocol, Deep Research Protocol
+  - AC2: `gather` SKILL.md retains: local file reading (markitdown + fallbacks), explicit URL fetching (3-tier), quality review for fetched content
+  - AC3: `gather` description updated to reflect file+URL only scope
+  - AC4: All cross-references within `gather` that pointed to search behavior now redirect to `search` skill
+- Blocked By: `US-15.1.1`
+
+**US-15.1.3: Update copilot-instructions.md skill registry**
+- Description: As a user invoking any skill, I want `copilot-instructions.md` to correctly list both `gather` (files/URLs) and `search` (internet/platforms), so that Copilot routes requests to the right skill.
+- Acceptance Criteria:
+  - AC1: `copilot-instructions.md` skill registry adds `search` skill entry with correct description, triggers, and SKILL.md path
+  - AC2: `gather` skill entry updated with narrowed description (files + explicit URLs only)
+  - AC3: Triggers don't overlap — clear differentiation between when each skill fires
+- Blocked By: `US-15.1.2`
+
+### Epic 15.2: RULE.md Enforcement Layer
+
+**US-15.2.1: Create `.github/RULE.md` with non-negotiable pipeline rules**
+- Description: As a pipeline operator, I want a single authoritative RULE.md file that defines non-negotiable laws for all skills and agents, so that compliance cannot be overridden by skill-level instructions.
+- Acceptance Criteria:
+  - AC1: `.github/RULE.md` created with clearly numbered rules covering: session init (state + raw prompt first), workflow order, audit gate enforcement, autonomous execution (no unnecessary questions), and jargon shield
+  - AC2: Rules written as hard constraints, not suggestions — use "MUST", "NEVER", "MANDATORY" language
+  - AC3: File includes explicit statement: "These rules override all SKILL.md and agent instructions"
+  - AC4: Rules are concise — max 2 pages, scannable format
+- Blocked By: `None`
+
+**US-15.2.2: Inject RULE.md into copilot-instructions.md with mandatory priority**
+- Description: As the pipeline enforcement mechanism, I want RULE.md referenced at the very top of `copilot-instructions.md` with an explicit override marker, so that Copilot loads and applies it before any other instruction.
+- Acceptance Criteria:
+  - AC1: Top of `copilot-instructions.md` contains a block: `[MANDATORY — Read .github/RULE.md FIRST. It overrides all instructions below.]`
+  - AC2: Block appears before any skill registry, product context, or workflow guidance
+  - AC3: Reference includes file path: `.github/RULE.md`
+- Blocked By: `US-15.2.1`
+
+### Epic 15.3: Hard Session Start Discipline
+
+**US-15.3.1: Define hard session start init sequence in RULE.md**
+- Description: As the pipeline, I want a non-negotiable session init sequence defined in RULE.md so that every session/prompt start saves state before any work begins.
+- Acceptance Criteria:
+  - AC1: RULE.md includes numbered rule: "RULE-1: On receiving any prompt, FIRST action is `python3 scripts/save_state.py --raw-prompt <prompt>`. No exceptions."
+  - AC2: Rule specifies: state file created at `tmp/session_state.json` with `raw_prompt`, `timestamp`, `session_id`
+  - AC3: Rule specifies: this runs before any orchestrator routing, before any skill invocation, before any analysis
+  - AC4: `scripts/save_state.py` updated to accept `--raw-prompt` flag and write state file
+- Blocked By: `US-15.2.1`
+
+**US-15.3.2: Apply hard session start to orchestrator agent**
+- Description: As a user submitting any request, I want the orchestrator to always execute the session init sequence as its absolute first step, so that state is always captured regardless of request type.
+- Acceptance Criteria:
+  - AC1: `orchestrator.agent.md` updated: first section is "Session Init (MANDATORY)" with explicit save_state.py call
+  - AC2: Init runs before intent classification, before routing, before any other step
+  - AC3: If save_state.py fails (file permission, script missing), log warning but continue — do not block pipeline
+- Blocked By: `US-15.3.1`
+
+**US-15.3.3: Parallel output template creation**
+- Description: As a pipeline generating output files, I want the output template (placeholder structure) created in parallel with prompt analysis — not sequentially after it — so that generation time is reduced.
+- Acceptance Criteria:
+  - AC1: Orchestrator updated: after session init, spawn template creation task concurrently with intent analysis
+  - AC2: Template creation uses `synthesize` Step 0 template logic — creates structural placeholder (sheet names, slide titles, section headings) immediately from request summary
+  - AC3: Template path saved to session state so gen-* skills can use it directly
+  - AC4: If template creation finishes before intent analysis, it waits; if intent analysis finishes first, it waits for template — then merge and proceed
+- Blocked By: `US-15.3.1`
+
+### Epic 15.4: Execute-Test-Pivot-Audit Loop
+
+**US-15.4.1: Define execute-test-pivot-audit loop standard**
+- Description: As a skill author, I want a standard execute-test-pivot-audit loop defined in RULE.md so that all skills follow the same quality enforcement pattern.
+- Acceptance Criteria:
+  - AC1: RULE.md includes "RULE-2: Every skill MUST follow the execute → self-review → pivot (if needed) → auditor gate → re-execute loop"
+  - AC2: Loop definition includes: max 3 pivot attempts per delivery, auditor gate threshold (>80/100), pivot strategies (change angle, change depth, change structure)
+  - AC3: Rule specifies: no skill delivers output without passing auditor gate or exhausting pivot attempts
+  - AC4: Pivot strategies defined per skill category: gather/search (change query/source), compose (change structure/angle), gen-* (change template/format)
+- Blocked By: `US-15.2.1`
+
+**US-15.4.2: Apply execute-test-pivot loop to gather and search skills**
+- Description: As the gather and search skills, I want to follow the execute-test-pivot-audit loop so that gathered content passes a quality gate before being passed to compose.
+- Acceptance Criteria:
+  - AC1: `gather` SKILL.md Step 5 (Quality Review) updated to reference the loop standard from RULE.md
+  - AC2: `search` SKILL.md includes explicit quality gate: if content volume/specificity/coverage fails, pivot (change queries, different sources, different search angle) and retry
+  - AC3: Max 2 pivot rounds before proceeding with honest coverage report
+- Blocked By: `US-15.4.1`
+
+**US-15.4.3: Apply execute-test-pivot loop to compose skill**
+- Description: As the compose skill, I want to follow the execute-test-pivot-audit loop so that synthesized content passes a quality gate before being passed to gen-* skills.
+- Acceptance Criteria:
+  - AC1: `compose` SKILL.md updated: after generation, self-review checks depth, specificity, requirement coverage
+  - AC2: If any section is thin (<300 chars, generic, no data), trigger pivot: rewrite from different angle or increase depth
+  - AC3: After pivot, call auditor gate before passing to gen-* skill
+  - AC4: Max 2 pivot attempts; if still below threshold, deliver with honest quality note
+- Blocked By: `US-15.4.1`
+
+**US-15.4.4: Apply execute-test-pivot loop to all gen-* skills**
+- Description: As any gen-* skill (gen-word, gen-excel, gen-slide, gen-pdf, gen-html), I want to follow the execute-test-pivot-audit loop so that generated files pass a quality gate before delivery.
+- Acceptance Criteria:
+  - AC1: Each gen-* SKILL.md updated: after file generation, auditor is called with the structured requirements list
+  - AC2: If auditor score <80: identify failing requirements, apply pivot (restructure, add content, fix formatting), regenerate
+  - AC3: Max 2 pivot attempts; after exhausting, deliver with auditor score and failure reasons documented
+  - AC4: Delivery message includes auditor score: "✅ Tạo file hoàn tất (điểm chất lượng: 87/100)"
+- Blocked By: `US-15.4.1`

@@ -591,5 +591,37 @@ Phase 0 là bắt buộc — không có `cai-dat` và `tong-hop` thì các skill
 
 ---
 
+## Phase 15 — Pipeline Hardening & Skill Decomposition
+
+**Goal:** Enforce strict, non-negotiable pipeline discipline across all skills. Split the `gather` skill into two focused skills (`gather` for files/URLs, `search` for internet discovery). Introduce a RULE.md enforcement layer that overrides all skill-level instructions. Establish a hard session-start discipline (state file + raw prompt saved before any skill invocation). Add an execute-test-pivot-audit loop as a mandatory delivery standard.
+
+> **Origin:** Real-world feedback reveals four systemic gaps: (1) `gather` is too broad — mixing file reading and internet search reduces reliability; (2) automation level too low — Copilot still asks unnecessary questions instead of deciding autonomously; (3) execute-test-pivot-audit loop missing — skills deliver on a single attempt with no angle-change or re-test cycle; (4) hard workflow and state compliance too low — RULE.md at highest instruction priority can fix the root cause.
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 15.1 — gather / search Skill Split** | Extract web-search and internet-discovery logic from `gather` into a new focused `search` skill. `gather` becomes file+URL only. Update `copilot-instructions.md` skill registry to reference both skills. |
+| **Epic 15.2 — RULE.md Enforcement Layer** | Create `.github/RULE.md` with non-negotiable pipeline rules (state init, workflow order, audit gates, autonomous execution, no unnecessary questions). Inject mandatory reference at top of `copilot-instructions.md` with `[MANDATORY — overrides all other instructions]` marker. |
+| **Epic 15.3 — Hard Session Start Discipline** | Define and enforce the non-negotiable session init sequence: create state file + save raw prompt via `scripts/save_state.py` as the absolute first action before any skill routing. Add parallel template creation — output template spawned concurrently with prompt analysis. |
+| **Epic 15.4 — Execute-Test-Pivot-Audit Loop** | Define the standard execute → self-review → change angle → retest → auditor → re-execute loop. Specify pivot strategies (angle, depth, structure change) per skill type. Apply loop to gather, search, compose, and all gen-* skills. |
+
+---
+
+## Phase 15 — Pipeline Hardening & Skill Decomposition (Tiếng Việt)
+
+**Mục tiêu:** Bắt buộc kỷ luật pipeline không thương lượng trên toàn bộ skill. Tách skill `gather` thành hai skill (`gather` cho file/URL, `search` cho tìm kiếm internet). Tạo lớp bắt buộc RULE.md ghi đè mọi instruction cấp skill. Thiết lập kỷ luật bắt đầu session cứng (lưu state file + raw prompt trước mọi skill). Thêm vòng lặp execute-test-pivot-audit như tiêu chuẩn giao hàng bắt buộc.
+
+> **Nguồn gốc:** Phản hồi thực tế cho thấy bốn khoảng thiếu hệ thống: (1) `gather` quá rộng — trộn lẫn đọc file và tìm kiếm internet làm giảm độ tin cậy; (2) mức độ tự động hóa quá thấp — Copilot vẫn hỏi thừa thay vì tự quyết; (3) thiếu vòng lặp execute-test-pivot — skill giao hàng sau một lần thử không có chu kỳ đổi góc và retest; (4) tuân thủ hard workflow và state quá thấp — RULE.md ở mức ưu tiên cao nhất có thể fix root cause.
+
+| Epic | Mô tả |
+|------|-------|
+| **Epic 15.1 — Tách skill gather / search** | Tách logic tìm kiếm web và khám phá internet từ `gather` sang skill `search` mới. `gather` chỉ còn xử lý file + URL. Cập nhật registry trong `copilot-instructions.md`. |
+| **Epic 15.2 — Lớp bắt buộc RULE.md** | Tạo `.github/RULE.md` với luật pipeline không thương lượng (init state, thứ tự workflow, cổng audit, thực thi tự động, không hỏi thừa). Inject tham chiếu bắt buộc đầu `copilot-instructions.md`. |
+| **Epic 15.3 — Kỷ luật bắt đầu session cứng** | Định nghĩa và bắt buộc trình tự init session: tạo state file + lưu raw prompt qua `save_state.py` là hành động đầu tiên tuyệt đối trước mọi routing. Template output tạo song song với phân tích prompt. |
+| **Epic 15.4 — Vòng lặp Execute-Test-Pivot-Audit** | Định nghĩa vòng lặp chuẩn execute → tự đánh giá → đổi góc → retest → auditor → thực thi lại. Chỉ định chiến lược pivot theo từng loại skill. Áp dụng cho gather, search, compose, và tất cả gen-* skills. |
+
+---
+
 *Roadmap này không bao gồm task-level breakdown. Xem User Stories để biết chi tiết triển khai.*  
 *Bước tiếp theo: `/product-roadmap-review` hoặc `/roadmap-to-user-stories`*

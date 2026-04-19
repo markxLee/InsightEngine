@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 120 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 DONE + 8 Phase 12 DONE + 9 Phase 13 DONE + 6 Phase 14 DONE)  
+> **Total User Stories:** 132 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 DONE + 8 Phase 12 DONE + 9 Phase 13 DONE + 6 Phase 14 DONE + 12 Phase 15 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -1332,6 +1332,99 @@ Wave 53 (sequential): US-14.2.2 (after 14.2.1)
 Wave 54 (sequential): US-14.3.1 (after 14.2.2)
 Wave 55 (sequential): US-14.4.1 (after 14.3.1)
 --- Phase 14 DONE (6/6) ---
+```
+
+---
+
+## Phase 15: Pipeline Hardening & Skill Decomposition
+
+> **Origin:** Real-world feedback — gather too broad, automation too low, execute-test-pivot loop missing, hard workflow compliance too low. Phase 15 adds gather/search split, RULE.md enforcement, hard session start, and execute-test-pivot-audit loop. **12 stories PLANNED.**
+
+### Epic 15.1: gather / search Skill Split
+
+- [ ] **US-15.1.1** — Create new `search` skill with internet discovery logic
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.1.1`
+  - Blocked By: `None`
+
+- [ ] **US-15.1.2** — Refactor `gather` skill — file and URL only
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.1.2`
+  - Blocked By: `US-15.1.1`
+
+- [ ] **US-15.1.3** — Update copilot-instructions.md skill registry
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.1.3`
+  - Blocked By: `US-15.1.2`
+
+### Epic 15.2: RULE.md Enforcement Layer
+
+- [ ] **US-15.2.1** — Create `.github/RULE.md` with non-negotiable pipeline rules
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.2.1`
+  - Blocked By: `None`
+
+- [ ] **US-15.2.2** — Inject RULE.md into copilot-instructions.md with mandatory priority
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.2.2`
+  - Blocked By: `US-15.2.1`
+
+### Epic 15.3: Hard Session Start Discipline
+
+- [ ] **US-15.3.1** — Define hard session start init sequence in RULE.md
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.3.1`
+  - Blocked By: `US-15.2.1`
+
+- [ ] **US-15.3.2** — Apply hard session start to orchestrator agent
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.3.2`
+  - Blocked By: `US-15.3.1`
+
+- [ ] **US-15.3.3** — Parallel output template creation
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.3.3`
+  - Blocked By: `US-15.3.1`
+
+### Epic 15.4: Execute-Test-Pivot-Audit Loop
+
+- [ ] **US-15.4.1** — Define execute-test-pivot-audit loop standard
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.4.1`
+  - Blocked By: `US-15.2.1`
+
+- [ ] **US-15.4.2** — Apply loop to gather and search skills
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.4.2`
+  - Blocked By: `US-15.4.1`
+
+- [ ] **US-15.4.3** — Apply loop to compose skill
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.4.3`
+  - Blocked By: `US-15.4.1`
+
+- [ ] **US-15.4.4** — Apply loop to all gen-* skills
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-15.4.4`
+  - Blocked By: `US-15.4.1`
+
+```
+Wave 56 (parallel): US-15.1.1 + US-15.2.1
+Wave 57 (sequential): US-15.1.2 (after 15.1.1) + US-15.2.2 (after 15.2.1) + US-15.3.1 (after 15.2.1) + US-15.4.1 (after 15.2.1)
+Wave 58 (sequential): US-15.1.3 (after 15.1.2) + US-15.3.2 (after 15.3.1) + US-15.3.3 (after 15.3.1) + US-15.4.2 (after 15.4.1) + US-15.4.3 (after 15.4.1) + US-15.4.4 (after 15.4.1)
+--- Phase 15 PLANNED (0/12) ---
 ```
 
 ---
