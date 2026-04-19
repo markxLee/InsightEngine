@@ -205,3 +205,69 @@ OUTPUT_VALIDATION:
     - At least 20 items for "tất cả" / comprehensive requests
     - Report if target couldn't be met and explain why
 ```
+
+---
+
+## Batch Progress Model
+
+When executing data_collection pipelines, emit non-interactive progress updates
+so the user knows what's happening without needing to be on-call.
+
+```yaml
+BATCH_PROGRESS:
+  purpose: >
+    User sees autonomous progress without approving each batch.
+    Replaces: "Đã thu thập 10 items, bạn có muốn tiếp tục không?" (BANNED)
+    With:      "🔍 ITViec: ✅ 10 items" (non-interactive update)
+    
+  PROGRESS_EVENTS:
+    platform_start:
+      format: "🔍 Đang thu thập từ {platform}..."
+      when: Before starting search on each platform
+      
+    platform_done:
+      format: "🔍 {platform}: ✅ {count} items ({field_sample})"
+      when: After extracting all items from a platform
+      example: "🔍 ITViec: ✅ 12 items (JavaScript Fresher, HCM)"
+      
+    batch_complete:
+      format: "📊 Tổng đã thu thập: {total} items từ {platform_count} nền tảng"
+      when: After all platforms are done, before Excel generation
+      
+    dedup_report:
+      format: "🔄 Sau khi loại trùng: {final_count} items ({removed} trùng đã xóa)"
+      when: After deduplication (if any duplicates found)
+      skip_if: removed == 0
+
+  BATCH_DECISIONS:
+    # ALL decisions below are made AUTOMATICALLY — never ask user
+    
+    platform_order:
+      rule: primary platforms first (ITViec, TopCV), secondary after
+      never_ask: "Bắt đầu từ nền tảng nào?"
+      
+    items_per_platform:
+      rule: Collect up to target/platform_count per platform
+      cap: 30 items per platform maximum (avoid infinite loops)
+      never_ask: "Thu thập bao nhiêu items từ {platform}?"
+      
+    quality_threshold:
+      rule: If <5 items from a platform → try next, don't ask
+      never_ask: "Chỉ có 3 items, bạn muốn tiếp tục không?"
+      
+    retry_on_failure:
+      rule: Retry once with simplified query, then skip platform
+      max_retries: 1
+      never_ask: "Lấy được ít, tiếp tục hay thử lại?"
+      
+    batch_size:
+      rule: Process all items without artificial pausing
+      never_ask: "Đã có 10 items, thu thập thêm không?"
+
+  MINIMAL_INTERACTION_CONTRACT:
+    before_collection:  "🔍 Thu thập {entity_type} từ {platform_list}..."
+    during_collection:  "{platform_done events} — non-interactive, no approval needed"
+    after_collection:   "📊 Tổng: {final_count} {entity_type} → Đang tạo {output_format}..."
+    on_completion:      (see Final Delivery section)
+```
+
