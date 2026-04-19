@@ -280,6 +280,37 @@ SEPARATION:
 
 ---
 
+## Frustration Signal Detection
+
+On EVERY user message, orchestrator checks for frustration signals BEFORE processing intent.
+
+```yaml
+FRUSTRATION_DETECTION:
+  reference: ".github/skills/synthesize/references/autonomy-rules.md"
+  
+  PROCESS:
+    1. Check message against EXPLICIT_OVERLOAD patterns (high confidence → silent mode)
+    2. Check IMPATIENCE patterns (medium confidence → activate autonomy_mode)
+    3. Check consecutive_approvals counter (≥3 → activate autonomy_mode + note)
+    4. Check EXPLICIT_N8N_COMPARISON patterns (high confidence → silent mode)
+    
+  ON_DETECTION:
+    silent_mode:
+      - SET session_mode=silent
+      - Reply ONCE: "Được rồi! Tôi sẽ tự thực hiện..."
+      - Proceed immediately
+    autonomy_mode:
+      - SET autonomy_mode=true (if not already)
+      - No announcement needed if plan already in progress
+    
+  SESSION_STATE_FIELDS:
+    session_mode: "guided | standard | silent"   # default: guided
+    consecutive_approvals: integer               # reset on any modification
+    frustration_detected: boolean
+```
+
+---
+
 ## Jargon Shield
 
 ALL messages composed by orchestrator and sent to the user MUST pass through jargon shield.
