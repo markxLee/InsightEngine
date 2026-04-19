@@ -136,6 +136,63 @@ When synthesize passes `mode: data_collection`, the workflow changes fundamental
 **Key principle: every item in output MUST have a direct_url to its detail page.**
 A search result URL or listing page URL is NEVER acceptable as a final output URL.
 
+### DC-0: Per-Step Search Planning (MANDATORY for complex data collection)
+
+Before any search step, call the **strategist agent** to generate a specialized search sub-flow
+tailored to the item type and target sources. This replaces flat "search Google → get results"
+for complex data-collection requests (sales leads, job listings, products, company profiles).
+
+**When to trigger DC-0:**
+- User wants specific items: jobs, products, leads, companies, listings, candidates
+- Item count ≥ 5 AND specific output fields are requested
+- synthesize passes `mode: data_collection`
+
+**Budget:** ≤1 strategist call per search step, max 3 per pipeline. Track in session state.
+If budget exhausted → skip DC-0, proceed directly to DC-1 using best-effort queries.
+
+**Call strategist with this structured context:**
+```yaml
+strategist_call:
+  task: generate_search_sub_flow
+  context:
+    item_type: "<what user wants: jobs|leads|products|courses|companies>"
+    potential_sources: ["<platform_1>", "<platform_2>", ...]  # Known relevant platforms
+    desired_quantity: <N>
+    required_fields: ["<field_1>", "<field_2>", ...]
+    user_request_summary: "<one-sentence description>"
+    filters: { location: "...", level: "...", salary: "..." }  # If specified
+```
+
+**Expected sub-flow output from strategist (minimum 4 ordered steps):**
+1. **source-plan** — Rank target platforms by relevance; identify primary and fallback sources
+2. **site-search** — Construct `site:{source}.com` queries for each platform; capture item URLs
+3. **dom-explore** — If site-search returns thin results (< 3 items), fetch source homepage,
+   extract DOM structure (nav links, search inputs, URL patterns) to find internal search paths
+   *(see `references/dom-exploration.md` for implementation; requires US-11.2.1+)*
+4. **internal-search** — Use the source platform's own search tool (discovered via dom-explore
+   or known URL patterns) to perform a more targeted query inside the platform
+
+Execute each step in sequence. Each step's output feeds into the next.
+If a step fails after 1 retry → continue to the next step with available data.
+If the overall sub-flow fails after 2 full attempts → trigger DC-6 (Adaptive Flow Advisor).
+
+**Budget tracking (session state):**
+```yaml
+session_state:
+  strategist_calls_used: 0   # Increment after each DC-0 call
+  strategist_calls_max: 3    # Per pipeline run — HARD STOP
+```
+
+Report after DC-0:
+```
+🗺️ Search sub-flow generated (strategist call {N}/3):
+  1. source-plan: {platform list}
+  2. site-search: {query templates}
+  3. dom-explore: {trigger condition}
+  4. internal-search: {search endpoint or approach}
+Đang thực hiện sub-flow...
+```
+
 ### DC-1: Platform-Specific Search (MANDATORY — DO NOT USE GENERIC GOOGLE)
 
 ⚠️ **Advanced examples: `references/data-collection.md`**

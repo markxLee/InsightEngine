@@ -1081,9 +1081,10 @@ Wave 33 (sequential): US-10.3.2 (after 10.3.1)
 
 ### Epic 11.1: Per-Step Search Planner
 
-- [ ] **US-11.1.1** — Integrate per-step search planner in gather skill
-  - Status: PLANNED
+- [x] **US-11.1.1** — Integrate per-step search planner in gather skill
+  - Status: DONE
   - Assignee: copilot
+  - Branch: `feature/insight-engine-us-11.1.1`
   - Blocked By: None
 
 ### Epic 11.2: Source DOM Explorer
@@ -1091,7 +1092,7 @@ Wave 33 (sequential): US-10.3.2 (after 10.3.1)
 - [ ] **US-11.2.1** — Auto DOM exploration when site-scoped search returns thin results
   - Status: PLANNED
   - Assignee: copilot
-  - Blocked By: US-11.1.1
+  - Blocked By: ~~US-11.1.1~~ ✅
 
 - [ ] **US-11.2.2** — Internal search usage via DOM-discovered endpoints
   - Status: PLANNED
@@ -1110,7 +1111,7 @@ Wave 33 (sequential): US-10.3.2 (after 10.3.1)
 - [ ] **US-11.4.1** — Advisory agent fallback after 2 failed search attempts
   - Status: PLANNED
   - Assignee: copilot
-  - Blocked By: US-11.1.1
+  - Blocked By: ~~US-11.1.1~~ ✅
 
 - [ ] **US-11.4.2** — User-facing flow alternatives presentation
   - Status: PLANNED
