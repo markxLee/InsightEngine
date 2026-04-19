@@ -1217,8 +1217,8 @@ Wave 42 (sequential): US-12.4.2 (after 12.4.1)
 
 ### Epic 13.2: Per-Step Auditor Enforcement
 
-- [ ] **US-13.2.1** — Mandatory auditor checkpoint after each pipeline step
-  - Status: PLANNED
+- [x] **US-13.2.1** — Mandatory auditor checkpoint after each pipeline step
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-13.2.1`
   - Blocked By: ~~US-13.1.2~~ ✅
@@ -1227,7 +1227,7 @@ Wave 42 (sequential): US-12.4.2 (after 12.4.1)
   - Status: PLANNED
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-13.2.2`
-  - Blocked By: US-13.2.1
+  - Blocked By: ~~US-13.2.1~~ ✅
 
 ### Epic 13.3: Child Soft-Workflow for Complex Steps
 

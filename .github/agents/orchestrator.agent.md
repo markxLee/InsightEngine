@@ -97,8 +97,39 @@ FLOW:
      ```
      After this point: execute fully autonomously — no more confirmation gates
      (see Autonomy Mode section below)
-  6. EXECUTE skills in order per plan
-  7. After each output skill → CALL auditor agent for quality gate
+  6. EXECUTE skills in order per plan — per-step protocol:
+     For EACH step in the plan:
+       a. Mark step in_progress:
+          ```bash
+          python3 scripts/save_state.py update --step <name> --status in_progress
+          ```
+       b. Execute the skill
+       c. CALL auditor checkpoint (MANDATORY after every step that produces output):
+          - Pass: structured_requirements from state, output file/content summary
+          - Check: does this step's output satisfy the requirements it covers?
+          - If auditor score < 80 OR any requirement < 60:
+              → Log BLOCKING_FAILURES to step state
+              → Retry step up to 2× targeting BLOCKING_FAILURES
+              → If still failing after 2 retries → mark step failed + proceed to failure handling (Step 7b)
+          ```bash
+          python3 scripts/save_state.py update --step <name> --status completed \
+            --audit-score <score> --req-scores '<per_req_json>'
+          ```
+       d. On step success → proceed to next step
+     
+     Reference: .github/skills/synthesize/references/per-step-audit.md
+
+  7a. After all steps complete → FINAL QUALITY CHECK:
+      - Confirm all required output files exist
+      - Call auditor with FULL output for final audit if gather steps produced varied quality
+      - Budget: deduct from auditor call budget (max 5 per run)
+
+  7b. FAILURE HANDLING (if any step fails after 2 retries):
+      - Log failure to state
+      - Notify user with specific failing requirements
+      - Offer: skip step / re-attempt with adjusted strategy / escalate to user
+      - See US-13.2.2 re-planning protocol
+
   8. DELIVER final output: ONE consolidated summary message
      - Collect all output files (path + size)
      - Include content metrics (word count, rows, slide count)
@@ -109,9 +140,13 @@ FLOW:
 
 BUDGET_ENFORCEMENT:
   strategist: max 1 call per pipeline run
-  auditor: max 5 calls per pipeline run
+  auditor: max 5 calls per pipeline run (per-step checkpoints count toward this budget)
   advisory: max 2 calls per pipeline run
   total: max 8 agent calls per pipeline run
+  
+  # Phase 13 note: If plan has > 3 output steps, call auditor selectively:
+  # Priority: gen-excel > gen-slide > gen-word > gen-html > compose
+  # Always call auditor on last output step regardless of budget
 ```
 
 ---
@@ -133,8 +168,10 @@ STATE:
       command: "python3 scripts/save_state.py save '{json}'"
       
     after_each_step:
-      what: Update step status, output_summary, output files
-      command: "python3 scripts/save_state.py update --step {name} --status completed --output-file {path}"
+      what: Update step status, output_summary, output files, audit score
+      command: |
+        python3 scripts/save_state.py update --step {name} --status completed \
+          --output-file {path} --audit-score {score} --req-scores '{per_req_json}'
       
     after_audit:
       what: audit_test_cases, score_history
