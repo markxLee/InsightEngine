@@ -323,6 +323,88 @@ which accessibility-test strategy to apply in SD-1 (US-14.2.1).
 
 ---
 
+### SD-1: Per-Source Accessibility Test (US-14.2.1)
+
+After classification produces a tiered candidate list, test each source for actual accessibility
+and data availability. This replaces the assumption that a discovered source is automatically
+usable — bot-protection, login walls, or structural changes can make a source inaccessible.
+
+**Test execution per candidate source:**
+
+1. **Attempt fetch using 3-tier fallback** (same as Step 4 standard fetch):
+   - Tier 1: `fetch_webpage` on homepage or main category page
+   - Tier 2: httpx + BeautifulSoup if Tier 1 fails/returns < 50 chars
+   - Tier 3: Playwright stealth mode if bot-detection signals detected
+   
+   > Tier 2 sources (preliminary Tier 2 from SD-0.5) → skip directly to Playwright
+
+2. **Check response for accessibility signals:**
+   ```yaml
+   ACCESSIBILITY_CHECKS:
+     status_ok:
+       pass: HTTP 200 or equivalent (content received)
+       fail: 403, 404, 429, empty body
+     not_bot_protected:
+       fail_signals:
+         - "Checking your browser", "Just a moment" (Cloudflare)
+         - "Please log in", "Sign in to continue" (login wall)
+         - "Subscribe to read" (paywall)
+         - Empty body despite valid URL
+     data_present:
+       pass: Response contains recognizable entity listings (jobs, reviews, companies)
+       check: Look for list elements, repeated card patterns, tabular data
+       fail: Only static marketing copy or homepage hero content
+   ```
+
+3. **Auto-escalate to Playwright on bot-detection** (never give up without Playwright):
+   ```yaml
+   AUTO_ESCALATE:
+     trigger: Tier 1 or Tier 2 returns bot-detection signals OR < 50 chars
+     action: Immediately try Playwright stealth mode
+     script: python3 .github/skills/gather/scripts/playwright_fetch.py "{url}" --wait 3
+     max_wait: 8s
+   ```
+
+4. **Log test result per source:**
+   ```yaml
+   test_result:
+     source_name: "<name>"
+     url: "<url>"
+     fetch_tier_used: 1 | 2 | 3  # Which tier succeeded
+     playwright_needed: true | false
+     accessible: true | false
+     data_present: true | false
+     fail_reason: "<reason if failed>"  # e.g., "login wall", "Cloudflare block", "empty content"
+   ```
+
+5. **Save results to session state:**
+   ```yaml
+   session_state:
+     sd1_test_results: [ { test_result objects } ]
+     sd1_complete: true
+   ```
+
+6. **Report (non-technical):**
+   ```
+   🔍 Kiểm tra {N} nguồn dữ liệu:
+     ✅ {name_1} — truy cập được, có dữ liệu
+     ✅ {name_2} — truy cập được (cần browser đặc biệt), có dữ liệu
+     ⚠️ {name_3} — truy cập được nhưng cần đăng nhập
+     ❌ {name_4} — không truy cập được ({friendly_reason})
+   → Đang tính điểm độ tin cậy...
+   ```
+   Jargon shield: "browser đặc biệt" instead of "Playwright", "không truy cập được" instead
+   of "403 Forbidden", "cần đăng nhập" instead of "login wall/paywall"
+
+**What SD-1 does NOT do:**
+- Does NOT compute final reliability score (that's SD-2 / US-14.2.2)
+- Does NOT present source plan (that's SD-3 / US-14.3.1)
+- Does NOT start data collection
+
+→ After SD-1 completes: pass `sd1_test_results` to **SD-2** (reliability scoring).
+
+---
+
 ### DC-0: Per-Step Search Planning (MANDATORY for complex data collection)
 
 Before any search step, call the **strategist agent** to generate a specialized search sub-flow
