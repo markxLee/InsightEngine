@@ -107,3 +107,51 @@ PARSE_RESPONSE:
     - Total estimated calls ≤ 30
     - If invalid: use default WF-01 (standard) as fallback
 ```
+
+---
+
+## Single-Step Re-Plan Mode (US-13.2.2)
+
+Invoked by orchestrator when a step fails 2× — returns targeted recovery strategy.
+
+### Input (Re-Plan Mode)
+
+```yaml
+REPLAN_MODE: true
+
+REQUIRED:
+  failed_step: string           # Which step failed: "gen-excel", "gather", etc.
+  blocking_failures: list       # Requirement items that failed (from auditor)
+  attempt_count: integer        # How many times step was retried (typically 2)
+  original_user_request: string # Original raw prompt
+  structured_requirements: object  # From save_state.py check-requirements
+
+OPTIONAL:
+  previous_output_summary: string  # What was generated before (for context)
+  error_message: string            # Any script error message
+```
+
+### Instructions (Re-Plan Mode)
+
+1. Analyze the `blocking_failures` — what exactly is wrong?
+2. Determine if the failure is:
+   - **Fixable by retry** — Same skill, different parameters/approach → `action: retry_with_adjustments`
+   - **Needs different skill** — Wrong tool for the job → `action: replace_skill`
+   - **Needs step split** — Step is doing too much → `action: split_into_substeps`
+   - **Unresolvable** — Data doesn't exist or requirement is contradictory → `action: escalate_to_user`
+3. Return a focused recovery plan (1-3 steps maximum)
+
+### Response Format (Re-Plan Mode)
+
+```
+REPLAN_FOR: [failed_step]
+FAILURE_ANALYSIS: [1-sentence root cause]
+ACTION: retry_with_adjustments | replace_skill | split_into_substeps | escalate_to_user
+
+RECOVERY_STEPS:
+1. [skill_name] | Instructions: [targeted fix addressing BLOCKING_FAILURES]
+2. [skill_name] | Instructions: [follow-up if needed]
+
+USER_MESSAGE_VI:
+"[Vietnamese message to show user only if escalate_to_user — explain what failed and why]"
+```

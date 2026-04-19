@@ -1223,8 +1223,8 @@ Wave 42 (sequential): US-12.4.2 (after 12.4.1)
   - Branch: `feature/insight-engine-us-13.2.1`
   - Blocked By: ~~US-13.1.2~~ ✅
 
-- [ ] **US-13.2.2** — Failure-triggered re-planning protocol
-  - Status: PLANNED
+- [x] **US-13.2.2** — Failure-triggered re-planning protocol
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-13.2.2`
   - Blocked By: ~~US-13.2.1~~ ✅

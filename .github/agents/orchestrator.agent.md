@@ -124,11 +124,21 @@ FLOW:
       - Call auditor with FULL output for final audit if gather steps produced varied quality
       - Budget: deduct from auditor call budget (max 5 per run)
 
-  7b. FAILURE HANDLING (if any step fails after 2 retries):
-      - Log failure to state
-      - Notify user with specific failing requirements
-      - Offer: skip step / re-attempt with adjusted strategy / escalate to user
-      - See US-13.2.2 re-planning protocol
+  7b. FAILURE HANDLING (if any step fails after 2 retries) — US-13.2.2 Re-Plan Protocol:
+      1. CALL strategist in REPLAN_MODE with:
+         - failed_step, blocking_failures, attempt_count=2
+         - original_user_request, structured_requirements
+         - previous_output_summary (what was generated before failure)
+      2. Parse strategist response:
+         - retry_with_adjustments → execute recovery_steps, then resume pipeline
+         - replace_skill → swap failed step with recovery_steps, then resume
+         - split_into_substeps → expand failed step into sub-steps, then resume
+         - escalate_to_user → show USER_MESSAGE_VI to user, pause, wait for input
+      3. After recovery: re-run auditor on the recovered output
+      4. If recovery also fails → escalate_to_user regardless of strategist verdict
+      
+      Budget note: strategist re-plan uses the same budget slot (max 1 per run).
+      If budget exhausted → skip strategist, use default retry_with_adjustments.
 
   8. DELIVER final output: ONE consolidated summary message
      - Collect all output files (path + size)
@@ -139,7 +149,7 @@ FLOW:
   9. SAVE session state for resume capability
 
 BUDGET_ENFORCEMENT:
-  strategist: max 1 call per pipeline run
+  strategist: max 1 call per pipeline run (includes re-plan calls — if budget used, skip re-plan)
   auditor: max 5 calls per pipeline run (per-step checkpoints count toward this budget)
   advisory: max 2 calls per pipeline run
   total: max 8 agent calls per pipeline run
