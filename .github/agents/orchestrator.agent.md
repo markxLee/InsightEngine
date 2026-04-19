@@ -93,6 +93,28 @@ FLOW:
      Do NOT skip even for simple requests — minimal requirements are still valid.
   2c. BEGIN OUTPUT TEMPLATE CREATION in parallel with step 3 (RULE-1 step 2):
      Based on classified intent and target format, prepare skeleton file structure.
+     This runs IN PARALLEL with strategist call (step 3) — do not wait for one to finish
+     before starting the other.
+
+     Template creation per format:
+     ```yaml
+     TEMPLATE_ACTIONS:
+       docx: Determine style (corporate/academic/minimal), prepare heading structure
+       xlsx: Identify sheets, column headers, formula patterns from requirements
+       pptx: Choose engine (ppt-master vs pptxgenjs), estimate slide count
+       pdf: Choose layout engine (Platypus vs Canvas), determine page structure
+       html: Choose mode (page vs presentation) and style theme
+       mixed: Create templates for each output format in the chain
+     ```
+
+     Save template decisions to session state:
+     ```bash
+     python3 scripts/save_state.py update --step template_init --status completed \
+       --data '{"format": "<format>", "template": "<template_name>", "structure": "<brief>"}'
+     ```
+
+     **Why parallel:** Template decisions depend on intent + requirements (already known),
+     NOT on strategist's workflow plan. Running them simultaneously saves one round-trip.
   3. CALL strategist agent → get workflow plan
   4. PRESENT plan to user in Vietnamese → wait for approval (guided mode only)
      EXCEPTION: session_mode=silent → skip presentation and proceed immediately
