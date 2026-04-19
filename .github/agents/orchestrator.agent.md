@@ -72,10 +72,19 @@ INTENT_CATEGORIES:
 ```yaml
 FLOW:
   1. CLASSIFY intent from user request
-  2. LOG classification to session state
+  2. LOG classification to session state — MANDATORY, run before anything else:
+     ```bash
+     python3 scripts/save_state.py init "<raw_user_prompt>" "<intent_classification>"
+     ```
+     Verify: must print STATE_INITIALIZED. If context is lost later, the request is
+     recoverable via `python3 scripts/save_state.py check`.
   3. CALL strategist agent → get workflow plan
-  4. PRESENT plan to user in Vietnamese → wait for approval
-  5. ON USER APPROVAL → SET session_flag: autonomy_mode=true
+  4. PRESENT plan to user in Vietnamese → wait for approval (guided mode only)
+     EXCEPTION: session_mode=silent → skip presentation and proceed immediately
+  5. ON USER APPROVAL (or if silent mode, proceed immediately) → SET autonomy_mode=true:
+     ```bash
+     python3 scripts/save_state.py set-mode standard  # or silent if already silent
+     ```
      After this point: execute fully autonomously — no more confirmation gates
      (see Autonomy Mode section below)
   6. EXECUTE skills in order per plan
@@ -165,7 +174,11 @@ RESUME_CHECK:
         - failed_step: step with status=failed (if any)
         - next_pending: first step with status=pending
      c. Verify output files still exist (check paths from output_files[])
-     d. Present resume summary in Vietnamese:
+     d. Restore session_mode and autonomy_mode from state:
+        - SET session_mode from state.session_mode
+        - SET autonomy_mode from state.autonomy_mode
+        (User does NOT need to re-confirm mode on resume)
+     e. Present resume summary in Vietnamese:
         "📋 Phát hiện pipeline đang dở:
          Yêu cầu: {raw_prompt[:150]}
          Intent: {intent_classification}
@@ -472,17 +485,20 @@ GAP_EVALUATION:
        minor: Nice-to-have, not blocking
        
     4. REPORT to user (Vietnamese):
-       "⚠️ Phát hiện thiếu khả năng:
-        - {gap_1}: {description} (mức: {severity})
-        - {gap_2}: {description} (mức: {severity})
-        
-        Đề xuất: {solution — create new skill/agent}
-        Bạn muốn tôi tạo {skill/agent} mới? (Ước tính: ~{time})"
+       # ⚠️ Only in guided mode — in autonomy_mode or silent_mode, skip to step 6 directly
+       IF session_mode == "guided":
+         "⚠️ Phát hiện thiếu khả năng:
+          - {gap_1}: {description} (mức: {severity})
+          Đề xuất: {solution}
+          Bạn muốn tôi tạo {skill/agent} mới? (Ước tính: ~{time})"
+       ELSE:
+         → Skip to step 6 (proceed with existing capabilities)
+         → Log gap to session state for improve session later
        
-    5. IF user approves creation:
+    5. IF user approves creation (guided mode only):
        → Route to self-improvement protocol (US-9.2.2 / US-9.2.3)
        
-    6. IF user declines:
+    6. IF user declines OR autonomy/silent mode:
        → Proceed with existing capabilities
        → Log gap for future improvement
        
@@ -524,13 +540,15 @@ RUNTIME_AGENT_CREATION:
        - Cross-domain coordination not handled by current agents
        
     2. PROPOSE to user (Vietnamese, always ask first):
-       "🤖 Phát hiện cần agent mới: {agent_name}
-        Mục đích: {purpose}
-        Sẽ xử lý: {responsibility}
-        
-        Tôi sẽ tạo file .github/agents/{agent_name}.agent.md
-        Bạn đồng ý không? (y/n)"
-       
+         # ⚠️ Only in guided mode
+         IF session_mode != "guided":
+           → Skip runtime agent creation entirely, log for improve session
+           → Proceed with best available agent
+         ELSE:
+           "🤖 Phát hiện cần agent mới: {agent_name}
+            Mục đích: {purpose}
+            Tôi sẽ tạo file .github/agents/{agent_name}.agent.md
+            Bạn đồng ý không? (y/n)"
     3. IF user approves:
        a. Create .github/agents/{name}.agent.md with VS Code standard:
           - YAML frontmatter: name, description, tools, agents, user-invocable
@@ -622,12 +640,15 @@ RUNTIME_SKILL_MANAGEMENT:
          e.g., gather exists but doesn't handle a specific file format
          
       2. PROPOSE upgrade (Vietnamese):
-         "📦 Skill '{skill_name}' cần nâng cấp:
-          Hiện tại: {current_capability}
-          Cần thêm: {needed_capability}
-          
-          Tôi sẽ thêm {feature} vào SKILL.md
-          Bạn đồng ý không? (y/n)"
+         # ⚠️ Only in guided mode — skip entirely in autonomy/silent mode
+         IF session_mode != "guided":
+           → Log upgrade need to session state, proceed with existing capability
+         ELSE:
+           "📦 Skill '{skill_name}' cần nâng cấp:
+            Hiện tại: {current_capability}
+            Cần thêm: {needed_capability}
+            Tôi sẽ thêm {feature} vào SKILL.md
+            Bạn đồng ý không? (y/n)"
          
       3. IF user approves:
          a. Read current SKILL.md

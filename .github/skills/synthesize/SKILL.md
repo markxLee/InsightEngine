@@ -41,18 +41,36 @@ compatibility:
 
 ---
 
-## Step 0: Resume Check (run on every startup)
+## Step 0: Resume Check
+
+> **Owner: orchestrator agent** — when synthesize is called via orchestrator, resume check is already handled. Only run Step 0 if synthesize is called DIRECTLY by the user (not routed through orchestrator).
 
 Run `python3 scripts/save_state.py check`.
 - `NO_STATE`/`COMPLETED` → skip to Step 1
-- `IN_PROGRESS` → show summary, ask "Tiếp tục hay bắt đầu lại?"
-  - Tiếp tục: `save_state.py resume-plan` → skip completed steps
+- `IN_PROGRESS` → show summary in Vietnamese:
+  - Report: raw_prompt (first 150 chars), session_mode, steps done/pending
+  - Ask: "Tiếp tục hay bắt đầu lại?"
+  - Tiếp tục: `save_state.py resume-plan` → restore session_mode/autonomy_mode → skip completed steps
   - Bắt đầu lại: `save_state.py archive` → Step 1
 - No state file or non-resume trigger: skip to Step 1 silently.
 
 ---
 
 ## Step 1: Parse Request
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║  💾 MANDATORY FIRST ACTION: Save raw prompt to state file NOW       ║
+║  Run BEFORE Step 1.5 analysis — this is your insurance vs. context  ║
+║  loss. If context is lost mid-pipeline, state file has the request. ║
+╚══════════════════════════════════════════════════════════════════════╝
+```
+
+Immediately run:
+```bash
+python3 scripts/save_state.py init "<user's exact request>" "<detected intent>"
+```
+Verify: `python3 scripts/save_state.py check` → must print IN_PROGRESS with correct prompt.
 
 1. Extract **input sources**: file paths, URLs, web-search topics, inline text
 2. Determine **processing type**: synthesis (default) | translation | summary
@@ -93,6 +111,11 @@ and present the analysis to the user. DO NOT proceed to Step 2 without completin
 ║  Do NOT proceed to Step 2, 3, or 4.                        ║
 ║  Do NOT skip this step. Do NOT summarize and continue.      ║
 ║  SHOW the analysis below. WAIT for user response.           ║
+║                                                              ║
+║  EXCEPTION — skip gate if ANY of these are true:            ║
+║  • session_mode = silent (frustration signal was detected)  ║
+║  • This is a RESUMED pipeline (autonomy_mode already true)  ║
+║  → In these cases: proceed with best assumptions silently.  ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
 
@@ -191,9 +214,19 @@ ROUTING: # Choose based on Step 1 parse results
   design:           gather → compose → design (poster/cover/certificate/banner)
   data_collection:  gather (platform-specific) → extract → gen-excel → verify
   mixed_collection: gather → extract → gen-excel → compose → tao-<format> → verify
+
+APPROVAL_GATE:
+  guided_mode: Present plan → WAIT for user approval before Step 4
+  standard_mode: Present plan for info only → proceed immediately (autonomy_mode is active)
+  silent_mode: SKIP plan presentation entirely → proceed directly to Step 4
 ```
 
-After user approves, save state: `python3 scripts/save_state.py save '<json>'`
+After plan is accepted (or skipped in autonomy/silent mode), save state:
+```bash
+python3 scripts/save_state.py save '{"raw_prompt": "...", "intent_classification": "...", "generated_plan": {}, "step_states": [], "status": "IN_PROGRESS"}'
+# Or just update the existing state (already initialized at Step 1):
+python3 scripts/save_state.py set-mode standard  # if user just approved
+```
 
 ### Step 3.5: Print Pipeline Step Trace (MANDATORY)
 

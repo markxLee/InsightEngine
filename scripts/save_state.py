@@ -2,17 +2,19 @@
 """Session state manager for InsightEngine pipeline.
 
 Commands:
+    python3 scripts/save_state.py init '<prompt>' [intent]  # FIRST CALL: save raw prompt immediately
     python3 scripts/save_state.py check        # Check if a session state exists
     python3 scripts/save_state.py save <json>   # Save current state (JSON string or @file)
     python3 scripts/save_state.py resume-plan   # Return pending steps as JSON
     python3 scripts/save_state.py archive       # Archive current state and start fresh
     python3 scripts/save_state.py update --step <name> [--output-file <path>]  # Update step status
     python3 scripts/save_state.py complete      # Mark pipeline as completed
+    python3 scripts/save_state.py set-mode <guided|standard|silent>  # Update session mode
 
-State file: tmp/.session-state.json
+State file: tmp/.session-state.json  (hidden file — use: ls -la tmp/)
 
-Enhanced Schema (v2 — Phase 9):
-    raw_prompt: str             # Original user request
+Enhanced Schema (v3 — Phase 12):
+    raw_prompt: str             # Original user request — saved FIRST before any processing
     intent_classification: str  # synthesis | creation | research | design | data_collection | mixed
     analyzed_requirements: dict # Expanded dimensions from analysis
     generated_plan: dict        # Workflow plan from strategist
@@ -22,7 +24,12 @@ Enhanced Schema (v2 — Phase 9):
     created_skills: list        # Runtime-created skills/agents
     output_files: list          # [{path, hash, format, size}]
     status: str                 # IN_PROGRESS | COMPLETED | FAILED
-    schema_version: int         # 2
+    schema_version: int         # 3
+    # Mode tracking (Phase 12 — persists across resume)
+    session_mode: str           # guided | standard | silent  (default: guided)
+    autonomy_mode: bool         # true after user approves plan
+    consecutive_approvals: int  # reset on modification
+    frustration_detected: bool
 """
 
 import hashlib
@@ -53,6 +60,64 @@ def load_state() -> Optional[dict]:
     return None
 
 
+def cmd_init(prompt: str, intent: str = "unknown"):
+    """FIRST CALL: save raw_prompt immediately before any processing.
+    Usage: save_state.py init '<user prompt>' [intent]
+    This is the insurance against context loss — call this BEFORE Step 1.5 analysis.
+    """
+    ensure_dirs()
+    # If existing IN_PROGRESS state, archive it first
+    existing = load_state()
+    if existing and existing.get("status") == "IN_PROGRESS":
+        ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        archive_path = ARCHIVE_DIR / f"session-state_{timestamp}.json"
+        import shutil
+        shutil.copy2(STATE_FILE, archive_path)
+
+    state = {
+        "schema_version": 3,
+        "raw_prompt": prompt,
+        "intent_classification": intent,
+        "status": "IN_PROGRESS",
+        "session_mode": "guided",
+        "autonomy_mode": False,
+        "consecutive_approvals": 0,
+        "frustration_detected": False,
+        "analyzed_requirements": {},
+        "generated_plan": {},
+        "step_states": [],
+        "audit_test_cases": [],
+        "score_history": [],
+        "created_skills": [],
+        "output_files": [],
+        "started_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat(),
+    }
+    STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"STATE_INITIALIZED: {STATE_FILE}")
+    print(f"Prompt saved ({len(prompt)} chars). Run 'check' to verify.")
+
+
+def cmd_set_mode(mode: str):
+    """Update session_mode and autonomy_mode in the state file.
+    Usage: save_state.py set-mode guided|standard|silent
+    """
+    state = load_state()
+    if state is None:
+        print("Error: NO_STATE — run init first")
+        sys.exit(1)
+    valid_modes = ("guided", "standard", "silent")
+    if mode not in valid_modes:
+        print(f"Error: mode must be one of {valid_modes}")
+        sys.exit(1)
+    state["session_mode"] = mode
+    state["autonomy_mode"] = mode in ("standard", "silent")
+    state["updated_at"] = datetime.now().isoformat()
+    STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"MODE_SET: session_mode={mode}, autonomy_mode={state['autonomy_mode']}")
+
+
 def cmd_check():
     state = load_state()
     if state is None:
@@ -68,6 +133,11 @@ def cmd_check():
     # IN_PROGRESS — show summary
     print(f"IN_PROGRESS (schema v{version})")
     print(f"Request: {state.get('raw_prompt', state.get('original_request', 'N/A'))[:200]}")
+    # Mode info (v3)
+    if version >= 3:
+        mode = state.get("session_mode", "guided")
+        auto = state.get("autonomy_mode", False)
+        print(f"Mode: {mode} | autonomy_mode: {auto}")
     if version >= 2:
         print(f"Intent: {state.get('intent_classification', 'N/A')}")
         steps = state.get("step_states", [])
@@ -99,9 +169,22 @@ def cmd_save(data_arg: str):
     # Auto-set schema_version if not present
     if "schema_version" not in data:
         if "step_states" in data or "raw_prompt" in data:
-            data["schema_version"] = 2
+            data["schema_version"] = 3
         else:
             data["schema_version"] = 1
+
+    # Preserve session_mode/autonomy_mode from existing state if not in new data
+    existing = load_state()
+    if existing:
+        for field in ("session_mode", "autonomy_mode", "consecutive_approvals", "frustration_detected"):
+            if field not in data and field in existing:
+                data[field] = existing[field]
+
+    # Default mode fields if still missing
+    data.setdefault("session_mode", "guided")
+    data.setdefault("autonomy_mode", False)
+    data.setdefault("consecutive_approvals", 0)
+    data.setdefault("frustration_detected", False)
 
     data["updated_at"] = datetime.now().isoformat()
     STATE_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -126,6 +209,10 @@ def cmd_resume_plan():
             "generated_plan": state.get("generated_plan", {}),
             "content_depth": state.get("content_depth", "comprehensive"),
             "score_history": state.get("score_history", []),
+            # Mode fields — restore these on resume so user doesn't re-confirm
+            "session_mode": state.get("session_mode", "guided"),
+            "autonomy_mode": state.get("autonomy_mode", False),
+            "frustration_detected": state.get("frustration_detected", False),
         }
     else:
         pending = state.get("pending_steps", [])
@@ -248,12 +335,23 @@ def cmd_archive():
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: save_state.py <check|save|resume-plan|update|complete|archive> [data]")
+        print("Usage: save_state.py <init|check|save|resume-plan|update|set-mode|complete|archive> [data]")
         sys.exit(1)
 
     command = sys.argv[1]
 
-    if command == "check":
+    if command == "init":
+        if len(sys.argv) < 3:
+            print("Error: init requires a prompt argument")
+            sys.exit(1)
+        intent = sys.argv[3] if len(sys.argv) >= 4 else "unknown"
+        cmd_init(sys.argv[2], intent)
+    elif command == "set-mode":
+        if len(sys.argv) < 3:
+            print("Error: set-mode requires guided|standard|silent")
+            sys.exit(1)
+        cmd_set_mode(sys.argv[2])
+    elif command == "check":
         cmd_check()
     elif command == "save":
         if len(sys.argv) < 3:
