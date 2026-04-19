@@ -1162,8 +1162,8 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
 
 ### Epic 12.3: User Signal Detection & Mode Switching
 
-- [ ] **US-12.3.1** — User frustration signal detection
-  - Status: IN_PROGRESS
+- [x] **US-12.3.1** — User frustration signal detection
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-12.3.1`
   - Blocked By: None
@@ -1176,8 +1176,9 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
 ### Epic 12.4: Batch Progress Model for Data Collection
 
 - [ ] **US-12.4.1** — Batch progress reporting for data_collection
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - Branch: `feature/insight-engine-us-12.4.1`
   - Blocked By: None
 
 - [ ] **US-12.4.2** — Final delivery summary (single message with all outputs)
