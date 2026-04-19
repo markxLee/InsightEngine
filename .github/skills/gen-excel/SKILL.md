@@ -80,9 +80,12 @@ COPILOT_WORKFLOW:
 
 ---
 
-## Template-First Protocol (US-13.4.1)
+## Template-First Protocol (US-13.4.1 / US-13.4.3)
 
-Before generating real content, create a structural placeholder to validate structure:
+**Core principle**: Create placeholder → validate structure → FILL placeholder (never recreate).
+
+The fill step UPDATES the existing validated placeholder instead of creating a new file.
+This guarantees the output always has the correct structure.
 
 ```bash
 # Step 0a: Create placeholder with required structure
@@ -98,9 +101,15 @@ python3 scripts/create_placeholder.py excel output/<filename>.xlsx \
 # If score >= 80 → proceed to fill
 # If score < 80 → fix placeholder structure (rename sheets, add missing columns)
 
-# Step 1+: Generate real script and fill data into validated placeholder
-# See US-13.4.3 — use --fill mode
+# Step 1-2: Generate data (gather, compose, or direct computation)
+# Save data to tmp/data.json in format: {"SheetName": [{"col1": "val1", ...}, ...]}
+
+# Step 3 (US-13.4.3): FILL validated placeholder — update, NOT recreate
 python3 scripts/create_placeholder.py excel output/<filename>.xlsx --fill tmp/data.json
+# This preserves the validated sheet structure and fills in real data rows
+
+# Step 4: Run recalc.py if formulas are needed
+python3 scripts/recalc.py output/<filename>.xlsx
 ```
 
 **When to use Template-First:**

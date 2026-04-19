@@ -16,17 +16,28 @@ Options:
   --columns <json>          Excel: {sheet_name: [col1, col2, ...]} mapping
   --sections <comma-list>   Word/HTML: section/heading names
   --slide-titles <json>     Slide: list of slide titles
-  --fill <json_file>        Fill mode: fill placeholder with content from JSON file
   --requirements <json>     Structured requirements from save_state.py check-requirements
+  --fill <json_file>        Fill mode (US-13.4.3): fill validated placeholder with real content
 
-Example (create):
+Fill Mode (US-13.4.3 — update, NOT create):
+  Fills an existing validated placeholder with real content.
+  Never recreates the file — preserves validated structure.
+
+  Fill JSON formats:
+    Excel:  {"SheetName": [{"col1": "val1", "col2": "val2"}, ...]}
+    Word:   {"title": "Title", "sections": {"Heading Name": "Content..."}}
+    HTML:   {"title": "Title", "sections": {"section-1": "<p>Content</p>"}}
+
+Example (create placeholder):
   python3 scripts/create_placeholder.py excel output/report.xlsx \\
-    --sheets "Hà Nội,TP.HCM,Đà Nẵng" \\
-    --columns '{"Hà Nội": ["STT","Công ty","Vị trí","Mức lương","Cấp độ"]}'
+    --sheets "Ha Noi,TP HCM" \\
+    --columns '{"Ha Noi": ["STT","Company","Role","Salary"]}'
 
-Example (fill):
+Example (fill placeholder — US-13.4.3):
   python3 scripts/create_placeholder.py excel output/report.xlsx \\
     --fill tmp/excel_content.json
+  python3 scripts/create_placeholder.py word output/report.docx \\
+    --fill tmp/word_content.json
 """
 
 import sys
@@ -308,6 +319,102 @@ def fill_excel_placeholder(output_path: Path, fill_path: Path):
     print(f"PLACEHOLDER_FILLED: {output_path} ({size} bytes)")
 
 
+def fill_word_placeholder(output_path: Path, fill_path: Path):
+    """Fill an existing Word placeholder with content from a JSON file.
+    
+    JSON format:
+    {
+      "title": "Document Title",
+      "sections": {
+        "Section Name": "Content for this section...",
+        "Another Section": "More content..."
+      }
+    }
+    """
+    try:
+        from docx import Document
+    except ImportError:
+        print("Error: python-docx not installed"); sys.exit(1)
+
+    if not output_path.exists():
+        print(f"Error: placeholder file not found: {output_path}"); sys.exit(1)
+
+    content = json.loads(fill_path.read_text(encoding="utf-8"))
+    doc = Document(output_path)
+
+    section_content = content.get("sections", {})
+    title = content.get("title", "")
+
+    # Update title if provided
+    if title and doc.paragraphs:
+        for para in doc.paragraphs:
+            if para.style.name == "Normal" and "[PLACEHOLDER" in para.text:
+                para.clear()
+                para.add_run(title)
+                break
+
+    # Update sections: find heading, replace placeholder paragraph below it
+    i = 0
+    while i < len(doc.paragraphs):
+        para = doc.paragraphs[i]
+        if para.style.name.startswith("Heading") and para.text in section_content:
+            section_text = section_content[para.text]
+            # Find placeholder paragraph after this heading
+            if i + 1 < len(doc.paragraphs):
+                next_para = doc.paragraphs[i + 1]
+                if "[PLACEHOLDER" in next_para.text:
+                    next_para.clear()
+                    # Split content by newlines and add as separate runs
+                    for line in section_text.split("\n"):
+                        next_para.add_run(line + " ")
+        i += 1
+
+    doc.save(output_path)
+    size = output_path.stat().st_size
+    print(f"PLACEHOLDER_FILLED: {output_path} ({size} bytes)")
+
+
+def fill_html_placeholder(output_path: Path, fill_path: Path):
+    """Fill an existing HTML placeholder with content from a JSON file.
+    
+    JSON format:
+    {
+      "title": "Page Title",
+      "sections": {
+        "section-1": "<p>Content for section 1</p>",
+        "section-2": "<p>Content for section 2</p>"
+      }
+    }
+    The section keys are matched against section id attributes in the HTML.
+    """
+    if not output_path.exists():
+        print(f"Error: placeholder file not found: {output_path}"); sys.exit(1)
+
+    content = json.loads(fill_path.read_text(encoding="utf-8"))
+    html = output_path.read_text(encoding="utf-8")
+
+    # Update title
+    if content.get("title"):
+        html = html.replace("[PLACEHOLDER DOCUMENT]", content["title"])
+        html = html.replace("<title>[PLACEHOLDER]</title>", f"<title>{content['title']}</title>")
+
+    # Update sections — replace placeholder paragraph inside matching section
+    sections = content.get("sections", {})
+    for section_id, section_html in sections.items():
+        # Match section by id or heading text
+        import re
+        # Replace placeholder paragraph in section with real content
+        pattern = rf'(<section[^>]*id="{section_id}"[^>]*>.*?<p class="placeholder">)[^<]+(</p>)'
+        replacement = rf'\g<1>{section_html}\2'
+        new_html = re.sub(pattern, replacement, html, flags=re.DOTALL)
+        if new_html != html:
+            html = new_html
+
+    output_path.write_text(html, encoding="utf-8")
+    size = output_path.stat().st_size
+    print(f"PLACEHOLDER_FILLED: {output_path} ({size} bytes)")
+
+
 # ─────────────────────────────────────
 # Main
 # ─────────────────────────────────────
@@ -319,6 +426,10 @@ def main():
         fill_path = options["fill"]
         if fmt == "excel":
             fill_excel_placeholder(output_path, fill_path)
+        elif fmt in ("word", "docx"):
+            fill_word_placeholder(output_path, fill_path)
+        elif fmt in ("html",):
+            fill_html_placeholder(output_path, fill_path)
         else:
             print(f"Fill mode not yet implemented for format: {fmt}")
             sys.exit(1)
