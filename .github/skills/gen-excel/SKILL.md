@@ -91,11 +91,15 @@ python3 scripts/create_placeholder.py excel output/<filename>.xlsx \
   --columns '{"<sheet1>": ["col1","col2",...], "<sheet2>": [...]}' \
   --requirements '<structured_requirements_json>'
 
-# Step 0b: Validate placeholder structure (auditor validates before filling)
-# See US-13.4.2 — call auditor in structural mode on placeholder
+# Step 0b: Structural audit (US-13.4.2 — before filling)
+# Call auditor with audit_mode: structural
+# Pass: structured_requirements + output_content = "sheet names: X, Y; columns per sheet: ..."
+# Auditor checks: sheet names match grouping[], columns match fields_required
+# If score >= 80 → proceed to fill
+# If score < 80 → fix placeholder structure (rename sheets, add missing columns)
 
 # Step 1+: Generate real script and fill data into validated placeholder
-# See US-13.4.3 — use --placeholder flag or fill mode
+# See US-13.4.3 — use --fill mode
 python3 scripts/create_placeholder.py excel output/<filename>.xlsx --fill tmp/data.json
 ```
 

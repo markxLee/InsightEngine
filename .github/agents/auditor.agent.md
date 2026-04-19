@@ -116,12 +116,67 @@ OPTIONAL:
   required_fields: string[]  # Specific fields user requested
   previous_score: number     # Score from previous attempt (for retry tracking)
   attempt_number: number     # Which retry attempt this is
+  audit_mode: string         # full (default) | structural (US-13.4.2 — structure-only before fill)
   
   # Phase 13: Structured requirements (preferred over free-text user_request)
   structured_requirements: object  # From save_state.py check-requirements
     # Schema: {output_files, fields_required, filters, grouping, format_constraints, sources, content_requirements}
     # When provided, auditor scores EACH requirement item individually (not just overall)
     # Reference: .github/skills/synthesize/references/requirement-anchor.md
+```
+
+### Structural Audit Mode (US-13.4.2)
+
+When `audit_mode: structural`, the auditor validates **placeholder structure only** — no content grading.
+
+This is called after `create_placeholder.py` creates the structural file but BEFORE filling with data.
+
+```yaml
+STRUCTURAL_AUDIT_CHECKS:
+  excel:
+    - Sheet names match grouping[] from structured_requirements
+    - Column headers in each sheet match fields_required
+    - No extra/missing required sheets
+    - Column order follows fields_required order
+  
+  word:
+    - Section headings match content_requirements[]
+    - No extra/missing required sections
+  
+  slide:
+    - Slide count >= expected (from content_requirements count)
+    - Slide titles match expected topics
+  
+  html:
+    - Section IDs/headings match content_requirements[]
+    - No broken structural elements
+
+STRUCTURAL_SCORING:
+  pass: ALL required structural elements present (100 = all, 80+ = minor issues)
+  fail: Missing required sheets/sections (< 80 = regenerate placeholder)
+  
+STRUCTURAL_VERDICT_FORMAT:
+  score: 0-100 (structural only)
+  audit_mode: structural
+  missing_structures: []     # sheets/sections/columns that are missing
+  extra_structures: []       # unexpected sheets/sections (may be OK)
+  structural_fixes: []       # specific instructions to fix placeholder
+  recommendation: "proceed_to_fill" | "regenerate_placeholder"
+
+STRUCTURAL_PASS_CONDITION: score >= 80
+```
+
+**Usage pattern:**
+```bash
+# 1. Create placeholder
+python3 scripts/create_placeholder.py excel output/report.xlsx --sheets "HN,HCM"
+
+# 2. Structural audit (US-13.4.2)
+# Call auditor with audit_mode: structural
+# auditor verifies: do sheet names match requirements?
+
+# 3. If structural PASS → proceed to fill (US-13.4.3)
+# 3. If structural FAIL → regenerate placeholder with corrected structure
 ```
 
 ### Per-Requirement Scoring (Phase 13)

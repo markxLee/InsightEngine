@@ -121,6 +121,14 @@ FLOW:
             5. Merge child outputs as per MERGE_INSTRUCTIONS
             6. `python3 scripts/save_state.py child-workflow complete --step-id <name> [--status failed|completed]`
           ELSE: execute step normally
+          
+          TEMPLATE-FIRST CHECK (US-13.4.1/13.4.2) — for gen-excel/word/slide/html steps:
+            IF structured_requirements available AND (> 3 sheets OR > 8 columns OR content_requirements):
+              1. Create placeholder: `python3 scripts/create_placeholder.py <format> <path> --requirements '<json>'`
+              2. Call auditor with audit_mode: structural → validates placeholder structure
+              3. If structural score >= 80: proceed to fill (step c below)
+              4. If structural score < 80: fix placeholder structure, re-audit once
+              5. Fill validated placeholder: `python3 scripts/create_placeholder.py <format> <path> --fill tmp/data.json`
        c. Execute the skill (or child workflow steps from above)
        d. CALL auditor checkpoint (MANDATORY after every step that produces output):
           - Pass: structured_requirements from state, output file/content summary
