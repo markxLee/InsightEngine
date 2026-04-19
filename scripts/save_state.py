@@ -304,7 +304,10 @@ def file_hash(filepath: str) -> str:
 
 def cmd_update(args: list):
     """Update a specific step's status in the state file.
-    Usage: save_state.py update --step <name> [--status completed|failed|in_progress] [--output-file <path>]
+    Usage: save_state.py update --step <name> [--status completed|failed|in_progress]
+                                              [--output-file <path>]
+                                              [--audit-score <0-100>]
+                                              [--req-scores <json>]
     """
     state = load_state()
     if state is None:
@@ -314,6 +317,8 @@ def cmd_update(args: list):
     step_name = None
     status = "completed"
     output_file = None
+    audit_score = None
+    req_scores = None  # list of per-requirement score dicts
 
     i = 0
     while i < len(args):
@@ -325,6 +330,18 @@ def cmd_update(args: list):
             i += 2
         elif args[i] == "--output-file" and i + 1 < len(args):
             output_file = args[i + 1]
+            i += 2
+        elif args[i] == "--audit-score" and i + 1 < len(args):
+            try:
+                audit_score = int(args[i + 1])
+            except ValueError:
+                pass
+            i += 2
+        elif args[i] == "--req-scores" and i + 1 < len(args):
+            try:
+                req_scores = json.loads(args[i + 1])
+            except json.JSONDecodeError:
+                pass
             i += 2
         else:
             i += 1
@@ -343,17 +360,40 @@ def cmd_update(args: list):
                 step["completed_at"] = datetime.now().isoformat()
             elif status == "in_progress":
                 step["started_at"] = datetime.now().isoformat()
+            if audit_score is not None:
+                step["audit_score"] = audit_score
+            if req_scores is not None:
+                step["per_requirement_scores"] = req_scores
             found = True
             break
 
     if not found:
-        steps.append({
+        new_step = {
             "name": step_name,
             "status": status,
             "started_at": datetime.now().isoformat() if status == "in_progress" else None,
             "completed_at": datetime.now().isoformat() if status == "completed" else None,
-        })
+        }
+        if audit_score is not None:
+            new_step["audit_score"] = audit_score
+        if req_scores is not None:
+            new_step["per_requirement_scores"] = req_scores
+        steps.append(new_step)
         state["step_states"] = steps
+
+    # Track per-requirement scores in score_history
+    if req_scores is not None:
+        score_history = state.get("score_history", [])
+        attempt_num = len(score_history) + 1
+        score_history.append({
+            "attempt": attempt_num,
+            "step": step_name,
+            "score": audit_score,
+            "per_requirement_scores": req_scores,
+            "failing_requirements": [r for r in req_scores if not r.get("pass", True)],
+            "timestamp": datetime.now().isoformat(),
+        })
+        state["score_history"] = score_history
 
     # Track output file
     if output_file and Path(output_file).exists():

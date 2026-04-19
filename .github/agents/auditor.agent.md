@@ -116,6 +116,61 @@ OPTIONAL:
   required_fields: string[]  # Specific fields user requested
   previous_score: number     # Score from previous attempt (for retry tracking)
   attempt_number: number     # Which retry attempt this is
+  
+  # Phase 13: Structured requirements (preferred over free-text user_request)
+  structured_requirements: object  # From save_state.py check-requirements
+    # Schema: {output_files, fields_required, filters, grouping, format_constraints, sources, content_requirements}
+    # When provided, auditor scores EACH requirement item individually (not just overall)
+    # Reference: .github/skills/synthesize/references/requirement-anchor.md
+```
+
+### Per-Requirement Scoring (Phase 13)
+
+When `structured_requirements` is provided, the auditor performs **per-requirement scoring**
+in ADDITION to the standard 100-point scoring:
+
+```yaml
+PER_REQUIREMENT_SCORING:
+  trigger: structured_requirements is provided in auditor input
+  
+  for_each_requirement_item:
+    categories: output_files + fields_required + filters + grouping + format_constraints
+    
+    scoring:
+      100: Requirement fully met
+      60-99: Partially met (note what's missing)
+      0-59: Requirement failed (blocking — must fix before continuing)
+    
+    output_per_item:
+      req_id: "REQ-001"              # Sequential ID
+      req_category: "grouping"       # Which category this belongs to
+      req_description: "one sheet per province/city"  # The requirement text
+      score: 0                       # 0-100
+      pass: false                    # score >= 60
+      reason: "Output has 1 sheet named 'unknown' — no per-province grouping"
+      evidence: "Sheet names found: ['unknown']"  # Concrete observation
+
+  BLOCKING_THRESHOLD: 60
+    # Any requirement with score < 60 = FAIL, pipeline must NOT continue
+    # Requirement scores < 60 are listed as BLOCKING_FAILURES
+
+  PASS_CONDITION:
+    # Per-requirement audit passes when ALL requirements score >= 60
+    # AND the overall 100-point score >= 80
+
+  REPORT_ADDITION: |
+    # Appended to standard verdict when structured_requirements is provided:
+
+    PER-REQUIREMENT AUDIT:
+    | ID     | Category           | Requirement                     | Score | Pass | Reason |
+    |--------|--------------------|---------------------------------|-------|------|--------|
+    | REQ-001 | grouping          | one sheet per province/city     | 0     | ❌   | 1 sheet named 'unknown' |
+    | REQ-002 | fields_required   | company_name present            | 100   | ✅   | All rows have company name |
+    | REQ-003 | filters           | fresher/junior roles only       | 10    | ❌   | 2 senior roles, 1 teamlead |
+    
+    BLOCKING_FAILURES: (requirements with score < 60)
+    - REQ-001: one sheet per province/city → FIX: create N sheets, one per province found in data
+    - REQ-003: fresher/junior roles only → FIX: filter out senior/teamlead roles before writing
 ```
 
 ### Audit Steps
@@ -179,9 +234,11 @@ CALL_AUDITOR:
   when: After generating .xlsx file
   prompt_vars:
     user_request: "{original user request}"
-    output_content: "{column headers, sample rows, formula summary}"
+    output_content: "{column headers, sheet names, sample rows, formula summary}"
     output_format: "excel"
     required_fields: "{data fields user specified}"
+    # Phase 13: include structured_requirements for per-requirement scoring
+    structured_requirements: "{from save_state.py check-requirements}"
 ```
 
 ---

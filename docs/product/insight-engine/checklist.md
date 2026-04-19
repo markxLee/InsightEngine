@@ -1209,8 +1209,8 @@ Wave 42 (sequential): US-12.4.2 (after 12.4.1)
   - Branch: `feature/insight-engine-us-13.1.1`
   - Blocked By: None
 
-- [ ] **US-13.1.2** — Per-requirement scoring in auditor calls
-  - Status: PLANNED
+- [x] **US-13.1.2** — Per-requirement scoring in auditor calls
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-13.1.2`
   - Blocked By: ~~US-13.1.1~~ ✅
@@ -1221,7 +1221,7 @@ Wave 42 (sequential): US-12.4.2 (after 12.4.1)
   - Status: PLANNED
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-13.2.1`
-  - Blocked By: US-13.1.2
+  - Blocked By: ~~US-13.1.2~~ ✅
 
 - [ ] **US-13.2.2** — Failure-triggered re-planning protocol
   - Status: PLANNED
@@ -1255,7 +1255,7 @@ Wave 42 (sequential): US-12.4.2 (after 12.4.1)
   - Status: PLANNED
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-13.4.2`
-  - Blocked By: US-13.4.1, US-13.1.2
+  - Blocked By: US-13.4.1, ~~US-13.1.2~~ ✅
 
 - [ ] **US-13.4.3** — Content-fill into validated placeholder (update, not create)
   - Status: PLANNED
