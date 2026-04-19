@@ -572,12 +572,26 @@ def main():
                 print("Error: NO_STATE"); sys.exit(1)
             child_workflows = state.get("child_workflows", {})
             if step_id in child_workflows:
-                child_workflows[step_id]["status"] = final_status
-                child_workflows[step_id]["completed_at"] = datetime.now().isoformat()
+                wf = child_workflows[step_id]
+                # Auto-detect status from step_states if not specified
+                steps = wf.get("step_states", [])
+                failed = [s for s in steps if s.get("status") == "failed"]
+                succeeded = [s for s in steps if s.get("status") == "completed"]
+                if final_status == "completed" and len(failed) > 0 and len(succeeded) == 0:
+                    final_status = "failed"
+                elif final_status == "completed" and len(failed) > 0:
+                    final_status = "partial"
+                wf["status"] = final_status
+                wf["completed_at"] = datetime.now().isoformat()
+                wf["failed_steps"] = [s["name"] for s in failed]
+                wf["succeeded_steps"] = [s["name"] for s in succeeded]
                 state["child_workflows"] = child_workflows
                 state["updated_at"] = datetime.now().isoformat()
                 STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
-                print(f"CHILD_WORKFLOW_COMPLETE: {step_id} → {final_status}")
+                if failed:
+                    print(f"CHILD_WORKFLOW_COMPLETE: {step_id} → {final_status} ({len(succeeded)} ok, {len(failed)} failed: {[s['name'] for s in failed]})")
+                else:
+                    print(f"CHILD_WORKFLOW_COMPLETE: {step_id} → {final_status}")
             else:
                 print(f"Error: child workflow {step_id} not found"); sys.exit(1)
         elif subcmd == "check":
@@ -597,6 +611,30 @@ def main():
                 print(json.dumps(child_workflows.get(step_id, {}), indent=2, ensure_ascii=False))
             else:
                 print(json.dumps(child_workflows, indent=2, ensure_ascii=False))
+        elif subcmd == "list-failed":
+            # list-failed [--step-id <id>]  → prints failed child step names
+            step_id = None
+            i = 0
+            while i < len(args_rest):
+                if args_rest[i] == "--step-id" and i + 1 < len(args_rest):
+                    step_id = args_rest[i + 1]; i += 2
+                else:
+                    i += 1
+            state = load_state()
+            if state is None:
+                print("NO_STATE"); sys.exit(1)
+            child_workflows = state.get("child_workflows", {})
+            if step_id:
+                wf = child_workflows.get(step_id, {})
+                failed = wf.get("failed_steps", [])
+                print(json.dumps(failed, ensure_ascii=False))
+            else:
+                # List all failed steps across all child workflows
+                all_failed = {}
+                for wf_id, wf in child_workflows.items():
+                    if wf.get("failed_steps"):
+                        all_failed[wf_id] = wf["failed_steps"]
+                print(json.dumps(all_failed, indent=2, ensure_ascii=False))
         else:
             print(f"Error: unknown child-workflow subcommand: {subcmd}")
             print("Usage: child-workflow <init|update|complete|check> --step-id <id> ...")

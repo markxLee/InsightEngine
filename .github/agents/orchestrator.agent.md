@@ -109,9 +109,17 @@ FLOW:
           IF triggered:
             1. Call strategist CHILD_WORKFLOW_MODE
             2. Init child workflow: `python3 scripts/save_state.py child-workflow init --step-id <name> --plan '<plan>'`
-            3. Execute child steps as sub-pipeline (each with its own auditor checkpoint)
-            4. Merge child outputs as per MERGE_INSTRUCTIONS
-            5. `python3 scripts/save_state.py child-workflow complete --step-id <name>`
+            3. Execute child steps as ISOLATED sub-pipeline (US-13.3.2 failure isolation):
+               - Each child step runs independently — failure of one does NOT abort others
+               - Failed child step: `python3 scripts/save_state.py child-workflow update --step-id <name> --step-name <child> --status failed`
+               - Retry failed child step up to 2× before marking it failed
+               - Continue other child steps even if one fails (partial results)
+            4. After all child steps: assess completeness:
+               - ALL child steps succeeded → full merge → proceed
+               - SOME child steps failed → partial merge with gap → call auditor, may still pass
+               - ALL child steps failed → mark parent failed → failure handling (Step 7b)
+            5. Merge child outputs as per MERGE_INSTRUCTIONS
+            6. `python3 scripts/save_state.py child-workflow complete --step-id <name> [--status failed|completed]`
           ELSE: execute step normally
        c. Execute the skill (or child workflow steps from above)
        d. CALL auditor checkpoint (MANDATORY after every step that produces output):
