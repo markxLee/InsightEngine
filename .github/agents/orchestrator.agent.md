@@ -80,8 +80,13 @@ FLOW:
      (see Autonomy Mode section below)
   6. EXECUTE skills in order per plan
   7. After each output skill → CALL auditor agent for quality gate
-  8. DELIVER final output to user (single delivery summary message)
-  8. SAVE session state for resume capability
+  8. DELIVER final output: ONE consolidated summary message
+     - Collect all output files (path + size)
+     - Include content metrics (word count, rows, slide count)
+     - Apply jargon-shield before sending
+     - Template: see synthesize/SKILL.md → Step 5 Final Delivery
+     - Rule: NO partial delivery messages before this step (unless progress updates)
+  9. SAVE session state for resume capability
 
 BUDGET_ENFORCEMENT:
   strategist: max 1 call per pipeline run

@@ -374,25 +374,75 @@ On failure: report with evidence → specific re-fetch instructions → max 1 fi
 
 ---
 
-## Step 5: Final Report
+## Step 5: Final Delivery (Single Summary Message)
 
 ```yaml
-FINAL_REPORT:
-  format: |
-    🎉 Hoàn tất! Kết quả:
+FINAL_DELIVERY:
+  # This step produces ONE consolidated summary message at pipeline end.
+  # No partial updates here — only the single final message.
+  # Templates: references/progress-messages.md → FINAL_DELIVERY section
+  
+  RULE: Deliver in ONE message. No drip updates after this point.
+  
+  COMPOSE_FINAL_MESSAGE:
+    1. Collect all output files (path + size) from pipeline run
+    2. Summarize content metrics (word count, item count, slide count, etc.)
+    3. Apply jargon-shield to all text
+    4. Format using appropriate template from progress-messages.md
+    
+  TEMPLATE_SELECTION:
+    single_file:           "✅ **Hoàn thành!** 📄 {file_type}: [{name}]({path}) ({size})"
+    multiple_files:        "✅ **Hoàn thành! {count} file đã tạo:** ..."
+    data_collection:       "✅ **Hoàn thành thu thập!** 📊 [{name}]({path}) — {rows} {entity}, {cols} trường"
+    with_quality:          Include quality score if auditor ran
+    
+  CONTENT_SUMMARY_RULES:
+    include:
+      - File path(s) as clickable markdown links
+      - File size
+      - Key metric (row count for Excel, slide count for PPTX, word count for Word)
+      - Source count or platform count for research/data_collection
+    exclude:
+      - Library names
+      - Script names
+      - Technical decisions made during run
+      - Step-by-step details (user doesn't need the recipe)
+      
+  QUALITY_DISPLAY:
+    if_auditor_ran:
+      90-100: "⭐⭐⭐ xuất sắc"
+      75-89:  "⭐⭐ tốt"
+      60-74:  "⭐ chấp nhận được"
+    if_no_audit: omit quality line
+    
+  FOLLOW_UP_HINT:
+    show: True (unless silent_mode)
+    format: "💡 {relevant_next_action}"
+    examples:
+      - "💡 Gõ 'cải thiện' để tối ưu thêm, hoặc 'tạo slide từ file này' để tiếp tục."
+      - "💡 Gõ 'kiểm tra chất lượng' nếu muốn tôi audit kỹ hơn."
+    silent_mode: omit follow_up_hint
 
-    📄 File đầu ra:
-    - {file_path} ({file_size})
-
-    ⏱️ Các bước đã thực hiện:
-    1. ✅ Thu thập: {source_count} nguồn
-    2. ✅ Biên soạn: {word_count} từ
-    3. ✅ Xuất {format}: {file_path}
-
-    💡 Bạn muốn chỉnh sửa gì không?
+  EXAMPLE_OUTPUTS:
+    single_word: |
+      ✅ **Hoàn thành!**
+      📄 Word: [bao-cao-thi-truong-ai.docx](output/bao-cao-thi-truong-ai.docx) (48 KB · 22 trang)
+      📊 Nội dung: 8,400 từ từ 5 nguồn
+      💡 Gõ 'tạo slide từ file này' nếu muốn tôi tạo thuyết trình.
+      
+    data_plus_slide: |
+      ✅ **Hoàn thành! 2 file đã tạo:**
+      📊 Excel: [jobs-fresher-js-hcm.xlsx](output/jobs-fresher-js-hcm.xlsx) (32 KB · 28 jobs)
+      🎯 Slide: [phan-tich-viec-lam.pptx](output/phan-tich-viec-lam.pptx) (1.2 MB · 15 slide)
+      🔍 Nguồn: ITViec, TopCV, LinkedIn
+      
+    research_report: |
+      ✅ **Hoàn thành!**
+      📄 Word: [xu-huong-ai-2026.docx](output/xu-huong-ai-2026.docx) (62 KB · 32 trang)
+      📊 Nội dung: 12,500 từ từ 8 nguồn · ⭐⭐ tốt
 ```
 
-After reporting, mark pipeline complete:
+After delivering the final message, mark pipeline complete:
 ```bash
 python3 scripts/save_state.py complete
 ```
