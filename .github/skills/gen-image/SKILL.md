@@ -27,6 +27,11 @@ compatibility:
 
 **References:** `references/chart-templates.md` | `references/image-generation.md`
 
+**Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
+
+**Quality loop (RULE-2):** After generating output, self-review + auditor gate (>80/100).
+Pivot strategies: 1) different chart type/style, 2) adjust data presentation, 3) different color palette.
+
 This skill handles two distinct visual output modes:
 - **Charts** (matplotlib): data-driven bar, line, pie, radar, scatter charts from Excel/CSV/inline data
 - **AI images** (diffusers/torch): generated illustrations, backgrounds, and slide assets

@@ -21,6 +21,11 @@ compatibility:
 
 **References:** `references/pdf-script-details.md`
 
+**Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
+
+**Quality loop (RULE-2):** After generating the PDF, self-review + auditor gate (>80/100).
+Pivot strategies: 1) different layout engine, 2) restructure page layout, 3) adjust content flow.
+
 Generates professional PDF documents using reportlab. For complex multi-section documents
 (the common case), use Platypus — it handles page breaks, headers, and flowing content
 automatically. For simple single-page outputs (certificates, labels), the Canvas API is

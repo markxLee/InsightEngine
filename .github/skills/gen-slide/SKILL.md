@@ -27,6 +27,11 @@ compatibility:
 
 **References:** `references/template-styles.md` | `references/pro-mode.md`
 
+**Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
+
+**Quality loop (RULE-2):** After generating slides, self-review + auditor gate (>80/100).
+Pivot strategies: 1) different layout template, 2) different content density, 3) switch engine.
+
 Two engines — **Pro là mặc định** cho mọi bài thuyết trình mới:
 
 | Mode | Engine | Khi nào dùng |

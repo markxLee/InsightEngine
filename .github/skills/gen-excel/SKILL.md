@@ -21,6 +21,11 @@ compatibility:
 
 # Tạo Excel — Excel Spreadsheet Output Skill
 
+**Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
+
+**Quality loop (RULE-2):** After generating the spreadsheet, self-review + auditor gate (>80/100).
+Pivot strategies: 1) restructure data layout, 2) different formula approach, 3) change formatting.
+
 Generates professionally formatted `.xlsx` files with working formulas and color-coded cells.
 See `references/formatting-conventions.md` for column width standards, color codes, and cell format patterns.
 

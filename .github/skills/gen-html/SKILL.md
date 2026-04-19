@@ -24,6 +24,11 @@ compatibility:
 
 **References:** `references/presentation-styles.md` | `references/template-styles.md` | `references/speaker-notes-pdf.md`
 
+**Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
+
+**Quality loop (RULE-2):** After generating HTML, self-review + auditor gate (>80/100).
+Pivot strategies: 1) different style theme, 2) different layout structure, 3) switch mode.
+
 Two output modes:
 - **page**: Self-contained static HTML with inline CSS (jinja2). No JavaScript, no external
   dependencies — the file works offline and can be emailed as-is.

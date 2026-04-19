@@ -21,6 +21,11 @@ compatibility:
 
 **References:** `references/word-styles-rules.md`
 
+**Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
+
+**Quality loop (RULE-2):** After generating the document, self-review + auditor gate (>80/100).
+Pivot strategies: 1) different style template, 2) restructure sections, 3) adjust content density.
+
 Generates professional `.docx` files from structured content. The skill uses python-docx with
 A4 page setup. Three things regularly cause bugs with python-docx and must be avoided:
 - Table column widths: use `WidthType.DXA` (twips), never `WidthType.PERCENTAGE` (it silently
