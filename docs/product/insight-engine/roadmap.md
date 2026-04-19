@@ -257,6 +257,23 @@ ROOT_CAUSES:
 
 ---
 
+## Phase 12 — Autonomous Pipeline UX
+
+**Goal:** Make InsightEngine's pipeline truly autonomous — fire-and-forget like n8n. After confirming a request, the user receives results, not follow-up questions. Eliminate all technical jargon from user-facing messages. Detect user frustration signals and switch to full-auto mode mid-pipeline.
+
+> **Origin:** Real-world user feedback: "flow kém hiệu quả hơn n8n, tính tự động hóa quá thấp, luôn luôn cần user túc trực và trả lời câu hỏi." Identified 5 root causes: excessive questions, technical jargon exposure, lack of autonomous batch execution, visible intermediate steps, no "just do it" mode.
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 12.1 — Fire-and-Forget Pipeline Mode** | After user confirms the pipeline plan at Step 1.5, execution runs fully autonomously to completion. No intermediate confirmations, no per-batch approvals, no technical questions. The pipeline only interrupts for CONTENT ambiguity (e.g., scope clarification) or complete failure after all retries. Delivers a single final summary message. |
+| **Epic 12.2 — Technical Jargon Shield** | All user-facing messages MUST pass through a jargon filter before display. Banned terms: JSON, Playwright, crawler, seed, HTTP, DOM, endpoint, selector, API, batch, fetch, parse. Replaced with user-friendly equivalents: "đang tìm trên ITViec… ✅ 23 jobs", "đang đọc thông tin chi tiết từng công ty", "đang tạo file Excel". |
+| **Epic 12.3 — User Signal Detection & Mode Switching** | Detect user frustration/impatience signals ("tiếp tục", "không cần hỏi", "tôi cần kết quả", "just do it", "cứ làm đi") and automatically switch to full-auto mode: suppress all remaining confirmation prompts in the current pipeline run and execute to completion. |
+| **Epic 12.4 — Batch Progress Model for Data Collection** | Replace per-item/per-source confirmations with a batch execution model: show periodic progress summary ("🔍 Đang tìm: ITViec ✅ 23 | TopCV ✅ 34 | VietnamWorks ⏳...") and a single delivery summary at the end ("Hoàn tất! 87 jobs từ 5 nguồn → output/jobs.xlsx (6 sheets)"). |
+
+---
+
 ## Skill Map theo Phase
 
 ```
@@ -272,6 +289,7 @@ Phase 8:  shared agents (refactor → runSubagent)  all output skills (auditor i
 Phase 9:  orchestrator (NEW agent)  synthesize (refactor → synthesis-only)  all agents (→ .agent.md standard)  auditor (100-point scoring)  improve (upgrade)  session state (enhanced)
 Phase 10: ALL skills (Vietnamese → English rename)  orchestrator (renamed from dieu-phoi)  natural language UX  legacy cleanup  design/verify/improve (backfill stories)
 Phase 11: gather (per-step search planner + DOM explorer + detail URL extractor + adaptive flow advisor)
+Phase 12: orchestrator (fire-and-forget mode + jargon shield + signal detection)  gather (batch progress model)
 ```
 
 > Note: Phase 0-9 Skill Map shows English names for readability. Actual rename happens in Phase 10.

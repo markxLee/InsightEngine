@@ -3,8 +3,8 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Scope:** Phase 0 → Phase 11 (all phases)  
-> **Total User Stories:** 97 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10 + 6 Phase 11)
+> **Scope:** Phase 0 → Phase 12 (all phases)  
+> **Total User Stories:** 105 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10 + 6 Phase 11 + 8 Phase 12)
 
 ---
 
@@ -12,7 +12,7 @@
 
 - **Product name:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, Phase 8, Phase 9, Phase 10, Phase 11
+- **Scope covered:** Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, Phase 8, Phase 9, Phase 10, Phase 11, Phase 12
 - **Total stories:** 91 (Phase 0: 5, Phase 1: 6, Phase 2: 5, Phase 3: 5, Phase 4: 15, Phase 5: 4, Phase 6: 14, Phase 7: 5, Phase 8: 6, Phase 9: 12, Phase 10: 14)
 - **ID format:** `US-<phase>.<epic>.<index>`
 
@@ -2035,6 +2035,106 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
   - AC4: Lựa chọn được ghi vào session state để không hỏi lại
   - AC5: Nếu user không chọn trong context window → sử dụng phương án #1 mặc định
 - Bị chặn bởi: `US-11.4.1`
+
+---
+
+## Phase 12: Autonomous Pipeline UX
+
+> **Origin:** Real-world user feedback — pipeline requires user to be on-call at every step, exposes technical jargon, and lacks autonomous execution compared to n8n. Phase 12 closes this gap with fire-and-forget execution, jargon shielding, frustration signal detection, and batch progress reporting.
+
+### Epic 12.1: Fire-and-Forget Pipeline Mode
+
+**US-12.1.1: Default auto-execute mode after plan approval**
+- Description: As a user, after I confirm the pipeline plan at Step 1.5, I want the entire pipeline to run autonomously to completion without asking me any more questions, so I can focus on other work while results are being prepared.
+- Acceptance Criteria:
+  - AC1: After Step 1.5 plan confirmation, orchestrator sets `autonomy_mode = true` for the session
+  - AC2: In autonomy mode, NO confirmation prompts are shown between pipeline steps
+  - AC3: Pipeline runs gather → compose → gen-[format] entirely without pausing
+  - AC4: Only TWO interruption conditions are allowed: (a) unresolvable content ambiguity about SCOPE/CONTENT (not technique), (b) all retries exhausted and data collection completely failed
+  - AC5: Final delivery: single summary message with all output files, counts, and sources
+- Blocked By: None
+
+**US-12.1.2: Content-only question filter (suppress technical prompts)**
+- Description: As a user in autonomy mode, I want the pipeline to never ask me technical questions (which library, which method, how many retries, confirm seed generation), so I only ever see questions about content scope.
+- Acceptance Criteria:
+  - AC1: A question is classified as TECHNICAL if it involves: tools, libraries, file formats, query strategy, platform selection, retry counts, configuration parameters
+  - AC2: A question is classified as CONTENT if it involves: which data to include, scope boundaries, output audience, language preference
+  - AC3: TECHNICAL questions are SUPPRESSED — pipeline auto-decides using best-practice defaults
+  - AC4: CONTENT questions may be asked (max 1 clarifying question per pipeline run)
+  - AC5: Classification logic documented in `gather/references/autonomy-rules.md`
+- Blocked By: `US-12.1.1`
+
+---
+
+### Epic 12.2: Technical Jargon Shield
+
+**US-12.2.1: Technical jargon blocklist for user messages**
+- Description: As a non-technical user, I never want to see programming/technical terms in messages from the pipeline, so the experience feels like talking to a smart assistant, not reading a developer log.
+- Acceptance Criteria:
+  - AC1: A jargon blocklist is defined covering at minimum: JSON, Playwright, crawler, seed, HTTP, API, DOM, endpoint, selector, XPath, regex, batch, fetch, parse, httpx, BeautifulSoup, script, subprocess
+  - AC2: Before any message is sent to the user, it is checked against the blocklist
+  - AC3: Blocked terms are replaced with approved user-friendly equivalents (documented in replacement table)
+  - AC4: Replacement table is in `references/jargon-shield.md`
+  - AC5: Technical terms are still allowed in terminal output and log files — only user-facing chat messages are filtered
+- Blocked By: None
+
+**US-12.2.2: User-friendly progress message templates**
+- Description: As a user, I want to see friendly, understandable progress updates during data collection (e.g., "Đang tìm trên ITViec... ✅ 23 jobs tìm được"), so I know the pipeline is working without needing to understand the technical steps.
+- Acceptance Criteria:
+  - AC1: Progress message template library covers: search start, search result count, source failure, fallback triggered, file generation start, file generation complete
+  - AC2: All templates use Vietnamese, human-readable language (no jargon)
+  - AC3: Data collection progress uses format: "🔍 [Source]... [status emoji] [count] [item_type]"
+  - AC4: File generation uses format: "📄 Đang tạo [file_type]..."
+  - AC5: Template library documented in `references/progress-messages.md`
+- Blocked By: `US-12.2.1`
+
+---
+
+### Epic 12.3: User Signal Detection & Mode Switching
+
+**US-12.3.1: User frustration signal detection**
+- Description: As a pipeline, when a user expresses impatience or frustration mid-pipeline, I want to automatically detect this signal, so I can stop asking questions and switch to autonomous mode.
+- Acceptance Criteria:
+  - AC1: Signal detection covers positive triggers: "tiếp tục", "cứ làm", "không cần hỏi", "just do it", "tôi cần kết quả", "làm luôn đi", "tự quyết định đi"
+  - AC2: Signal detection covers frustration indicators: "tôi không hiểu", "sao cứ hỏi", "làm ơn đừng hỏi nữa", "đừng hỏi"
+  - AC3: Detection is case-insensitive and handles partial matches
+  - AC4: When signal detected → log signal type and switch `autonomy_mode = true`
+  - AC5: Signal list documented in `references/autonomy-rules.md`
+- Blocked By: None
+
+**US-12.3.2: Dynamic mode switching (interactive → autonomous)**
+- Description: As a pipeline that started in interactive mode, when I detect a user frustration signal or explicit "just do it" command, I want to immediately switch to autonomous mode and never ask again for the rest of this pipeline run.
+- Acceptance Criteria:
+  - AC1: On signal detection, pipeline immediately suppresses the current pending question (if any)
+  - AC2: Responds with confirmation: "Đã hiểu — tôi sẽ tự xử lý và báo kết quả khi xong."
+  - AC3: All subsequent steps in the pipeline run execute in autonomy mode (US-12.1.1 rules apply)
+  - AC4: Mode switch is irreversible within the current pipeline run (user cannot switch back to interactive)
+  - AC5: Mode switch is recorded in session state for traceability
+- Blocked By: `US-12.3.1`, `US-12.1.1`
+
+---
+
+### Epic 12.4: Batch Progress Model for Data Collection
+
+**US-12.4.1: Batch progress reporting for data_collection**
+- Description: As a user running a data collection pipeline (e.g., collecting jobs from 5 platforms), I want to see a single consolidated progress update per batch rather than per-source confirmations, so I'm informed without being overwhelmed.
+- Acceptance Criteria:
+  - AC1: During data collection, show a single progress block updated in-place (not a new message per source)
+  - AC2: Progress block format: `🔍 Thu thập dữ liệu:\n  ITViec ✅ 23 | TopCV ✅ 34 | VietnamWorks ⏳ | LinkedIn ⏳ | Topcv ✅ 18`
+  - AC3: Progress is updated after each source completes (not during)
+  - AC4: Failed sources shown with ❌ and reason: `VietnamWorks ❌ (cần đăng nhập)`
+  - AC5: Total count shown: `Tổng: 75/[target] jobs (cần thêm [X])`
+- Blocked By: None
+
+**US-12.4.2: Final delivery summary (single message with all outputs)**
+- Description: As a user, when the pipeline finishes, I want to receive ONE comprehensive summary message listing all outputs, counts, and sources, so I know exactly what was produced without hunting through the conversation.
+- Acceptance Criteria:
+  - AC1: Final message title: `✅ Hoàn tất! — [brief task description]`
+  - AC2: Lists all output files with: file path, file size, brief description
+  - AC3: Lists data summary: total items collected, breakdown by source, breakdown by category (e.g., by province/city)
+  - AC4: Lists any gaps or limitations: sources that failed, items that could not be retrieved
+  - AC5: Message ends with next step suggestion if applicable (e.g., "Bạn có thể mở file Excel tại output/jobs.xlsx")
+- Blocked By: `US-12.4.1`
 
 ---
 

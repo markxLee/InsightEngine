@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 97 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 PLANNED)  
+> **Total User Stories:** 105 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 PLANNED + 8 Phase 12 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -1129,6 +1129,65 @@ Wave 36 (parallel): US-11.2.2 (after 11.2.1), US-11.3.1 (after 11.2.1)
 Wave 37 (sequential): US-11.4.1 (after 11.1.1)
 Wave 38 (sequential): US-11.4.2 (after 11.4.1)
 --- Phase 11 PLANNED (6/6) ---
+
+## Phase 12: Autonomous Pipeline UX
+
+> **Origin:** Real-world feedback — pipeline asks too many technical questions, exposes jargon, lacks autonomous execution. **8 stories PLANNED.**
+
+### Epic 12.1: Fire-and-Forget Pipeline Mode
+
+- [ ] **US-12.1.1** — Default auto-execute mode after plan approval
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: None
+
+- [ ] **US-12.1.2** — Content-only question filter (suppress technical prompts)
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: US-12.1.1
+
+### Epic 12.2: Technical Jargon Shield
+
+- [ ] **US-12.2.1** — Technical jargon blocklist for user messages
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: None
+
+- [ ] **US-12.2.2** — User-friendly progress message templates
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: US-12.2.1
+
+### Epic 12.3: User Signal Detection & Mode Switching
+
+- [ ] **US-12.3.1** — User frustration signal detection
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: None
+
+- [ ] **US-12.3.2** — Dynamic mode switching (interactive → autonomous)
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: US-12.3.1, US-12.1.1
+
+### Epic 12.4: Batch Progress Model for Data Collection
+
+- [ ] **US-12.4.1** — Batch progress reporting for data_collection
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: None
+
+- [ ] **US-12.4.2** — Final delivery summary (single message with all outputs)
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: US-12.4.1
+
+```
+Wave 39 (parallel): US-12.1.1, US-12.2.1, US-12.3.1, US-12.4.1
+Wave 40 (parallel): US-12.1.2 (after 12.1.1), US-12.2.2 (after 12.2.1)
+Wave 41 (sequential): US-12.3.2 (after 12.3.1 + 12.1.1)
+Wave 42 (sequential): US-12.4.2 (after 12.4.1)
+--- Phase 12 PLANNED (0/8) ---
 ```
 
 ---
