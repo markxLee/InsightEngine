@@ -1311,9 +1311,11 @@ Wave 49 (sequential): US-13.4.3 (after 13.4.2)
 ### Epic 14.3: Verified Source Plan
 
 - [ ] **US-14.3.1** — Verified source plan output (information, not question)
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - AI: copilot
   - Branch: `feature/insight-engine-us-14.3.1`
+  - Locked: 2026-04-19T00:04:00Z
   - Blocked By: ~~US-14.2.2~~ ✅
 
 ### Epic 14.4: Retry Loop for Data Collection
