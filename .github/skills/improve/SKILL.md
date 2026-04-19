@@ -24,6 +24,8 @@ compatibility:
 
 # Cải Tiến — Session Retrospective & Continuous Improvement
 
+**Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
+
 **References:** `references/retrospective-template.md`
 
 This skill looks at a completed (or failed) InsightEngine session and asks: **"What went wrong,

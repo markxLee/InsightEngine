@@ -117,6 +117,8 @@ CHILD_WORKFLOW_CHECK:
 
 ## Workflow Templates
 
+**Detailed templates:** `.github/skills/synthesize/references/workflow-templates/` — full step-by-step with basic/standard/advanced variants.
+
 | Template | Flow |
 |----------|------|
 | WF-01 Report | gather → compose → gen-word/gen-pdf |

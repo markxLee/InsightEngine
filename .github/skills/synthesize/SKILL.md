@@ -23,10 +23,12 @@ compatibility:
 
 # Tổng Hợp — Content Synthesis Skill
 
+**Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
+
 > **Role:** Pure content synthesis. Orchestration is handled by `orchestrator` agent.
 > When user says `synthesize`, orchestrator intercepts, classifies as synthesis, and routes here.
 
-**References:** `references/pipeline-ux.md` | `references/session-summary.md` | `references/output-chaining.md` | `references/auto-escalation.md` | `references/file-placement-rules.md` | `references/agent-context-schema.md` | `references/decision-maps.md` | `references/final-audit-rollback.md` | `references/conditional-skill-forge.md` | `references/public-skill-clone.md` | `references/agent-mode.md` | `references/request-analysis.md`
+**References:** `references/pipeline-ux.md` | `references/session-summary.md` | `references/output-chaining.md` | `references/auto-escalation.md` | `references/file-placement-rules.md` | `references/agent-context-schema.md` | `references/decision-maps.md` | `references/final-audit-rollback.md` | `references/conditional-skill-forge.md` | `references/public-skill-clone.md` | `references/agent-mode.md` | `references/request-analysis.md` | `references/quality-gates.md` | `references/workflow-templates/`
 **Agents:** `.github/agents/auditor.agent.md` (quality gate)
 **State:** `tmp/.session-state.json` (written after each step via `scripts/save_state.py`)
 
@@ -37,7 +39,7 @@ compatibility:
 
 **Quality mechanisms:** (1) Deep Analysis at Step 1.5 with HARD GATE, (2) Auto Quality Review after each sub-skill (max 2 retries), (3) Comprehensive by default (5000-15000 words). All Vietnamese. Shows plan → waits approval → executes.
 
-**File rules** (`references/file-placement-rules.md`): scripts→`/scripts`, temp→`/tmp`, output→`/output`, input→`/input`. Validated at pipeline start + after each step.
+**File rules** (`references/file-placement-rules.md`): reusable utilities→`/scripts`, one-time scripts+temp→`/tmp`, output→`/output`, input→`/input`. Validated at pipeline start + after each step.
 
 ---
 

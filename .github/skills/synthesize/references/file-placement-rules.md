@@ -10,23 +10,28 @@
 FILE_PLACEMENT:
   scripts:
     path: /scripts
-    purpose: All executable scripts (Python, Node.js CLI tools)
+    purpose: Permanent reusable utility scripts only (shared across sessions)
     examples:
-      - scripts/gen_report.py
-      - scripts/gen_slides.js
-      - scripts/fetch_data.py
-    rule: NEVER place scripts in tmp/, output/, or root directory
+      - scripts/check_deps.py
+      - scripts/recalc.py
+      - scripts/save_state.py
+      - scripts/validate_urls.py
+    rule: ONLY place scripts here if they are reusable utilities. These are tracked by git.
+    anti_pattern: NEVER place one-time/session-specific scripts here — they pollute the repo.
 
   tmp:
     path: /tmp
-    purpose: Temporary/intermediate files during pipeline execution
+    purpose: Temporary/intermediate files AND one-time scripts during pipeline execution
     examples:
       - tmp/.session-state.json
       - tmp/.agent-context.json
       - tmp/raw_content.md
       - tmp/search_results.json
-    rule: Cleaned up after pipeline completion (optional)
-    note: Session state and agent context files live here
+      - tmp/gen_custom_report.py    # one-time script for this session
+      - tmp/scrape_listings.py      # session-specific scraping script
+      - tmp/fetch_data.py           # one-time data fetching script
+    rule: Everything in /tmp is gitignored. Cleaned up after pipeline completion (optional).
+    note: Session state, agent context files, AND one-time scripts live here.
 
   output:
     path: /output
@@ -60,7 +65,8 @@ VALIDATION:
 
   checks:
     1. Scripts check:
-       - Any .py or .js file created outside /scripts → ERROR
+       - Any .py or .js file created in /scripts → verify it's a reusable utility
+       - One-time/session-specific scripts MUST go to /tmp, NOT /scripts
        - Exception: .github/skills/*/scripts/ (skill-internal scripts are OK)
     
     2. Output check:
@@ -69,6 +75,7 @@ VALIDATION:
     
     3. Temp check:
        - Intermediate JSON/MD files should be in /tmp
+       - One-time scripts should be in /tmp
        - Session state must be in /tmp/.session-state.json
     
   on_violation:

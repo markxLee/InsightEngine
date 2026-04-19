@@ -20,6 +20,8 @@ compatibility:
 
 # Cài đặt — InsightEngine Setup Skill
 
+**Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
+
 Guides the user through installing all dependencies needed by InsightEngine. The approach is
 conservative: check what's missing first (via `check_deps.py`), then install only what's
 needed. This avoids unnecessary reinstalls and respects the user's existing environment.

@@ -18,6 +18,8 @@ user-invocable: true
 > Replaces binary PASS/FAIL with QA-grade weighted scoring system.
 > Pass threshold: >80/100. Max 5 calls per pipeline run.
 
+**Quality criteria reference:** `.github/skills/synthesize/references/quality-gates.md` — per-step pass/fail criteria for pipeline quality gates.
+
 ---
 
 ## Budget
