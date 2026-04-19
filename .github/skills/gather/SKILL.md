@@ -29,8 +29,12 @@ compatibility:
 
 This skill reads content from local files and explicit URLs — and returns clean Markdown text.
 It runs standalone or as part of the synthesize pipeline.
-**Quality-driven:** after reading, auto-reviews content against the request; if too thin,
-tries fallback readers (max 1 retry per source).
+
+**Quality loop (RULE-2):** After reading all sources, self-review runs automatically. If content
+is insufficient, pivots through fallback strategies (max 3 pivots per RULE-2):
+1. Switch reader: markitdown → format-specific library
+2. Switch fetch tier: fetch_webpage → httpx → Playwright
+3. Report failure with honest gap assessment
 
 For web search, topic research, or platform discovery → use the **search** skill instead.
 

@@ -33,6 +33,12 @@ compatibility:
 This skill searches the internet, discovers platforms, and collects structured data.
 It returns clean Markdown text with source attribution.
 
+**Quality loop (RULE-2):** After each search execution, self-review runs automatically. If results
+are insufficient, pivots through strategies (max 3 pivots per RULE-2):
+1. Different query formulation (rephrase, add year, switch language)
+2. Different source domain (switch to alternative platform)
+3. Broaden/narrow scope, switch to deep research mode
+
 **Core principle:** Never rely solely on training knowledge for time-sensitive or region-specific
 information. Always search at runtime to discover what currently exists, then combine runtime
 findings with training knowledge for best coverage.
