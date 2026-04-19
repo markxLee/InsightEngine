@@ -314,6 +314,23 @@ ROOT_CAUSES:
 
 ---
 
+## Phase 14 — Source Intelligence & Verify-Retry Protocol
+
+**Goal:** Pipeline should never assume it knows which platforms, review sites, or directories exist for a given country or domain. Sources are discovered, tested, and ranked before data collection begins. Every collection step follows test → verify → retry logic.
+
+> **Origin:** Real-world testing failure — pipeline uses stale model training knowledge to select data sources (review sites, job boards, directories) instead of discovering and verifying current sources. The concrete failure: a request for company review platforms in Vietnam prompted the model to produce a hardcoded list of sites — some missing, some inaccessible, without any actual verification.
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 14.1 — Source Discovery Protocol** | Before any data collection requiring "soft knowledge" sources (review platforms, job boards, local directories), perform gather searches to discover current sources for that country/domain. Never assumes model training knowledge is current or correct. |
+| **Epic 14.2 — Per-Source Accessibility Test** | After discovering candidate sources, test each one: fetch homepage, check data structure, score reliability. Tier by score: primary (≥60) / Playwright fallback / skip. |
+| **Epic 14.3 — Verified Source Plan** | Before proceeding to collection, produce a verified source plan. Present discovered + tested sources as INFORMATION (not a question): "Found 4 review sites: itviec.com ✅, topdev.vn ✅, glassdoor.com ⚠️ (Playwright needed)". Auto-proceed; user can override if desired. |
+| **Epic 14.4 — Retry Loop for Data Collection** | Per source: attempt fetch → check data quality → retry up to 2× with alternative approaches (Playwright, different query, different URL pattern) before marking failed. Never stops pipeline on single source failure — partial results preferred. |
+
+---
+
 ## Skill Map theo Phase
 
 ```
@@ -331,6 +348,7 @@ Phase 10: ALL skills (Vietnamese → English rename)  orchestrator (renamed from
 Phase 11: gather (per-step search planner + DOM explorer + detail URL extractor + adaptive flow advisor)
 Phase 12: orchestrator (fire-and-forget mode + jargon shield + signal detection)  gather (batch progress model)
 Phase 13: orchestrator + auditor (requirement anchor + per-step audit)  synthesize (child soft-workflow)  all output skills (template-first output protocol)
+Phase 14: gather (source discovery + accessibility test + verified plan)  orchestrator (verify-retry collection loop)
 ```
 
 > Note: Phase 0-9 Skill Map shows English names for readability. Actual rename happens in Phase 10.
@@ -553,6 +571,23 @@ Phase 0 là bắt buộc — không có `cai-dat` và `tong-hop` thì các skill
 | **Epic 11.2 — Source DOM Explorer** | Khi tìm `site:nguồn.com` trả kết quả mỏng, tự động fetch trang chủ nguồn, trích xuất cấu trúc DOM (nav links, ô tìm kiếm, URL patterns), và xây dựng query nhắm mục tiêu hoặc đường dẫn trực tiếp dựa trên cấu trúc vừa khám phá. |
 | **Epic 11.3 — Detail URL Extractor** | Với nguồn hiển thị kết quả qua popup mở, expandable card, hoặc detail inline — phát hiện pattern và trích xuất URL trang detail chính xác. Quy tắc bắt buộc: URL trang listing không bao giờ được dùng làm URL đầu ra cuối cùng. |
 | **Epic 11.4 — Adaptive Flow Advisor** | Nếu sub-flow tìm kiếm thất bại sau 2 lần, gọi advisory agent đề xuất hướng tiếp cận thay thế (chuyển sang URL pattern trực tiếp, API nội trang, hoặc nền tảng khác). Hiển thị 2-3 lựa chọn cho user trước khi thử lại. |
+
+---
+
+---
+
+## Phase 14 — Source Intelligence & Verify-Retry Protocol (Tiếng Việt)
+
+**Mục tiêu:** Pipeline không bao giờ giả định biết nền tảng nào tồn tại trong một quốc gia hay lĩnh vực. Nguồn được khám phá, test, và xếp hạng trước khi bắt đầu thu thập. Mọi bước thu thập theo logic test → verify → retry.
+
+> **Nguồn gốc:** Thất bại thực tế — pipeline sử dụng kiến thức huấn luyện cũ để chọn nguồn dữ liệu (trang đánh giá, job board, thư mục) thay vì khám phá và xác thực nguồn hiện tại. Ví dụ cụ thể: yêu cầu liệt kê các trang đánh giá công ty Việt Nam dẫn đến danh sách cứng — một số trang thiếu, một số không truy cập được, không có xác minh nào.
+
+| Epic | Mô tả |
+|------|-------|
+| **Epic 14.1 — Source Discovery Protocol** | Trước khi thu thập dữ liệu từ nguồn “soft knowledge”, tự tìm kiếm khám phá nguồn hiện tại — không dựa vào kiến thức huấn luyện. |
+| **Epic 14.2 — Per-Source Accessibility Test** | Test từng nguồn: fetch trang chủ, kiểm tra cấu trúc dữ liệu, chấm điểm độ tin cậy. Phân tầng: primary (≥60), Playwright fallback, bỏ qua. |
+| **Epic 14.3 — Verified Source Plan** | Trước khi thu thập, xuất kế hoạch nguồn đã xác minh dưới dạng THÔNG TIN (không phải câu hỏi). Tự động tiếp tục; user có thể chỉnh sửa nếu muốn. |
+| **Epic 14.4 — Retry Loop for Data Collection** | Mỗi nguồn: fetch → kiểm tra chất lượng → retry đến 2 lần với chiến lược thay thế trước khi đánh dấu thất bại. Pipeline không bao giờ dừng vì một nguồn thất bại. |
 
 ---
 

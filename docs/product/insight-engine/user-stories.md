@@ -3,8 +3,8 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Scope:** Phase 0 → Phase 13 (all phases)
-> **Total User Stories:** 114 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10 + 6 Phase 11 + 8 Phase 12 + 9 Phase 13)
+> **Scope:** Phase 0 → Phase 14 (all phases)
+> **Total User Stories:** 120 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10 + 6 Phase 11 + 8 Phase 12 + 9 Phase 13 + 6 Phase 14)
 
 ---
 
@@ -2252,3 +2252,83 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
   - AC5: On completion, output script moves validated+filled file from `tmp/` to `output/` (not save to output directly)
   - AC6: Final output file path matches the name from requirements output_files[]
 - Blocked By: `US-13.4.2`
+
+---
+
+## Phase 14: Source Intelligence & Verify-Retry Protocol
+
+> **Origin:** Real-world testing failure — pipeline uses stale model training knowledge to select data sources (review sites, job boards, directories) instead of discovering and verifying current sources. The concrete example: a request for company review platforms in Vietnam prompted the model to produce a hardcoded list — some missing, some inaccessible — with no actual verification. Phase 14 adds source discovery, accessibility testing, verified source planning, and per-source retry loops. **6 stories PLANNED.**
+
+### Epic 14.1: Source Discovery Protocol
+
+**US-14.1.1: Source discovery search for domain + country**
+- Description: As a pipeline about to collect data from "soft knowledge" sources (review platforms, job boards, local directories), I want to perform gather searches to discover currently active sources in that country/domain before starting collection, so that I never rely on potentially stale model training knowledge.
+- Acceptance Criteria:
+  - AC1: Before any data collection step requiring source selection, the pipeline performs at least 2 search queries to discover current platforms for that domain + country
+  - AC2: Search queries are constructed from domain context (e.g., "company review sites Vietnam 2024", "job boards Vietnam developer")
+  - AC3: Results are parsed into a candidate source list with: name, URL, source type, description
+  - AC4: Discovery runs silently — user is NOT asked which sources to use; the pipeline discovers them autonomously
+  - AC5: At least 3 candidate sources are required before proceeding to accessibility testing
+- Blocked By: None
+
+**US-14.1.2: Source classification by reliability and data type**
+- Description: As a pipeline that has discovered candidate sources, I want to classify each source by its reliability tier and data type, so that collection strategy can be tailored per source (direct fetch vs Playwright vs skip).
+- Acceptance Criteria:
+  - AC1: Each candidate source is classified by data type: review_platform / job_board / directory / aggregator / news
+  - AC2: Each source is assigned an initial reliability tier based on domain heuristics: Tier 1 (established platform), Tier 2 (regional/niche), Tier 3 (uncertain/new)
+  - AC3: Classification results are logged to session state alongside the source list
+  - AC4: Tier assignment influences which accessibility test strategy is applied in Epic 14.2
+- Blocked By: `US-14.1.1`
+
+---
+
+### Epic 14.2: Per-Source Accessibility Test
+
+**US-14.2.1: Per-source accessibility test with auto-retry (Playwright escalation)**
+- Description: As a pipeline with a classified source list, I want to test each source's accessibility (fetch homepage, check for data availability), auto-escalate to Playwright on bot-detection, and score each source so that only viable sources proceed to collection.
+- Acceptance Criteria:
+  - AC1: For each candidate source, attempt a fetch of the homepage/search page via standard HTTP
+  - AC2: If HTTP fetch returns bot-detection indicators (Cloudflare, CAPTCHA, JS-only content) → auto-escalate to Playwright stealth mode
+  - AC3: After fetch (or Playwright), check response for: status 200, non-empty body, presence of expected data fields
+  - AC4: Sources that fail both HTTP and Playwright escalation are marked as inaccessible and removed from collection plan
+  - AC5: Test results (status, escalation needed, accessibility confirmed) are logged per source
+- Blocked By: `US-14.1.2`
+
+**US-14.2.2: Source reliability scoring and ranking**
+- Description: As a pipeline that has tested all candidate sources, I want to compute a reliability score for each source and rank them, so that the most reliable sources are prioritized for data collection.
+- Acceptance Criteria:
+  - AC1: Reliability score (0-100) is computed per source from: accessibility status (40 pts), data completeness sample (40 pts), initial tier classification (20 pts)
+  - AC2: Sources with score ≥ 60 are designated Tier 1 (primary, direct fetch)
+  - AC3: Sources with score 30-59 are designated Tier 2 (Playwright escalation during collection)
+  - AC4: Sources with score < 30 are designated Tier 3 (skip unless no Tier 1/2 sources available)
+  - AC5: Ranked source list is saved to session state and used as input for Epic 14.3
+- Blocked By: `US-14.2.1`
+
+---
+
+### Epic 14.3: Verified Source Plan
+
+**US-14.3.1: Verified source plan output (information, not question)**
+- Description: As a pipeline that has discovered and tested sources, I want to present the verified source plan to the user as factual information (not a question), then auto-proceed with collection, so that the user is informed without being required to answer a technical question.
+- Acceptance Criteria:
+  - AC1: Before collection begins, pipeline displays: "Found N review sites: [site A] ✅, [site B] ✅, [site C] ⚠️ (Playwright needed), [site D] ❌ (inaccessible — skipped)"
+  - AC2: Message format is friendly/non-technical (jargon shield applies: no "HTTP 403", "Cloudflare bypass", "DOM scraping")
+  - AC3: Pipeline auto-proceeds to collection after displaying the plan — no user confirmation required
+  - AC4: If user responds with correction (e.g., "add site X"), pipeline adds it to the list and re-tests it before proceeding
+  - AC5: If zero Tier 1/2 sources found, pipeline stops and reports failure with the raw list of what was found
+- Blocked By: `US-14.2.2`
+
+---
+
+### Epic 14.4: Retry Loop for Data Collection
+
+**US-14.4.1: Verify-retry data collection loop per source**
+- Description: As a pipeline collecting data from verified sources, I want each source's collection to follow a test → verify quality → retry loop, so that low-quality or empty results trigger a retry with adjusted strategy before the source is marked as failed.
+- Acceptance Criteria:
+  - AC1: After fetching data from each source, run a quality check: minimum record count (≥3), required fields present (>50% coverage), no empty/null across all records
+  - AC2: If quality check fails, retry with adjusted strategy: (a) modified search query, (b) different page/endpoint, (c) Playwright escalation if not already used
+  - AC3: Maximum 2 retry attempts per source before marking as failed
+  - AC4: Failed sources are logged with reason but do NOT stop the pipeline
+  - AC5: Pipeline completes with partial results if some sources fail — final summary includes: total sources attempted, succeeded, failed (with reasons)
+  - AC6: User receives summary in friendly format: "Collected from 3 out of 4 sources. [Site D] had no accessible data and was skipped."
+- Blocked By: `US-14.3.1`

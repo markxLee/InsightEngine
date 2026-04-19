@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 114 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 DONE + 8 Phase 12 DONE + 9 Phase 13 PLANNED)  
+> **Total User Stories:** 120 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 DONE + 8 Phase 12 DONE + 9 Phase 13 DONE + 6 Phase 14 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -1271,7 +1271,67 @@ Wave 46 (sequential): US-13.2.2 (after 13.2.1)
 Wave 47 (sequential): US-13.3.2 (after 13.3.1)
 Wave 48 (sequential): US-13.4.2 (after 13.4.1 + 13.1.2)
 Wave 49 (sequential): US-13.4.3 (after 13.4.2)
---- Phase 13 PLANNED (0/9) ---
+--- Phase 13 DONE (9/9) ---
+```
+
+---
+
+## Phase 14: Source Intelligence & Verify-Retry Protocol
+
+> **Origin:** Real-world testing failure — pipeline uses stale model training knowledge to select data sources (review sites, job boards, directories) instead of discovering and verifying current sources. Phase 14 adds source discovery, per-source accessibility testing, verified source planning, and per-source retry loops. **6 stories PLANNED.**
+
+### Epic 14.1: Source Discovery Protocol
+
+- [ ] **US-14.1.1** — Source discovery search for domain + country
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-14.1.1`
+  - Blocked By: None
+
+- [ ] **US-14.1.2** — Source classification by reliability and data type
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-14.1.2`
+  - Blocked By: US-14.1.1
+
+### Epic 14.2: Per-Source Accessibility Test
+
+- [ ] **US-14.2.1** — Per-source accessibility test with auto-retry (Playwright escalation)
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-14.2.1`
+  - Blocked By: US-14.1.2
+
+- [ ] **US-14.2.2** — Source reliability scoring and ranking
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-14.2.2`
+  - Blocked By: US-14.2.1
+
+### Epic 14.3: Verified Source Plan
+
+- [ ] **US-14.3.1** — Verified source plan output (information, not question)
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-14.3.1`
+  - Blocked By: US-14.2.2
+
+### Epic 14.4: Retry Loop for Data Collection
+
+- [ ] **US-14.4.1** — Verify-retry data collection loop per source
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-14.4.1`
+  - Blocked By: US-14.3.1
+
+```
+Wave 50 (sequential): US-14.1.1
+Wave 51 (sequential): US-14.1.2 (after 14.1.1)
+Wave 52 (sequential): US-14.2.1 (after 14.1.2)
+Wave 53 (sequential): US-14.2.2 (after 14.2.1)
+Wave 54 (sequential): US-14.3.1 (after 14.2.2)
+Wave 55 (sequential): US-14.4.1 (after 14.3.1)
+--- Phase 14 PLANNED (0/6) ---
 ```
 
 ---
