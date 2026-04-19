@@ -1237,8 +1237,8 @@ Wave 42 (sequential): US-12.4.2 (after 12.4.1)
   - Branch: `feature/insight-engine-us-13.3.1`
   - Blocked By: ~~US-13.1.1~~ ✅
 
-- [ ] **US-13.3.2** — Child workflow state + failure isolation
-  - Status: PLANNED
+- [x] **US-13.3.2** — Child workflow state + failure isolation
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-13.3.2`
   - Blocked By: ~~US-13.3.1~~ ✅
