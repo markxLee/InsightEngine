@@ -1143,8 +1143,9 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
   - Blocked By: None
 
 - [ ] **US-12.1.2** — Content-only question filter (suppress technical prompts)
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - Branch: `feature/insight-engine-us-12.1.2`
   - Blocked By: US-12.1.1
 
 ### Epic 12.2: Technical Jargon Shield
@@ -1175,8 +1176,8 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
 
 ### Epic 12.4: Batch Progress Model for Data Collection
 
-- [ ] **US-12.4.1** — Batch progress reporting for data_collection
-  - Status: IN_PROGRESS
+- [x] **US-12.4.1** — Batch progress reporting for data_collection
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-12.4.1`
   - Blocked By: None

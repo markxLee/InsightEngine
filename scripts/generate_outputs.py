@@ -23,7 +23,12 @@ OUT_DIR.mkdir(exist_ok=True)
 
 def load_jobs():
     jobs = []
-    for p in ['tmp/jobs_extracted_playwright.json','tmp/jobs_extracted.json']:
+    # Prefer filtered file if present
+    candidate_files = []
+    if os.path.exists('tmp/jobs_extracted_filtered.json'):
+        candidate_files.append('tmp/jobs_extracted_filtered.json')
+    candidate_files.extend(['tmp/jobs_extracted_playwright.json','tmp/jobs_extracted.json'])
+    for p in candidate_files:
         if os.path.exists(p):
             try:
                 data = json.load(open(p,'r',encoding='utf-8'))

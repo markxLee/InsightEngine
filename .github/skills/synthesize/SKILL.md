@@ -150,13 +150,16 @@ AUTONOMY_MODE:
     - Only 2 allowed interruptions:
         a. CONTENT ambiguity: scope or field is genuinely unclear from the request
            (max 1 clarifying question — ask it inline, proceed with best assumption if not answered)
+           ⚠️ Classification guide: references/content-only-filter.md
         b. TOTAL failure: all retry attempts exhausted and data collection completely failed
     - Show periodic progress updates (non-interactive): "✅ Step 3 done — 45 items collected"
     
   CONTENT_VS_TECHNICAL:
-    CONTENT (may ask once): which companies to include, output language, which provinces
+    # Full classification: references/content-only-filter.md
+    CONTENT (may ask once): which companies to include, output language, which provinces, data cutoff date
     TECHNICAL (never ask): which library, how many retries, confirm seed generation,
-      approve each batch, confirm file format, confirm query strategy
+      approve each batch, confirm file format, confirm query strategy, install dependencies,
+      step transitions ("Step 1 done, proceed?"), batch size, retry approval
       
   PROGRESS_FORMAT:
     each_step: "⚙️ {step_name}... ✅ done ({summary})"
