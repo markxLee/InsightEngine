@@ -1109,15 +1109,16 @@ Wave 33 (sequential): US-10.3.2 (after 10.3.1)
 
 ### Epic 11.4: Adaptive Flow Advisor
 
-- [ ] **US-11.4.1** — Advisory agent fallback after 2 failed search attempts
-  - Status: PLANNED
+- [x] **US-11.4.1** — Advisory agent fallback after 2 failed search attempts
+  - Status: DONE
   - Assignee: copilot
+  - Branch: `feature/insight-engine-us-11.4.1`
   - Blocked By: ~~US-11.1.1~~ ✅
 
 - [ ] **US-11.4.2** — User-facing flow alternatives presentation
   - Status: PLANNED
   - Assignee: copilot
-  - Blocked By: US-11.4.1
+  - Blocked By: ~~US-11.4.1~~ ✅
 
 Wave 34 (sequential): US-11.1.1
 Wave 35 (sequential): US-11.2.1 (after 11.1.1)

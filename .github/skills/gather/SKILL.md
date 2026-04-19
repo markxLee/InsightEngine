@@ -319,6 +319,92 @@ Check 4 criteria: (1) URL specificity — no search/listing URLs, re-fetch if fo
 
 Full spec: `references/deep-research.md`
 
+### DC-6: Adaptive Flow Advisor (triggered after 2 failed sub-flow attempts)
+
+When a search sub-flow for a specific source **fails 2 times** (insufficient items after
+DC-0 sub-flow execution + 1 retry, or DC-2.5 DOM exploration also returns no usable
+structure), call the **advisory agent** for alternative approaches before giving up.
+
+```yaml
+TRIGGER_CONDITION:
+  - Sub-flow attempted: 2 times for this source/step
+  - Both attempts produced: < threshold items (< 3 for that source)
+  - DOM exploration also failed (DC-2.5 returned no usable structure)
+
+BUDGET:
+  advisory_calls_max: 2 per pipeline run  # HARD STOP
+  # If budget exhausted → log "Advisory budget exhausted" and proceed with available items
+```
+
+**Call advisory agent with this context:**
+```yaml
+advisory_call:
+  task: propose_alternative_search_flow
+  context:
+    item_type: "<what was being searched>"
+    attempted_sources: ["<source_1> — {reason_failed}", "<source_2> — {reason_failed}"]
+    current_results_count: <N>  # Items found so far
+    target_quantity: <M>         # Original target
+    gap_count: <M - N>           # Still needed
+    failed_queries: ["<query_1>", "<query_2>"]
+    search_approach_tried: ["site:search", "dom-exploration", "direct-fetch"]
+```
+
+**Advisory agent returns 2-3 alternatives, each with:**
+```yaml
+alternative:
+  name: "<short name>"
+  description: "<how to execute>"
+  example: "<concrete example URL or query>"
+  pros: ["<pro_1>"]
+  cons: ["<con_1>"]
+```
+
+**After receiving alternatives:**
+- Store alternatives in session state for DC-6 Step 2 (US-11.4.2) — user presentation
+- If user has already selected → execute the chosen alternative immediately
+- If first encounter → PAUSE and present to user (see DC-7 below)
+- Budget tracking: increment `advisory_calls_used`
+
+Report:
+```
+⚠️ Search sub-flow thất bại sau 2 lần thử cho {source_domain}
+  Đã thử: {attempt_summary}
+  Kết quả hiện tại: {N}/{M} items
+→ Gọi advisory agent để đề xuất phương án thay thế...
+```
+
+### DC-7: User-Facing Flow Alternatives Presentation
+
+*(Requires US-11.4.2 to be fully activated — see user-stories.md)*
+
+After DC-6 calls advisory agent, present alternatives to user before retrying:
+
+```
+⚡ Không tìm được đủ {item_type} từ {source} sau 2 lần thử.
+
+Advisory agent đề xuất 3 phương án thay thế:
+
+1. **{alternative_1_name}**
+   {description}
+   Ví dụ: {example}
+   ✅ {pros} | ⚠️ {cons}
+
+2. **{alternative_2_name}**
+   {description}
+   Ví dụ: {example}
+
+3. **{alternative_3_name}** (tiếp tục với {N} items đã có)
+
+Nhập 1, 2, hoặc 3 để chọn — hoặc mô tả phương án khác:
+```
+
+**Handle user response:**
+- `"1"` or `"2"` → Execute selected alternative
+- `"3"` → Proceed with current results (accept partial)
+- Freeform text → Use as custom guidance for next attempt
+- No response in context window → Default to alternative #1 (non-blocking)
+
 ### DR-1: Query Decomposition
 
 1. Read the full request and identify every distinct information dimension
