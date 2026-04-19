@@ -75,9 +75,12 @@ FLOW:
   2. LOG classification to session state
   3. CALL strategist agent → get workflow plan
   4. PRESENT plan to user in Vietnamese → wait for approval
-  5. EXECUTE skills in order per plan
-  6. After each output skill → CALL auditor agent for quality gate
-  7. DELIVER final output to user
+  5. ON USER APPROVAL → SET session_flag: autonomy_mode=true
+     After this point: execute fully autonomously — no more confirmation gates
+     (see Autonomy Mode section below)
+  6. EXECUTE skills in order per plan
+  7. After each output skill → CALL auditor agent for quality gate
+  8. DELIVER final output to user (single delivery summary message)
   8. SAVE session state for resume capability
 
 BUDGET_ENFORCEMENT:
@@ -199,6 +202,59 @@ CROSS_SESSION_RESUME:
     - "tiếp tục", "resume", "tiếp tục từ lần trước"
     - "pipeline đang dở", "continue from where I left off"
     - Any new request when IN_PROGRESS state exists → prompt resume choice
+```
+
+---
+
+## Autonomy Mode
+
+After the user confirms the plan (Step 4 above), `autonomy_mode=true` activates for this pipeline run.
+
+```yaml
+AUTONOMY_MODE:
+  description: >
+    Fire-and-forget execution. User said "go" — now pipeline runs end-to-end
+    without interruption. No technical gates. One final delivery message.
+
+  activates_when:
+    - User responds to plan presentation with any approval signal:
+        ["ok", "đồng ý", "tiếp tục", "được", "yes", "go", "làm đi", "bắt đầu"]
+    - Signal is case-insensitive; short confirmations count
+
+  behavior_when_active:
+    execute_autonomously:
+      - All steps per the approved plan
+      - All technical decisions (library choice, query strategy, batch size, retry count)
+      - All file format details (page size, font, column widths, chart type)
+      - Retry logic: auto-retry up to 2x before marking step failed
+    
+    suppress:
+      - "Bạn có muốn tiếp tục không?" style questions
+      - Step-by-step confirmations between skills
+      - Technical questions like "dùng thư viện nào?", "format gì?"
+      - Batch approval gates ("Đã thu thập 10 items, tiếp tục không?")
+
+    allowed_interruptions:
+      content_ambiguity:
+        description: >
+          A CONTENT detail is genuinely unclear and would cause wrong output
+          (e.g., which specific province, which company sector)
+        action: Ask ONE inline question in Vietnamese, then proceed with best assumption
+        max: 1 per pipeline run
+      total_failure:
+        description: All retry attempts for a critical step are exhausted
+        action: Report to user with partial results, stop gracefully
+
+  progress_updates:
+    # Non-interactive updates shown during pipeline execution
+    step_done:    "✅ {step_name} — xong ({brief_summary})"
+    collecting:   "🔍 {source}: ✅ {count} items"
+    generating:   "📄 Đang tạo {file_type}..."
+    retrying:     "⚠️ Thử lại {step} ({attempt}/2)..."
+    
+  delivery:
+    format: Single summary message at the end (see Final Delivery section)
+    no_intermediate_approvals: true
 ```
 
 ---

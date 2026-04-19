@@ -1137,8 +1137,9 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
 ### Epic 12.1: Fire-and-Forget Pipeline Mode
 
 - [ ] **US-12.1.1** — Default auto-execute mode after plan approval
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - Branch: `feature/insight-engine-us-12.1.1`
   - Blocked By: None
 
 - [ ] **US-12.1.2** — Content-only question filter (suppress technical prompts)

@@ -1,5 +1,12 @@
 pipeline:
   product_slug: insight-engine
+  max_iterations: 8
+  current_iteration: 0
+  started_at: "2026-04-19"
+  status: running
+  completed_stories: []
+  failed_stories: []
+  # Phase 12 stories: US-12.1.1, US-12.1.2, US-12.2.1, US-12.2.2, US-12.3.1, US-12.3.2, US-12.4.1, US-12.4.2
   max_iterations: 10
   current_iteration: 0
   started_at: 2026-04-19T00:00:00
