@@ -1342,88 +1342,88 @@ Wave 55 (sequential): US-14.4.1 (after 14.3.1)
 
 ### Epic 15.1: gather / search Skill Split
 
-- [ ] **US-15.1.1** — Create new `search` skill with internet discovery logic
-  - Status: PLANNED
+- [x] **US-15.1.1** — Create new `search` skill with internet discovery logic
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.1.1`
+  - Branch: `main` (17d9621)
   - Blocked By: `None`
 
-- [ ] **US-15.1.2** — Refactor `gather` skill — file and URL only
-  - Status: PLANNED
+- [x] **US-15.1.2** — Refactor `gather` skill — file and URL only
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.1.2`
-  - Blocked By: `US-15.1.1`
+  - Branch: `main` (158c06a)
+  - Blocked By: ~~`US-15.1.1`~~
 
-- [ ] **US-15.1.3** — Update copilot-instructions.md skill registry
-  - Status: PLANNED
+- [x] **US-15.1.3** — Update copilot-instructions.md skill registry
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.1.3`
-  - Blocked By: `US-15.1.2`
+  - Branch: `main` (3f8ae24)
+  - Blocked By: ~~`US-15.1.2`~~
 
 ### Epic 15.2: RULE.md Enforcement Layer
 
-- [ ] **US-15.2.1** — Create `.github/RULE.md` with non-negotiable pipeline rules
-  - Status: PLANNED
+- [x] **US-15.2.1** — Create `.github/RULE.md` with non-negotiable pipeline rules
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.2.1`
+  - Branch: `main` (51fb840)
   - Blocked By: `None`
 
-- [ ] **US-15.2.2** — Inject RULE.md into copilot-instructions.md with mandatory priority
-  - Status: PLANNED
+- [x] **US-15.2.2** — Inject RULE.md into copilot-instructions.md with mandatory priority
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.2.2`
-  - Blocked By: `US-15.2.1`
+  - Branch: `main` (5070daf)
+  - Blocked By: ~~`US-15.2.1`~~
 
 ### Epic 15.3: Hard Session Start Discipline
 
-- [ ] **US-15.3.1** — Define hard session start init sequence in RULE.md
-  - Status: PLANNED
+- [x] **US-15.3.1** — Define hard session start init sequence in RULE.md
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.3.1`
-  - Blocked By: `US-15.2.1`
+  - Branch: `main` (da65de6)
+  - Blocked By: ~~`US-15.2.1`~~
 
-- [ ] **US-15.3.2** — Apply hard session start to orchestrator agent
-  - Status: PLANNED
+- [x] **US-15.3.2** — Apply hard session start to orchestrator agent
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.3.2`
-  - Blocked By: `US-15.3.1`
+  - Branch: `main` (557bcd9)
+  - Blocked By: ~~`US-15.3.1`~~
 
-- [ ] **US-15.3.3** — Parallel output template creation
-  - Status: PLANNED
+- [x] **US-15.3.3** — Parallel output template creation
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.3.3`
-  - Blocked By: `US-15.3.1`
+  - Branch: `main` (1593130)
+  - Blocked By: ~~`US-15.3.1`~~
 
 ### Epic 15.4: Execute-Test-Pivot-Audit Loop
 
-- [ ] **US-15.4.1** — Define execute-test-pivot-audit loop standard
-  - Status: PLANNED
+- [x] **US-15.4.1** — Define execute-test-pivot-audit loop standard
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.4.1`
-  - Blocked By: `US-15.2.1`
+  - Branch: `main` (1ef11a1)
+  - Blocked By: ~~`US-15.2.1`~~
 
-- [ ] **US-15.4.2** — Apply loop to gather and search skills
-  - Status: PLANNED
+- [x] **US-15.4.2** — Apply loop to gather and search skills
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.4.2`
-  - Blocked By: `US-15.4.1`
+  - Branch: `main` (53e883c)
+  - Blocked By: ~~`US-15.4.1`~~
 
-- [ ] **US-15.4.3** — Apply loop to compose skill
-  - Status: PLANNED
+- [x] **US-15.4.3** — Apply loop to compose skill
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.4.3`
-  - Blocked By: `US-15.4.1`
+  - Branch: `main` (d533b16)
+  - Blocked By: ~~`US-15.4.1`~~
 
-- [ ] **US-15.4.4** — Apply loop to all gen-* skills
-  - Status: PLANNED
+- [x] **US-15.4.4** — Apply loop to all gen-* skills
+  - Status: DONE
   - Assignee: copilot
-  - Branch: `feature/insight-engine-us-15.4.4`
-  - Blocked By: `US-15.4.1`
+  - Branch: `main` (22a26b3)
+  - Blocked By: ~~`US-15.4.1`~~
 
 ```
-Wave 56 (parallel): US-15.1.1 + US-15.2.1
-Wave 57 (sequential): US-15.1.2 (after 15.1.1) + US-15.2.2 (after 15.2.1) + US-15.3.1 (after 15.2.1) + US-15.4.1 (after 15.2.1)
-Wave 58 (sequential): US-15.1.3 (after 15.1.2) + US-15.3.2 (after 15.3.1) + US-15.3.3 (after 15.3.1) + US-15.4.2 (after 15.4.1) + US-15.4.3 (after 15.4.1) + US-15.4.4 (after 15.4.1)
+Wave 56 (parallel): US-15.1.1 ✅ + US-15.2.1 ✅
+Wave 57 (sequential): US-15.1.2 ✅ + US-15.2.2 ✅ + US-15.3.1 ✅ + US-15.4.1 ✅
+Wave 58 (sequential): US-15.1.3 ✅ + US-15.3.2 ✅ + US-15.3.3 ✅ + US-15.4.2 ✅ + US-15.4.3 ✅ + US-15.4.4 ✅
 --- Phase 15 PLANNED (0/12) ---
 ```
 
