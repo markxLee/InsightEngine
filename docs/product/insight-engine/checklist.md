@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 97 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 14 Phase 10 PLANNED + 6 Phase 11 PLANNED)  
+> **Total User Stories:** 97 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -1016,8 +1016,9 @@ Wave 15 (sequential): US-5.1.2 (after 5.1.1), US-5.2.2 (after 5.2.1)
 
 ### Epic 10.7: Product Doc Alignment
 
-{temp}
+- [ ] **US-10.7.1** — Update instructions.md Vietnamese Language Rules
   - Status: PLANNED
+  - Assignee: copilot
   - Blocked By: ~~US-10.1.1~~ ✅
 
 - [x] **US-10.7.2** — Final cross-document consistency check
@@ -1071,14 +1072,49 @@ Wave 30 (parallel): US-10.1.1, US-10.2.1, US-10.5.1
 Wave 31 (parallel): US-10.1.2, US-10.4.1, US-10.5.2, US-10.6.1, US-10.6.2, US-10.6.3, US-10.7.1
 Wave 32 (parallel): US-10.3.1, US-10.4.2, US-10.7.2
 Wave 33 (sequential): US-10.3.2 (after 10.3.1)
---- Phase 10 PLANNED (14/14) ---
+--- Phase 10: 13 DONE, 1 PLANNED (US-10.7.1) ---
 
-## ☐ US-11.1.1: Integrate per-step search planner in gather skill
-## ☐ US-11.2.1: Auto DOM exploration when site-scoped search returns thin results
-## ☐ US-11.2.2: Internal search usage via DOM-discovered endpoints
-## ☐ US-11.3.1: Extract canonical detail-page URLs for inline/popup detail sources
-## ☐ US-11.4.1: Advisory agent fallback after 2 failed search attempts
-## ☐ US-11.4.2: User-facing flow alternatives presentation
+## Phase 11: Adaptive Search Intelligence
+
+> Tìm kiếm thông minh thích ứng — per-step search planning, DOM exploration, detail URL extraction, adaptive flow advisor. **6 stories PLANNED.**
+
+### Epic 11.1: Per-Step Search Planner
+
+- [ ] **US-11.1.1** — Integrate per-step search planner in gather skill
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: None
+
+### Epic 11.2: Source DOM Explorer
+
+- [ ] **US-11.2.1** — Auto DOM exploration when site-scoped search returns thin results
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: US-11.1.1
+
+- [ ] **US-11.2.2** — Internal search usage via DOM-discovered endpoints
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: US-11.2.1
+
+### Epic 11.3: Detail URL Extractor
+
+- [ ] **US-11.3.1** — Extract canonical detail-page URLs for inline/popup detail sources
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: US-11.2.1
+
+### Epic 11.4: Adaptive Flow Advisor
+
+- [ ] **US-11.4.1** — Advisory agent fallback after 2 failed search attempts
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: US-11.1.1
+
+- [ ] **US-11.4.2** — User-facing flow alternatives presentation
+  - Status: PLANNED
+  - Assignee: copilot
+  - Blocked By: US-11.4.1
 
 Wave 34 (sequential): US-11.1.1
 Wave 35 (sequential): US-11.2.1 (after 11.1.1)
