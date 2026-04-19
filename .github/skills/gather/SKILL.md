@@ -243,7 +243,83 @@ TRIGGER_SD0:
 
 **Budget:** SD-0 consumes ≤3 web search calls. Counts toward overall gather budget.
 
-→ After SD-0 completes: pass `sd0_candidates` to US-14.1.2 classification, then proceed to DC-0.
+→ After SD-0 completes: pass `sd0_candidates` to **SD-0.5** (classification below).
+
+---
+
+### SD-0.5: Source Classification (runs immediately after SD-0)
+
+After source discovery produces a candidate list, classify each source by **data type** and
+assign a preliminary **reliability tier** based on domain heuristics. Classification informs
+which accessibility-test strategy to apply in SD-1 (US-14.2.1).
+
+**Classification steps:**
+
+1. **Classify by data type** (one of the following):
+   ```yaml
+   source_types:
+     review_platform: "Site where users leave company/product/service reviews"
+     job_board: "Site listing job openings with apply flow"
+     directory: "Structured listing of companies, products, or services"
+     aggregator: "Re-publishes listings from multiple sources"
+     news: "Primarily publishes articles — NOT a platform (exclude from collection)"
+   ```
+   Assignment heuristics:
+   - Domain contains "review", "rating", "đánh giá", "review" in URL/name → `review_platform`
+   - Domain contains "job", "career", "việc", "tuyển" in URL/name → `job_board`
+   - Domain has category navigation, filters, entity listing → `directory`
+   - Domain republishes from other sources without original data → `aggregator`
+   - Domain is primarily a news/blog site → `news` → **exclude from candidate list**
+
+2. **Assign preliminary reliability tier** (Tier 1/2/3) based on heuristics:
+   ```yaml
+   tier_heuristics:
+     Tier_1:  # Score 60+ expected — likely primary source
+       - National/regional platform established ≥3 years (check domain age if possible)
+       - Has dedicated mobile app (mentioned in search snippets)
+       - In top 3 results for all discovery queries
+       - High volume signals (">X reviews", ">X listings" in snippet)
+     Tier_2:  # Score 30-59 expected — may need Playwright fallback
+       - Regional niche platform
+       - Appears in only 1 of 2 discovery queries
+       - No strong volume signals
+       - Domain age unknown
+     Tier_3:  # Score <30 expected — likely to be skipped
+       - Very low profile (only 1 mention total)
+       - Appears to be a news site or aggregator
+       - Domain not clearly related to the target type
+   ```
+
+3. **Exclude `news`-type sources** from the candidate list entirely (add to `excluded_sources`).
+
+4. **Save classification to session state:**
+   ```yaml
+   session_state:
+     sd0_candidates: [
+       { name, url, source_type, description, discovery_query, preliminary_tier }
+     ]
+     sd0_excluded: [  # news/aggregator sources removed
+       { name, url, reason }
+     ]
+     sd05_complete: true
+   ```
+
+5. **Report (non-technical, user-friendly):**
+   ```
+   📋 Phân loại {N} nguồn:
+     Tier 1 (chính): {count} — {names}
+     Tier 2 (dự phòng): {count} — {names}
+     Tier 3 (xác minh thêm): {count} — {names}
+     Loại bỏ (tin tức/blog): {count} — {names}
+   → Đang kiểm tra khả năng truy cập từng nguồn...
+   ```
+
+**What SD-0.5 does NOT do:**
+- Does NOT fetch any URLs (that's SD-1)
+- Does NOT compute final scores (that's SD-2)
+- Does NOT confirm with user — fully autonomous
+
+→ After SD-0.5 completes: pass classified + tiered candidates to **SD-1** (accessibility testing).
 
 ---
 
