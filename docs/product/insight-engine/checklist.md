@@ -1289,9 +1289,11 @@ Wave 49 (sequential): US-13.4.3 (after 13.4.2)
   - Blocked By: None
 
 - [ ] **US-14.1.2** — Source classification by reliability and data type
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - AI: copilot
   - Branch: `feature/insight-engine-us-14.1.2`
+  - Locked: 2026-04-19T00:01:00Z
   - Blocked By: ~~US-14.1.1~~ ✅
 
 ### Epic 14.2: Per-Source Accessibility Test
