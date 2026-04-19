@@ -1103,9 +1103,10 @@ Wave 33 (sequential): US-10.3.2 (after 10.3.1)
 
 ### Epic 11.3: Detail URL Extractor
 
-- [ ] **US-11.3.1** — Extract canonical detail-page URLs for inline/popup detail sources
-  - Status: PLANNED
+- [x] **US-11.3.1** — Extract canonical detail-page URLs for inline/popup detail sources
+  - Status: DONE
   - Assignee: copilot
+  - Branch: `feature/insight-engine-us-11.3.1`
   - Blocked By: ~~US-11.2.1~~ ✅
 
 ### Epic 11.4: Adaptive Flow Advisor

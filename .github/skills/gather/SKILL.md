@@ -225,10 +225,60 @@ Steps: construct `site:{platform}` search → collect item URLs → deduplicate.
 | salary | "Lương:", numbers + "triệu" \| "Thương lượng" |
 | experience | "Kinh nghiệm:", normalize to "< 1 năm" etc. |
 | skills | "Yêu cầu:", tech lists → comma-separated |
-| location | "\u0110ịa \u0111iểm:", city or "Remote" |
+| location | "Địa điểm:", city or "Remote" |
 | direct_url | THE URL FETCHED (item page) — NEVER search/listing |
 
 Validate URL is item page (has ID/slug, not ?q= or /search?). If field missing → "Không rõ".
+
+**⚠️ DC-2 Inline/Popup Detection Rule (MANDATORY):**
+
+Some sources display item details inline (expandable card, popup, JS-rendered modal)
+rather than navigating to a separate detail page. These sources will show listing URLs
+for every item — which are NEVER acceptable as final output URLs.
+
+**Detection signals:**
+- All anchor tags in results point back to the listing page (same URL + hash `#item-id`)
+- Items use `data-id` attributes instead of `href` links
+- Clicking an item triggers a modal/popup rather than page navigation
+- All result URLs match `?q=` or `#results` pattern
+
+**When inline/popup source detected:**
+```bash
+# Extract canonical URLs using detail_url_extractor.py
+python3 .github/skills/gather/scripts/detail_url_extractor.py \
+  "{listing_url}" \
+  --item-selector "{css_selector_for_item_cards}" \
+  --limit 20
+
+# For JS-rendered items requiring click-to-navigate
+python3 .github/skills/gather/scripts/detail_url_extractor.py \
+  "{listing_url}" \
+  --click-and-capture \
+  --item-selector ".job-card, .item-card" \
+  --limit 10
+```
+
+The extractor:
+1. Tries `<link rel="canonical">`, `og:url`, `data-url` attributes from each item's HTML
+2. Falls back to clicking the item and capturing URL after navigation (Playwright)
+3. **Rejects** any URL matching listing-page patterns (`?q=`, `?page=`, `#results`, `/search?`)
+4. Logs rejected URLs for traceability
+
+**Hard rule — enforce before adding any item to output:**
+```yaml
+URL_VALIDATION:
+  FORBIDDEN_PATTERNS:
+    - URL contains "?page=", "?q=", "?query=", "#results", "#search"
+    - URL matches listing page format (/jobs?, /search?, /browse?)
+    - URL is identical to the search/listing page URL
+  REQUIRED:
+    - URL has a unique ID or slug: /jobs/title-at-company-12345
+    - URL is fetchable and returns item-specific content
+  ON_VALIDATION_FAIL:
+    - Log: "⚠️ Rejected listing URL: {url} — not an item detail page"
+    - Run detail_url_extractor.py to find canonical
+    - If canonical not found → mark item as "URL not available", do NOT use listing URL
+```
 
 ### DC-2.5: DOM Exploration (triggered when DC-1 returns thin results)
 
