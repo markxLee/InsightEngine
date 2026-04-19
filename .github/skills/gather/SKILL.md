@@ -405,6 +405,88 @@ usable — bot-protection, login walls, or structural changes can make a source 
 
 ---
 
+### SD-2: Source Reliability Scoring & Ranking (US-14.2.2)
+
+After accessibility testing, compute a **final reliability score (0-100)** for each accessible
+source and rank them. This score determines which sources are used in collection, which need
+special handling (Playwright), and which to skip.
+
+**Scoring formula (100 points total):**
+
+```yaml
+RELIABILITY_SCORE:
+  accessibility_status:        # 40 points max
+    accessible_no_playwright:  40   # Tier 1 fetch worked without Playwright
+    accessible_with_playwright: 28  # Required Playwright but accessible
+    login_wall_no_account: 0        # Inaccessible — exclude
+    failed_all_tiers: 0             # Inaccessible — exclude
+
+  data_completeness_sample:    # 40 points max
+    # Based on data seen during SD-1 fetch — can we observe entity listings?
+    rich_structured_data: 40       # Clear listings with multiple fields (title, company, etc.)
+    basic_structured_data: 24      # Some structured data but sparse fields
+    unstructured_content: 12       # Readable text but no clear item listings
+    no_data_visible: 0             # No relevant data detected — exclude
+
+  preliminary_tier_bonus:      # 20 points max
+    Tier_1_preliminary: 20     # Was marked Tier 1 in SD-0.5
+    Tier_2_preliminary: 10     # Was marked Tier 2 in SD-0.5
+    Tier_3_preliminary: 0      # Was marked Tier 3 in SD-0.5
+```
+
+**Tier assignment from final score:**
+```yaml
+TIER_FROM_SCORE:
+  Tier_1_final:  score >= 60   # Primary source — direct collection
+  Tier_2_final:  30 <= score < 60  # Fallback source — Playwright collection
+  Tier_3_final:  score < 30    # Skip unless NO Tier 1 or 2 available
+```
+
+**Fallback rule (no Tier 1 or 2 sources):**
+```yaml
+IF count(Tier_1_final) + count(Tier_2_final) == 0:
+  → Check if any Tier 3 sources have score > 0
+  → If yes: promote best Tier 3 to Tier 2, log: "⚠️ Chỉ có nguồn Tier 3 — thử với dữ liệu hạn chế"
+  → If all score == 0: EXIT collection for this domain, report failure to SD-3
+```
+
+**Save ranked list to session state:**
+```yaml
+session_state:
+  sd2_ranked_sources: [  # Sorted by score DESC
+    {
+      name, url, source_type,
+      final_score: 0-100,
+      final_tier: 1|2|3,
+      playwright_needed: true|false,
+      included: true|false,  # false if score == 0
+      score_breakdown: { accessibility: N, data: M, tier_bonus: K }
+    }
+  ]
+  sd2_collection_viable: true|false  # false if no Tier 1 or 2
+  sd2_complete: true
+```
+
+**Report (non-technical):**
+```
+📊 Đánh giá độ tin cậy {N} nguồn:
+  Tier 1 (ưu tiên cao): {count} nguồn
+    • {name_1} — điểm {score_1}/100
+    • {name_2} — điểm {score_2}/100
+  Tier 2 (dự phòng): {count} nguồn
+    • {name_3} — điểm {score_3}/100
+  Bỏ qua (điểm thấp/không truy cập): {count} nguồn
+→ Chuẩn bị kế hoạch thu thập dữ liệu...
+```
+
+**What SD-2 does NOT do:**
+- Does NOT present plan to user (that's SD-3 / US-14.3.1)
+- Does NOT start data collection
+
+→ After SD-2 completes: pass `sd2_ranked_sources` to **SD-3** (verified source plan).
+
+---
+
 ### DC-0: Per-Step Search Planning (MANDATORY for complex data collection)
 
 Before any search step, call the **strategist agent** to generate a specialized search sub-flow

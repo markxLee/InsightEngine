@@ -1302,12 +1302,10 @@ Wave 49 (sequential): US-13.4.3 (after 13.4.2)
   - Branch: `feature/insight-engine-us-14.2.1`
   - Blocked By: ~~US-14.1.2~~ ✅
 
-- [ ] **US-14.2.2** — Source reliability scoring and ranking
-  - Status: IN_PROGRESS
+- [x] **US-14.2.2** — Source reliability scoring and ranking
+  - Status: DONE
   - Assignee: copilot
-  - AI: copilot
   - Branch: `feature/insight-engine-us-14.2.2`
-  - Locked: 2026-04-19T00:03:00Z
   - Blocked By: ~~US-14.2.1~~ ✅
 
 ### Epic 14.3: Verified Source Plan
@@ -1316,7 +1314,7 @@ Wave 49 (sequential): US-13.4.3 (after 13.4.2)
   - Status: PLANNED
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-14.3.1`
-  - Blocked By: US-14.2.2
+  - Blocked By: ~~US-14.2.2~~ ✅
 
 ### Epic 14.4: Retry Loop for Data Collection
 
