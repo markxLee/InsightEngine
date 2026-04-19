@@ -445,34 +445,65 @@ Report:
 
 ### DC-7: User-Facing Flow Alternatives Presentation
 
-*(Requires US-11.4.2 to be fully activated — see user-stories.md)*
+After DC-6 calls the advisory agent, present alternatives to the user before retrying.  
+**Reference:** `.github/skills/gather/references/adaptive-flow.md`
 
-After DC-6 calls advisory agent, present alternatives to user before retrying:
-
-```
-⚡ Không tìm được đủ {item_type} từ {source} sau 2 lần thử.
-
-Advisory agent đề xuất 3 phương án thay thế:
-
-1. **{alternative_1_name}**
-   {description}
-   Ví dụ: {example}
-   ✅ {pros} | ⚠️ {cons}
-
-2. **{alternative_2_name}**
-   {description}
-   Ví dụ: {example}
-
-3. **{alternative_3_name}** (tiếp tục với {N} items đã có)
-
-Nhập 1, 2, hoặc 3 để chọn — hoặc mô tả phương án khác:
+**Step 1 — Check session state first:**
+```yaml
+IF session_state["adaptive_flow"]["per_source"][source]["user_choice"] IS NOT NULL:
+  → Skip presentation; use stored choice directly (do NOT ask again)
 ```
 
-**Handle user response:**
-- `"1"` or `"2"` → Execute selected alternative
-- `"3"` → Proceed with current results (accept partial)
-- Freeform text → Use as custom guidance for next attempt
-- No response in context window → Default to alternative #1 (non-blocking)
+**Step 2 — Present numbered alternatives:**
+```
+⚡ Không tìm được đủ {item_type} từ {source_domain} sau 2 lần thử.
+
+Tôi đã thử:
+• Lần 1: {search_approach_1} → {result_count_1} kết quả
+• Lần 2: {search_approach_2} → {result_count_2} kết quả
+
+Advisory agent đề xuất {N} phương án thay thế:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**Phương án 1: {alternative_1.name}**
+{alternative_1.description}
+Ví dụ: {alternative_1.example}
+✅ {alternative_1.pros[0]} | ⚠️ {alternative_1.cons[0]}
+
+**Phương án 2: {alternative_2.name}**
+{alternative_2.description}
+Ví dụ: {alternative_2.example}
+✅ {alternative_2.pros[0]} | ⚠️ {alternative_2.cons[0]}
+
+**Phương án 3: Tiếp tục với {collected_count} items đã có**
+Bỏ qua {source_domain}, xử lý kết quả hiện có.
+✅ Không mất thêm thời gian | ⚠️ Output thiếu ~{gap_count} items
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nhập 1, 2, hoặc 3 để chọn — hoặc mô tả hướng dẫn khác:
+```
+
+**Step 3 — Handle user response:**
+
+| User input | Action |
+|-----------|--------|
+| `"1"` / `"phương án 1"` | Execute `alternative_1` from advisory result |
+| `"2"` / `"phương án 2"` | Execute `alternative_2` from advisory result |
+| `"3"` / `"tiếp tục"` | Accept current partial results, move on |
+| Freeform text | Use as custom guidance: construct new query/approach |
+| No response (context full) | Default to `alternative_1`; note: "Đã tự động chọn phương án 1" |
+
+**Step 4 — Save choice to session state:**
+```yaml
+# MANDATORY — prevents repeating the same question
+session_state["adaptive_flow"]["per_source"][source]["user_choice"] = user_input
+session_state["adaptive_flow"]["per_source"][source]["chosen_alternative"] = resolved_alternative
+```
+
+**Step 5 — Execute chosen alternative:**
+- `alternative_1` / `alternative_2`: Run as a new search sub-flow (DC-1 / DC-2 / DC-2.5)
+- `alternative_3` / "tiếp tục": Mark source as `resolved: true`, proceed with items collected
+- Freeform: Treat as a natural language instruction for a single additional attempt
 
 ### DR-1: Query Decomposition
 
