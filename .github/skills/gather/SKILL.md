@@ -120,10 +120,29 @@ COMPLEXITY_SIGNALS:
     - Needs platform-specific search, not generic Google
     - Must return individual item URLs, not search result pages
 
+  source_discovery_needed:
+    # BEFORE data collection: does the pipeline know which sources actually exist?
+    # Trigger source discovery (SD-0) when ALL of the following are true:
+    #   1. Mode is data_collection
+    #   2. Item type requires "soft knowledge" sources (review platforms, job boards,
+    #      local directories, company profiles, regional marketplaces)
+    #   3. No explicit source list was provided by the user or orchestrator
+    # "Soft knowledge" = sources that vary by country/domain and may have changed
+    #   since model training. Contrast with "hard knowledge" sources (LinkedIn, Amazon,
+    #   GitHub, YouTube) which are universally known and stable.
+    examples:
+      - "danh sách đánh giá công ty Việt Nam" → review platforms are soft knowledge
+      - "tin tuyển dụng ở Malaysia" → job boards in Malaysia are soft knowledge
+      - "nền tảng ecommerce Thái Lan" → regional marketplaces are soft knowledge
+    NOT_triggered_for:
+      - LinkedIn, Shopee, Amazon, GitHub — globally known, model knowledge reliable
+      - User provides explicit URLs → skip discovery, go directly to DC-0
+
 RESULT:
   deep → follow Deep Research Protocol below (replaces Steps 3-4 for web search)
   standard → follow standard Steps 1-4 as before
-  data_collection → follow Data Collection Protocol below
+  data_collection → check source_discovery_needed FIRST → if yes: run SD-0 → then DC-0
+  data_collection → if source_discovery NOT needed: proceed directly to DC-0
 ```
 
 ---
@@ -136,11 +155,106 @@ When synthesize passes `mode: data_collection`, the workflow changes fundamental
 **Key principle: every item in output MUST have a direct_url to its detail page.**
 A search result URL or listing page URL is NEVER acceptable as a final output URL.
 
+### SD-0: Source Discovery (MANDATORY when source_discovery_needed = true)
+
+Before any data collection step when soft-knowledge sources are involved, the pipeline MUST
+discover currently active sources for that domain + country. **Never assume model training
+knowledge is current.** Even well-known local platforms change over time — new sites launch,
+old ones shut down, regional names vary.
+
+**Trigger check (runs at start of data_collection mode):**
+```yaml
+TRIGGER_SD0:
+  condition: |
+    mode == data_collection
+    AND item_type involves soft-knowledge sources
+    AND no explicit source_list provided by user/orchestrator
+  soft_knowledge_signals:
+    - "công ty", "đánh giá công ty", "review công ty"  → company review platforms
+    - "việc làm" + country (not global platform)        → regional job boards
+    - "ecommerce" + non-global region                   → regional marketplaces
+    - "nền tảng", "trang web", "sites" + domain+country → platform discovery
+  skip_SD0_when:
+    - User/orchestrator provides explicit URL list → proceed to DC-0 directly
+    - Item type targets universal platforms (LinkedIn, Shopee, Amazon, GitHub, etc.)
+```
+
+**SD-0 Execution Steps:**
+
+1. **Extract discovery context** from the user request:
+   ```yaml
+   domain: "<what category of platform>" # e.g., "company review", "job board", "marketplace"
+   country: "<target country>"           # e.g., "Vietnam", "Malaysia", "Thailand"
+   year: "<current year>"               # e.g., "2026" (always current year — freshness signal)
+   ```
+
+2. **Construct ≥2 discovery search queries** (in English for better coverage):
+   ```yaml
+   query_templates:
+     primary:   "{domain} sites {country} {year}"     # e.g., "company review sites Vietnam 2026"
+     secondary: "best {domain} platforms {country}"    # e.g., "best job boards Vietnam"
+     tertiary:  "{country} {domain} website list"      # e.g., "Vietnam company review website list"
+   ```
+   Execute ALL queries. Use English query even if user request was in Vietnamese.
+
+3. **Parse results into candidate source list:**
+   For each result, extract:
+   ```yaml
+   candidate_source:
+     name: "<platform display name>"    # e.g., "ITViec"
+     url: "<homepage or root URL>"      # e.g., "https://itviec.com"
+     source_type: "<category>"          # review_platform | job_board | directory | aggregator | news
+     description: "<one-line summary>"  # From search snippet
+     discovery_query: "<which query found this>"
+   ```
+   Deduplicate by domain. Ignore news articles or non-platform results.
+
+4. **Minimum threshold check:**
+   ```yaml
+   IF len(candidate_sources) < 3:
+     → Run one additional search with a broader or alternative query
+     → If still < 3 after one additional round:
+         Log: "⚠️ SD-0: Chỉ tìm được {N} nguồn — tiếp tục với kết quả hiện có"
+         → Proceed to US-14.1.2 (classification) with available candidates
+   ```
+
+5. **Save to session state** and **report (non-technical):**
+   ```yaml
+   session_state:
+     sd0_candidates: [<list of candidate_source objects>]
+     sd0_complete: true
+   ```
+   Report format (jargon shield applies):
+   ```
+   🔍 Tìm kiếm nguồn dữ liệu cho {domain} tại {country}...
+   → Đã tìm thấy {N} nền tảng/trang web phù hợp:
+      • {name_1} ({url_domain_1}) — {source_type_1}
+      • {name_2} ({url_domain_2}) — {source_type_2}
+      • {name_3} ({url_domain_3}) — {source_type_3}
+      ...
+   → Đang kiểm tra từng nguồn... (see US-14.2.1)
+   ```
+
+**What SD-0 does NOT do:**
+- Does NOT ask user to choose sources — fully autonomous
+- Does NOT test accessibility (that's US-14.2.1 / SD-1)
+- Does NOT rank sources (that's US-14.2.2 / SD-2)
+- Does NOT present plan (that's US-14.3.1 / SD-3)
+
+**Budget:** SD-0 consumes ≤3 web search calls. Counts toward overall gather budget.
+
+→ After SD-0 completes: pass `sd0_candidates` to US-14.1.2 classification, then proceed to DC-0.
+
+---
+
 ### DC-0: Per-Step Search Planning (MANDATORY for complex data collection)
 
 Before any search step, call the **strategist agent** to generate a specialized search sub-flow
 tailored to the item type and target sources. This replaces flat "search Google → get results"
 for complex data-collection requests (sales leads, job listings, products, company profiles).
+
+> **Note:** If SD-0 ran (source_discovery_needed = true), the `sd0_candidates` list from SD-0
+> replaces the "potential_sources" field below — use discovered sources, not model assumptions.
 
 **When to trigger DC-0:**
 - User wants specific items: jobs, products, leads, companies, listings, candidates
