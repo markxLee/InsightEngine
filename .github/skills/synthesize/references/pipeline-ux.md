@@ -2,32 +2,21 @@
 
 ## Progress Messages
 
+> **Full template set: `progress-messages.md`** — use those templates for all events.
+
 ```yaml
 PROGRESS_MESSAGES:
-  step_start: "⏳ Đang {action}..."
+  # Abbreviated reference — see progress-messages.md for complete set
+  step_start: "⏳ Đang {action}..."   # or use specific template from progress-messages.md
   step_done: "✅ {action} hoàn tất → {next_action}"
-  step_error: "❌ Lỗi tại bước {step}: {error_message}"
-
-  examples:
-    gathering: "⏳ Đang thu thập nội dung từ 3 nguồn..."
-    gathered: "✅ Thu thập hoàn tất (3 nguồn, ~5,200 từ) → Đang biên soạn..."
-    synthesizing: "⏳ Đang biên soạn và tổng hợp nội dung..."
-    synthesized: "✅ Biên soạn hoàn tất → Đang tạo file Word..."
-    generating: "⏳ Đang tạo file {format}..."
-    generated: "✅ Tạo {format} hoàn tất: {file_path} ({file_size})"
-
-  chain_progress: |
-    📊 Tiến độ: {completed}/{total} bước
-    ✅ {step_1_name}
-    ✅ {step_2_name}
-    ⏳ {current_step_name}...
-    ⬜ {pending_step_name}
+  step_error: "❌ Lỗi: {user_friendly_message}"  # apply jargon-shield before showing
 
 COPILOT_MUST:
-  - Show progress message BEFORE starting each step
-  - Show completion message with metrics AFTER each step
-  - Include word count, file count, or file size in completion messages
-  - Use Vietnamese for all progress messages
+  - Use templates from progress-messages.md (NOT improvised messages)
+  - Fill ALL placeholders with actual values before displaying
+  - Never show {placeholder} text to users
+  - Apply jargon-shield substitutions on top of templates
+  - In silent mode: show only collecting/done events + final delivery
 ```
 
 ---

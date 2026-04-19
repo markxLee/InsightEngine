@@ -1142,8 +1142,8 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
   - Branch: `feature/insight-engine-us-12.1.1`
   - Blocked By: None
 
-- [ ] **US-12.1.2** — Content-only question filter (suppress technical prompts)
-  - Status: IN_PROGRESS
+- [x] **US-12.1.2** — Content-only question filter (suppress technical prompts)
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-12.1.2`
   - Blocked By: US-12.1.1
@@ -1157,8 +1157,9 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
   - Blocked By: None
 
 - [ ] **US-12.2.2** — User-friendly progress message templates
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - Branch: `feature/insight-engine-us-12.2.2`
   - Blocked By: US-12.2.1
 
 ### Epic 12.3: User Signal Detection & Mode Switching
