@@ -129,9 +129,40 @@ Tôi đề xuất mở rộng phạm vi:
 
 ```yaml
 USER_RESPONSE:
-  approved: ["ok", "đồng ý", "tiếp tục", "được", "yes"] → Proceed to Step 2
+  approved: ["ok", "đồng ý", "tiếp tục", "được", "yes"] → SET autonomy_mode=true → Proceed to Step 2
   modified: User adjusts → update analysis, re-present if major changes
   no_response: DO NOT PROCEED. The pipeline is paused until user confirms.
+```
+
+### 1.5.4: Autonomy Mode (MANDATORY after user approval)
+
+```yaml
+AUTONOMY_MODE:
+  # Set when user confirms at Step 1.5. Persists for the entire pipeline run.
+  activate_on: User response matching approved signals above
+  
+  WHEN_ACTIVE:
+    - Execute ALL remaining steps (2→7) without stopping or asking
+    - Auto-decide ALL technical choices: libraries, query strategy, platform order,
+      file format details, retry counts, batch size
+    - SUPPRESS all confirmation prompts between steps
+    - SUPPRESS "Bạn có muốn tiếp tục?" style questions
+    - Only 2 allowed interruptions:
+        a. CONTENT ambiguity: scope or field is genuinely unclear from the request
+           (max 1 clarifying question — ask it inline, proceed with best assumption if not answered)
+        b. TOTAL failure: all retry attempts exhausted and data collection completely failed
+    - Show periodic progress updates (non-interactive): "✅ Step 3 done — 45 items collected"
+    
+  CONTENT_VS_TECHNICAL:
+    CONTENT (may ask once): which companies to include, output language, which provinces
+    TECHNICAL (never ask): which library, how many retries, confirm seed generation,
+      approve each batch, confirm file format, confirm query strategy
+      
+  PROGRESS_FORMAT:
+    each_step: "⚙️ {step_name}... ✅ done ({summary})"
+    data_collection: "🔍 {source}: ✅ {count} items"
+    file_generation: "📄 Đang tạo {file_type}..."
+    completion: Single delivery summary message (see Step 7)
 ```
 
 ---

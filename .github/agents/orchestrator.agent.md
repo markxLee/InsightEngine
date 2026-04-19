@@ -75,9 +75,12 @@ FLOW:
   2. LOG classification to session state
   3. CALL strategist agent → get workflow plan
   4. PRESENT plan to user in Vietnamese → wait for approval
-  5. EXECUTE skills in order per plan
-  6. After each output skill → CALL auditor agent for quality gate
-  7. DELIVER final output to user
+  5. ON USER APPROVAL → SET session_flag: autonomy_mode=true
+     After this point: execute fully autonomously — no more confirmation gates
+     (see Autonomy Mode section below)
+  6. EXECUTE skills in order per plan
+  7. After each output skill → CALL auditor agent for quality gate
+  8. DELIVER final output to user (single delivery summary message)
   8. SAVE session state for resume capability
 
 BUDGET_ENFORCEMENT:
