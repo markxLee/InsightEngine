@@ -1156,8 +1156,8 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
   - Branch: `feature/insight-engine-us-12.2.1`
   - Blocked By: None
 
-- [ ] **US-12.2.2** — User-friendly progress message templates
-  - Status: IN_PROGRESS
+- [x] **US-12.2.2** — User-friendly progress message templates
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-12.2.2`
   - Blocked By: US-12.2.1
@@ -1171,8 +1171,9 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
   - Blocked By: None
 
 - [ ] **US-12.3.2** — Dynamic mode switching (interactive → autonomous)
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - Branch: `feature/insight-engine-us-12.3.2`
   - Blocked By: US-12.3.1, US-12.1.1
 
 ### Epic 12.4: Batch Progress Model for Data Collection

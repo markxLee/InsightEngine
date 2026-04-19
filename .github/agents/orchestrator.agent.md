@@ -311,6 +311,95 @@ FRUSTRATION_DETECTION:
 
 ---
 
+## Dynamic Mode Switching
+
+Full protocol for transitioning between interaction modes during a session.
+
+```yaml
+DYNAMIC_MODE_SWITCHING:
+  reference: ".github/skills/synthesize/references/autonomy-rules.md"
+
+  # --- Mode Transitions ---
+  
+  GUIDED_TO_STANDARD:
+    trigger: User approves plan at pipeline Step 4 (any approval signal)
+    approval_signals: ["ok", "đồng ý", "tiếp tục", "được", "yes", "go", "làm đi", "bắt đầu"]
+    action:
+      - SET session_mode=standard
+      - SET autonomy_mode=true
+    announcement: (none — just proceed)
+    reversible: Yes (user can say "hỏi lại" to return to guided)
+
+  GUIDED_OR_STANDARD_TO_SILENT:
+    trigger: FRUSTRATION_SIGNAL detected with HIGH confidence
+    action:
+      - SET session_mode=silent
+      - SET autonomy_mode=true
+      - Announce ONCE in Vietnamese (friendly, 1 sentence):
+          "Được rồi! Tôi sẽ tự thực hiện và chỉ báo khi có kết quả."
+      - Proceed immediately
+    reversible: Yes (user can say "guided" or "hỏi lại tôi")
+
+  STANDARD_TO_SILENT:
+    trigger: EXPLICIT_OVERLOAD or N8N_COMPARISON or 3+ consecutive approvals
+    action: Same as GUIDED_OR_STANDARD_TO_SILENT
+    
+  ANY_TO_GUIDED:
+    trigger: User says "guided", "hỏi lại tôi", "confirm từng bước", "hỏi tôi từng bước"
+    action:
+      - SET session_mode=guided
+      - SET autonomy_mode=false
+      - Announce: "Được! Tôi sẽ hỏi xác nhận ở mỗi bước quan trọng."
+    when: At any point in the session
+
+  # --- Persistence ---
+  
+  PERSISTENCE:
+    mode_persists: Entire session (NOT reset between pipeline runs)
+    saved_to_state: session_mode, autonomy_mode fields in session JSON
+    on_resume: Restore session_mode from saved state (no need to re-confirm)
+    
+  # --- Mode Characteristics ---
+  
+  GUIDED:
+    confirmation_gates: All (step-by-step approval)
+    questions_allowed: Unlimited (content + technical)
+    progress_updates: Before and after each step
+    
+  STANDARD:
+    confirmation_gates: ONLY plan presentation (Step 4 in pipeline)
+    questions_allowed: Max 1 content question per pipeline run
+    progress_updates: Non-interactive milestone updates
+    
+  SILENT:
+    confirmation_gates: None
+    questions_allowed: None (infer everything)
+    progress_updates: platform_done events + final delivery only
+    word_budget: 200 words max during execution
+
+  # --- User Control Commands ---
+  
+  USER_COMMANDS:
+    switch_to_guided:
+      phrases: ["guided", "hỏi lại tôi", "confirm từng bước", "interactive mode"]
+      response: "Được! Tôi sẽ hỏi xác nhận ở mỗi bước quan trọng."
+      
+    switch_to_autonomous:
+      phrases: ["tự động", "auto mode", "cứ làm đi", "không cần hỏi"]
+      response: "Được! Tôi sẽ tự thực hiện và chỉ báo khi có kết quả."
+      
+    check_mode:
+      phrases: ["chế độ hiện tại", "current mode", "đang ở mode nào"]
+      response: |
+        "Mode hiện tại: {session_mode}
+         - guided: Tôi hỏi xác nhận từng bước
+         - standard: Tôi tự chạy sau khi bạn duyệt kế hoạch
+         - silent: Tôi tự chạy hoàn toàn, chỉ báo khi xong
+         Gõ 'guided', 'standard', hay 'silent' để đổi."
+```
+
+---
+
 ## Jargon Shield
 
 ALL messages composed by orchestrator and sent to the user MUST pass through jargon shield.
