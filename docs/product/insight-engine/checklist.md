@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 120 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 DONE + 8 Phase 12 DONE + 9 Phase 13 DONE + 6 Phase 14 PLANNED)  
+> **Total User Stories:** 120 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 DONE + 8 Phase 12 DONE + 9 Phase 13 DONE + 6 Phase 14 DONE)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -1318,12 +1318,10 @@ Wave 49 (sequential): US-13.4.3 (after 13.4.2)
 
 ### Epic 14.4: Retry Loop for Data Collection
 
-- [ ] **US-14.4.1** — Verify-retry data collection loop per source
-  - Status: IN_PROGRESS
+- [x] **US-14.4.1** — Verify-retry data collection loop per source
+  - Status: DONE
   - Assignee: copilot
-  - AI: copilot
   - Branch: `feature/insight-engine-us-14.4.1`
-  - Locked: 2026-04-19T00:05:00Z
   - Blocked By: ~~US-14.3.1~~ ✅
 
 ```
@@ -1333,7 +1331,7 @@ Wave 52 (sequential): US-14.2.1 (after 14.1.2)
 Wave 53 (sequential): US-14.2.2 (after 14.2.1)
 Wave 54 (sequential): US-14.3.1 (after 14.2.2)
 Wave 55 (sequential): US-14.4.1 (after 14.3.1)
---- Phase 14 PLANNED (0/6) ---
+--- Phase 14 DONE (6/6) ---
 ```
 
 ---

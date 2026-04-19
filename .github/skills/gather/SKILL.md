@@ -572,6 +572,10 @@ has already done the work (discovery + testing + scoring). The user is informed,
 
 → After SD-3: auto-proceed to **DC-0** (per-step search planning) with verified source list.
 
+> **Note on SD-4 (verify-retry loop):** Once data collection begins (DC-0 → DC-7), the SD-4
+> verify-retry loop wraps EACH source's collection. See **SD-4** section below for the full
+> per-source retry protocol that runs during data collection.
+
 ---
 
 ### DC-0: Per-Step Search Planning (MANDATORY for complex data collection)
@@ -946,6 +950,92 @@ session_state["adaptive_flow"]["per_source"][source]["chosen_alternative"] = res
 - `alternative_1` / `alternative_2`: Run as a new search sub-flow (DC-1 / DC-2 / DC-2.5)
 - `alternative_3` / "tiếp tục": Mark source as `resolved: true`, proceed with items collected
 - Freeform: Treat as a natural language instruction for a single additional attempt
+
+---
+
+### SD-4: Verify-Retry Data Collection Loop (US-14.4.1)
+
+The SD-4 loop **wraps each source's data collection** when using verified sources from SD-3.
+Instead of blindly fetching and returning whatever was collected, SD-4 checks quality after
+each source fetch, and retries with adjusted strategy if quality is insufficient.
+
+**This loop runs FOR EACH source in `sd3_source_plan.tier1_sources + tier2_sources`:**
+
+```yaml
+LOOP (per source):
+  max_retries_per_source: 2  # Max retry attempts before marking source as failed
+  
+  attempt: 1...(1 + max_retries_per_source):
+    1. FETCH data from source (using DC-1 / DC-2 approach)
+    
+    2. QUALITY CHECK — evaluate collected data:
+       minimum_records:
+         pass: ≥3 items/entities collected from this source
+         fail: 0-2 items (clearly insufficient)
+       field_coverage:
+         pass: >50% of required fields present across items
+         fail: ≤50% — fields mostly empty or "Không rõ"
+       url_validity:
+         pass: All direct_urls are item-page URLs (not listing/search pages)
+         fail: Any URL matches forbidden patterns (?q=, /search?, listing-page format)
+       
+    3. IF quality_check PASS:
+       → Mark source as: succeeded: true, items: [collected_items]
+       → Break loop (move to next source)
+       
+    4. IF quality_check FAIL AND attempt < max_retries:
+       → Determine retry strategy:
+         if insufficient_records AND attempt == 1: retry_strategy = modified_search_query
+         if insufficient_records AND attempt == 2: retry_strategy = different_url_pattern
+         if playwright_needed AND not_yet_used: retry_strategy = playwright_escalation
+         if bad_urls AND detail_extractor_not_tried: retry_strategy = run_detail_extractor
+       → LOG: "⚠️ Nguồn {name} — kết quả không đủ ({reason}). Đang thử lại..."
+       → RETRY with adjusted strategy
+       
+    5. IF quality_check FAIL AND attempt > max_retries:
+       → Mark source as: failed: true, reason: "<why_failed>", items: []
+       → LOG: "❌ Nguồn {name} — không thu thập được sau {N} lần thử ({reason})"
+       → Break loop (move to next source)
+```
+
+**After all sources processed:**
+
+```yaml
+POST_LOOP:
+  total_sources: <N>
+  succeeded_sources: [ { name, items_count, items } ]
+  failed_sources: [ { name, reason } ]
+  
+  IF len(succeeded_sources) == 0:
+    → Report total failure with details
+    → Return empty result (do NOT fabricate)
+    
+  ELSE:
+    → Combine all items from succeeded sources
+    → Present summary (non-technical, friendly):
+      ```
+      ✅ Thu thập hoàn tất:
+        Thành công: {N} nguồn ({total_items} kết quả)
+          • {name_1}: {count_1} {entity_type}
+          • {name_2}: {count_2} {entity_type}
+        
+        ❌ Không thu thập được: {M} nguồn
+          • {name_3}: {friendly_reason_3}
+      
+      → Tổng cộng: {total_items} {entity_type} từ {N} nguồn
+      ```
+    → Pass combined items to compose for synthesis
+```
+
+**SD-4 does NOT:**
+- Stop the pipeline because one source failed (partial results are always acceptable)
+- Ask user whether to continue after a source fails
+- Fabricate data to meet quantity targets
+
+**Budget impact:** Each retry counts as additional fetch calls. SD-4 max adds
+`count(sources) * max_retries * avg_fetch_calls` to total gather budget.
+
+---
 
 ### DR-1: Query Decomposition
 
