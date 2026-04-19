@@ -1170,8 +1170,8 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
   - Branch: `feature/insight-engine-us-12.3.1`
   - Blocked By: None
 
-- [ ] **US-12.3.2** — Dynamic mode switching (interactive → autonomous)
-  - Status: IN_PROGRESS
+- [x] **US-12.3.2** — Dynamic mode switching (interactive → autonomous)
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-12.3.2`
   - Blocked By: US-12.3.1, US-12.1.1
@@ -1185,8 +1185,9 @@ Wave 38 (sequential): US-11.4.2 (after 11.4.1)
   - Blocked By: None
 
 - [ ] **US-12.4.2** — Final delivery summary (single message with all outputs)
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - Branch: `feature/insight-engine-us-12.4.2`
   - Blocked By: US-12.4.1
 
 ```
