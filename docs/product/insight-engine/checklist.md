@@ -1251,8 +1251,8 @@ Wave 42 (sequential): US-12.4.2 (after 12.4.1)
   - Branch: `feature/insight-engine-us-13.4.1`
   - Blocked By: ~~US-13.1.1~~ ✅
 
-- [ ] **US-13.4.2** — Placeholder validation vs requirements before fill
-  - Status: PLANNED
+- [x] **US-13.4.2** — Placeholder validation vs requirements before fill
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-13.4.2`
   - Blocked By: ~~US-13.4.1~~ ✅, ~~US-13.1.2~~ ✅
@@ -1261,7 +1261,7 @@ Wave 42 (sequential): US-12.4.2 (after 12.4.1)
   - Status: PLANNED
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-13.4.3`
-  - Blocked By: US-13.4.2
+  - Blocked By: ~~US-13.4.2~~ ✅
 
 ```
 Wave 43 (parallel): US-13.1.1
