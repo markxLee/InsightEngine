@@ -19,7 +19,23 @@ user-invocable: false
 
 ## Budget
 
-Max **1 strategist call** per pipeline run (includes re-plan and child workflow calls).
+```yaml
+STRATEGIST_BUDGET:
+  initial_plan:       1 call  # MANDATORY — full workflow plan at pipeline start
+  replan_mode:        1 call  # OPTIONAL — only when a step fails 2×
+  child_workflow_mode: 1 call per complex step  # OPTIONAL — each complex step triggers once
+  total_max:          5 calls per pipeline run  # Hard cap across all modes
+
+PRIORITY:
+  1. initial_plan (always)
+  2. child_workflow (before step execution if triggered)
+  3. replan (after step fails 2×, if budget remains)
+  ESCALATE_TO_USER if total_max reached
+```
+
+> **IMPORTANT (US-13.2.2 note):** REPLAN_MODE and CHILD_WORKFLOW_MODE share the same 5-call
+> total budget. The old "max 1 call" rule only applied to the initial_plan. All three modes
+> are now accounted for in the 5-call total.
 
 ---
 

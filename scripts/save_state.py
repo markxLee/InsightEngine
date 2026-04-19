@@ -281,6 +281,9 @@ def cmd_resume_plan():
             "session_mode": state.get("session_mode", "guided"),
             "autonomy_mode": state.get("autonomy_mode", False),
             "frustration_detected": state.get("frustration_detected", False),
+            # Phase 13 fields — restore for per-requirement scoring and child workflow state
+            "structured_requirements": state.get("structured_requirements", {}),
+            "child_workflows": state.get("child_workflows", {}),
         }
     else:
         pending = state.get("pending_steps", [])

@@ -147,7 +147,8 @@ for complex data-collection requests (sales leads, job listings, products, compa
 - Item count ≥ 5 AND specific output fields are requested
 - synthesize passes `mode: data_collection`
 
-**Budget:** ≤1 strategist call per search step, max 3 per pipeline. Track in session state.
+**Budget:** ≤1 strategist call per search step, max 2 per gather execution.
+These calls count toward the orchestrator's total strategist budget (max 5/pipeline).
 If budget exhausted → skip DC-0, proceed directly to DC-1 using best-effort queries.
 
 **Call strategist with this structured context:**

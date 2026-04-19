@@ -43,7 +43,7 @@ COPILOT_MUST:
 ```yaml
 SKILLS:
   synthesize:
-    purpose: "Main pipeline — deeply analyzes user intent, expands prompt dimensions, orchestrates sub-skills with auto-quality-review loops. Default content depth is COMPREHENSIVE (expert-level, rich). Auto-reviews each step's output and loops if quality is insufficient."
+    purpose: "Content synthesis pipeline — pure content execution (gather → compose → gen-[format]). Orchestration and intent classification handled by orchestrator agent. Default content depth is COMPREHENSIVE. Auto-reviews each step's output and loops if quality is insufficient."
     location: ".github/skills/synthesize/SKILL.md"
     triggers:
       - "tổng hợp nội dung"
@@ -229,10 +229,11 @@ SKILLS:
 ```yaml
 PIPELINE_FLOW:
   1. User describes request (in Vietnamese)
-  2. orchestrator agent classifies intent and routes to skills
-  3. synthesize skill orchestrates sub-skills in order:
-     gather → compose → gen-[format]
-  4. Copilot executes scripts via run_in_terminal
+  2. orchestrator agent classifies intent, extracts structured requirements (Phase 13),
+     calls strategist for workflow plan, presents to user, and manages full pipeline
+  3. For synthesis requests: orchestrator routes to synthesize skill which runs:
+     gather → compose → gen-[format] (pure content pipeline)
+  4. Copilot executes scripts via run_in_terminal; per-step auditor checkpoints enforce quality
   5. Confirm result (output file path + size)
 
 CHAINING:

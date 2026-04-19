@@ -61,16 +61,19 @@ Run `python3 scripts/save_state.py check`.
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
 ║  💾 MANDATORY FIRST ACTION: Save raw prompt to state file NOW       ║
-║  Run BEFORE Step 1.5 analysis — this is your insurance vs. context  ║
-║  loss. If context is lost mid-pipeline, state file has the request. ║
+║  EXCEPTION: If called via orchestrator, state is already saved.     ║
+║  Check first: python3 scripts/save_state.py check                  ║
+║  → If IN_PROGRESS with matching prompt → skip init, use existing   ║
+║  → If NO_STATE or COMPLETED → run init below                        ║
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
 
-Immediately run:
+If no existing state (DIRECT call, not via orchestrator):
 ```bash
 python3 scripts/save_state.py init "<user's exact request>" "<detected intent>"
+python3 scripts/save_state.py extract-requirements '<structured_json>'  # Phase 13
 ```
-Verify: `python3 scripts/save_state.py check` → must print IN_PROGRESS with correct prompt.
+If state already IN_PROGRESS with matching prompt → skip init, proceed to Step 1 analysis.
 
 1. Extract **input sources**: file paths, URLs, web-search topics, inline text
 2. Determine **processing type**: synthesis (default) | translation | summary
@@ -115,6 +118,8 @@ and present the analysis to the user. DO NOT proceed to Step 2 without completin
 ║  EXCEPTION — skip gate if ANY of these are true:            ║
 ║  • session_mode = silent (frustration signal was detected)  ║
 ║  • This is a RESUMED pipeline (autonomy_mode already true)  ║
+║  • Called via orchestrator + user already approved workflow  ║
+║    plan at FLOW step 4 (autonomy_mode set by orchestrator)  ║
 ║  → In these cases: proceed with best assumptions silently.  ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
@@ -386,12 +391,23 @@ For any format: if output is thin/empty/broken → re-generate. Do NOT move on j
 ╚════════════════════════════════════════════════════════════════════╝
 ```
 
+> **Phase 13 note (US-13.2.1):** If called via orchestrator, per-step auditor calls are
+> already managed by orchestrator FLOW step 6d (structured per-requirement scoring).
+> This step 4.7 is the FINAL intelligence-driven audit (URL verification + content reasoning).
+> Pass `structured_requirements` from state when running final check for completeness.
+> NOTE: verify skill ≠ auditor agent — verify does URL fetching + reasoning, auditor does scoring.
+> Both serve different purposes and can run in the same pipeline.
+
 After ALL output files generated:
 1. **READ** actual output content (not just file metadata)
 2. **OPEN** URLs from output using `fetch_webpage` — verify they are real item pages
 3. **COMPARE** output fields (title, salary, company) against actual page content
 4. **REASON** about whether output genuinely matches user's request
 5. For research: verify 5 key claims against sources
+6. **Phase 13**: Call auditor with `structured_requirements` for per-requirement scoring
+   - Pass: all output files, structured_requirements from state
+   - Check: ALL requirements met?
+   - On fail: targeted fix + re-audit (1 retry, budget permitting)
 
 Inputs: `original_request`, `required_fields`, `expanded_analysis`, `output_files`.
 On failure: report with evidence → specific re-fetch instructions → max 1 fix cycle.

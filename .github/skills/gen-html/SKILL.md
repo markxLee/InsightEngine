@@ -57,14 +57,20 @@ Full color/font specs: `references/presentation-styles.md`
 2. Confirm content available (from pipeline or ask user)
 3. Determine style
 
-### Template-First Protocol (US-13.4.1)
+### Template-First Protocol (US-13.4.1 / US-13.4.3)
 
 When structured_requirements available with content_requirements:
 ```bash
-# Create structural placeholder before generating
+# Step 0a: Create structural placeholder
 python3 scripts/create_placeholder.py html output/<filename>.html \
   --sections "<section1>,<section2>,..."
-# Then fill with real content
+
+# Step 0b: Call auditor with audit_mode: structural to verify section structure
+
+# Step 3+ (US-13.4.3): FILL placeholder with real content — update, NOT recreate
+# Save content to tmp/html_content.json: {"title": "...", "sections": {"section-1": "<p>...</p>"}}
+python3 scripts/create_placeholder.py html output/<filename>.html \
+  --fill tmp/html_content.json
 ```
 
 ### Thin Content Guard (STRICT — reject and loop back)

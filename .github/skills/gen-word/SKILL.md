@@ -42,14 +42,21 @@ All responses to the user are in Vietnamese.
 3. Determine style (user-specified, pipeline-inferred, or ask user: corporate / academic / minimal)
 4. Determine output path (default: `./<title>.docx`)
 
-### Template-First Protocol (US-13.4.1)
+### Template-First Protocol (US-13.4.1 / US-13.4.3)
 
 When structured_requirements available with content_requirements:
 ```bash
-# Create structural placeholder before generating
+# Step 0a: Create structural placeholder before generating content
 python3 scripts/create_placeholder.py word output/<filename>.docx \
   --sections "<section1>,<section2>,..."
-# Then fill with real content in Step 3+
+
+# Step 0b: Call auditor with audit_mode: structural to verify section structure
+# Verify section headings match content_requirements before filling
+
+# Step 3+ (US-13.4.3): FILL placeholder with real content — update, NOT recreate
+# Save content to tmp/word_content.json: {"title": "...", "sections": {"Heading": "content..."}}
+python3 scripts/create_placeholder.py word output/<filename>.docx \
+  --fill tmp/word_content.json
 ```
 
 ### Thin Content Guard (STRICT — reject and loop back)

@@ -99,14 +99,18 @@ Full color/font specs: `references/template-styles.md`
 3. Determine style (user-specified, pipeline-inferred, or ask)
 4. Determine output path (default: `./<title>.pptx`)
 
-### Template-First Protocol (US-13.4.1)
+### Template-First Protocol (US-13.4.1 / US-13.4.3)
 
 When structured_requirements available with content_requirements:
 ```bash
-# Create structural placeholder before generating
+# Step 0a: Create structural placeholder
 python3 scripts/create_placeholder.py slide output/<filename>.pptx \
   --slide-titles '["Title 1","Title 2","Title 3"]'
-# Then fill with real content
+
+# Step 0b: Call auditor with audit_mode: structural to verify slide structure
+
+# Step 3+ (US-13.4.3): slide fill mode is not yet implemented in create_placeholder.py
+# Use direct generation with gen_pptx.py — placeholder serves as structural reference only
 ```
 
 ### Thin Content Guard (STRICT — reject and loop back)

@@ -163,8 +163,8 @@ FLOW:
       3. After recovery: re-run auditor on the recovered output
       4. If recovery also fails → escalate_to_user regardless of strategist verdict
       
-      Budget note: strategist re-plan uses the same budget slot (max 1 per run).
-      If budget exhausted → skip strategist, use default retry_with_adjustments.
+      Budget note: strategist re-plan uses a separate budget slot (see BUDGET_ENFORCEMENT).
+      If total budget exhausted → skip strategist, use default retry_with_adjustments.
 
   8. DELIVER final output: ONE consolidated summary message
      - Collect all output files (path + size)
@@ -175,11 +175,15 @@ FLOW:
   9. SAVE session state for resume capability
 
 BUDGET_ENFORCEMENT:
-  strategist: max 1 call per pipeline run (includes re-plan calls — if budget used, skip re-plan)
+  strategist:
+    initial_plan: 1 call  # MANDATORY
+    replan_mode:  1 call  # per failing step (max 1 total per run)
+    child_workflow: 1 call per complex step
+    strategist_total_max: 5 per pipeline run  # hard cap across all modes
   auditor: max 5 calls per pipeline run (per-step checkpoints count toward this budget)
   advisory: max 2 calls per pipeline run
-  total: max 8 agent calls per pipeline run
-  
+  total: max 12 agent calls per pipeline run  # 5 strategist + 5 auditor + 2 advisory
+
   # Phase 13 note: If plan has > 3 output steps, call auditor selectively:
   # Priority: gen-excel > gen-slide > gen-word > gen-html > compose
   # Always call auditor on last output step regardless of budget

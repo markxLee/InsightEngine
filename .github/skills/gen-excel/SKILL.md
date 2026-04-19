@@ -62,6 +62,14 @@ CLI_SCRIPT:
   output: Prints "✅ Saved: <path> (<size> KB, <N> sheet(s), style: <style>)"
 
 COPILOT_WORKFLOW:
+  # DECISION: Template-First (US-13.4) vs Direct Generation
+  # Use Template-First if: structured_requirements available AND (> 3 sheets OR > 8 columns)
+  # Use Direct if: simple single-sheet, no structured requirements, quick request
+  
+  # Path A: Template-First (see Template-First Protocol section below)
+  0a. Create placeholder → 0b. Structural audit → 1. Gather data → fill → recalc
+  
+  # Path B: Direct Generation (gen_xlsx.py)
   1. Prepare data as JSON (from compose output or user data)
   2. Save JSON to tmp file
   3. Run: python3 .github/skills/gen-excel/scripts/gen_xlsx.py --input data.json --output output.xlsx --style <style>
