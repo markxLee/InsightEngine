@@ -1325,8 +1325,8 @@ Wave 65 (sequential): US-17.2.2 (after 17.2.1) + US-17.3.2 (after 17.3.1) + US-1
   - Branch: `feature/insight-engine-us-18.1.1`
   - Blocked By: None
 
-- [ ] **US-18.1.2** — save_state.py register-artifact, list-artifacts, and read-context commands
-  - Status: IN_PROGRESS
+- [x] **US-18.1.2** — save_state.py register-artifact, list-artifacts, and read-context commands
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-18.1.2`
   - Blocked By: ~~US-18.1.1~~ ✅
@@ -1337,7 +1337,7 @@ Wave 65 (sequential): US-17.2.2 (after 17.2.1) + US-17.3.2 (after 17.3.1) + US-1
   - Status: PLANNED
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-18.2.1`
-  - Blocked By: US-18.1.2
+  - Blocked By: ~~US-18.1.2~~ ✅
 
 - [ ] **US-18.2.2** — Refactor skills to call read-context and register-artifact
   - Status: PLANNED
