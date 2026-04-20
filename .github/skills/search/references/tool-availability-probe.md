@@ -129,10 +129,15 @@ fallback_cascade(query)
       exit 0 → use {url,title,snippet} results, continue Step 3 fetching
       exit 1 → no results, try next query; all empty → escalate to Tier 3
       exit 2 → log diagnostic, treat as no results
-  → Tier 3 (placeholder until US-16.1.3): emit Vietnamese "no results" message
+  → Tier 3: python3 .github/skills/search/scripts/http_search.py "<query>" --limit 8
+      exit 0 → use {url,title,snippet} results, continue Step 3 fetching
+      exit 1 → no results, try next query
+      exit 2 → log diagnostic, treat as no results
+  → All empty across all tiers: emit Vietnamese "no results" message
 ```
 
-Full contract for Tier 2: `references/playwright-search-fallback.md`.
+Full contracts: Tier 2 `references/playwright-search-fallback.md`,
+Tier 3 `references/http-search-fallback.md`.
 
 ---
 
@@ -146,6 +151,5 @@ worked.
 
 ## Out of Scope (handled by later stories)
 
-- US-16.1.3 — HTTP zero-auth fallback as final tier
 - Persistent (cross-session) caching of probe state
 - User-controlled re-probe / retry primary command

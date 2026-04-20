@@ -1165,8 +1165,8 @@ Wave 58 (sequential): US-15.1.3 ✅ + US-15.3.2 ✅ + US-15.3.3 ✅ + US-15.4.2 
   - Branch: feature/insight-engine-us-16.1.2
   - Blocked By: ~~US-16.1.1~~ ✅
 
-- [ ] **US-16.1.3** — HTTP zero-auth fallback as final tier
-  - Status: IN_PROGRESS
+- [x] **US-16.1.3** — HTTP zero-auth fallback as final tier
+  - Status: DONE
   - Assignee: copilot
   - Device: Trucs-MacBook-Air-2
   - AI: copilot

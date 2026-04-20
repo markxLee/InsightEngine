@@ -118,12 +118,24 @@ text is ever shown to the user. The user only sees `🔍 Đang tìm kiếm...` (
    - Exit `2` (error) → log diagnostic, treat that query as no results
    - Full contract: `references/playwright-search-fallback.md`
 
-2. **Tier 3 — HTTP zero-auth** (placeholder until US-16.1.3 ships)
-   - Log a single diagnostic note to `docs/runs/<branch-slug>/diagnostics/search-probe.log`.
-   - Skip Step 3 entirely.
-   - Emit a single friendly Vietnamese message to the user:
-     `"Không tìm thấy kết quả tìm kiếm cho yêu cầu này."`
-   - Continue the synthesize pipeline with empty search results (caller decides next).
+2. **Tier 3 — HTTP zero-auth → DuckDuckGo HTML** (US-16.1.3)
+   - For each query that Tier 2 returned empty (or when Playwright itself is unavailable):
+     ```bash
+     python3 .github/skills/search/scripts/http_search.py "<query>" --limit 8
+     ```
+   - Stdout JSON shape matches the primary tool: `{"query","results":[{url,title,snippet}]}`
+   - Exit `0` → use results, continue to Step 3 URL fetching unchanged
+   - Exit `1` (no results) → continue to next query
+   - Exit `2` (error) → log diagnostic, treat that query as no results
+   - Uses only `httpx` + `beautifulsoup4` (already in `requirements.txt`); no API
+     key, no headless browser, no auth UI. Safe for restricted CI environments.
+   - If ALL queries return empty across all three tiers:
+     - Log a single diagnostic note to `docs/runs/<branch-slug>/diagnostics/search-probe.log`.
+     - Skip Step 3 entirely.
+     - Emit a single friendly Vietnamese message:
+       `"Không tìm thấy kết quả tìm kiếm cho yêu cầu này."`
+     - Continue the synthesize pipeline with empty search results.
+   - Full contract: `references/http-search-fallback.md`
 
 **Default:** If no unavailability signal exists, the probe returns AVAILABLE. The
 goal is to avoid regressing fully-configured installations.
