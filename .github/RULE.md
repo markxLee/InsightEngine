@@ -343,4 +343,61 @@ If a non-orchestrator skill/agent attempts to emit user-facing output:
 
 ---
 
+## RULE-11: (Reserved — see US-17.2.1)
+
+---
+
+## RULE-12: Script Placement Discipline (US-17.3.1)
+
+One-time scripts and reusable utilities MUST live in separate directories.
+This prevents pipeline-generated throwaway scripts from polluting the repo.
+
+### Definitions
+
+| Type | Definition | Location |
+|------|-----------|----------|
+| **One-time script** | Created for a single pipeline run — session-specific paths, single-use logic, hardcoded run data | `/tmp/scripts/` |
+| **Reusable utility** | Invoked by 2+ pipeline runs OR 2+ skills — generic, parameterized, no session state | `/scripts/` |
+
+### MUST
+
+- Any skill creating a script MUST classify it as one-time or reusable
+- One-time scripts MUST live in `/tmp/scripts/` (gitignored)
+- Reusable scripts MUST live in `/scripts/` (committed to repo)
+- `scripts/validate_script_placement.py` is the runtime enforcer — invoked by orchestrator at pipeline start AND after every step
+
+### MUST_NOT
+
+- One-time scripts MUST NOT be placed in `/scripts/`
+- One-time scripts MUST NOT be committed to git
+- Reusable utilities MUST NOT be placed in `/tmp/`
+
+### Classification Heuristics
+
+A script is **one-time** if ANY of these apply:
+- Contains a hardcoded `session_id` or run-specific path
+- References files from the current pipeline run (e.g., `tmp/data_processed.json`)
+- Has no CLI parameter interface (hardcoded inputs)
+- Was generated to solve a single pipeline step
+
+A script is **reusable** if ALL of these apply:
+- Accepts CLI arguments for all inputs
+- Contains no session-specific data
+- Is useful across multiple pipeline runs
+- Follows existing `/scripts/` conventions
+
+### Enforcement Chain
+
+```
+Skill creates script
+  → Classifies: one-time or reusable
+  → Places in /tmp/scripts/ or /scripts/ accordingly
+  → validate_script_placement.py runs (orchestrator calls after each step)
+  → If misplaced: validator MOVES file to correct location + logs
+  → .gitignore blocks /tmp/ from commits
+  → Pre-commit check catches any leaks
+```
+
+---
+
 *These rules are loaded at maximum priority. SKILL.md files and agent instructions operate within these constraints.*

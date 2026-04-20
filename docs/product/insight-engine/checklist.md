@@ -1278,8 +1278,8 @@ Wave 62 (sequential): US-16.5.2 (after 16.5.1)
 
 ### Epic 17.3: One-Time Script Isolation
 
-- [ ] **US-17.3.1** — Add RULE-12 — one-time script placement
-  - Status: IN_PROGRESS
+- [x] **US-17.3.1** — Add RULE-12 — one-time script placement
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-17.3.1`
   - Blocked By: None
@@ -1288,7 +1288,7 @@ Wave 62 (sequential): US-16.5.2 (after 16.5.1)
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: `US-17.3.1`
+  - Blocked By: ~~US-17.3.1~~ ✅
 
 - [ ] **US-17.3.3** — Update .gitignore + pre-commit check
   - Status: PLANNED
