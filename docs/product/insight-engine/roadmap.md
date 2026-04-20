@@ -11,7 +11,7 @@
 
 - **Product name:** InsightEngine
 - **Product slug:** `insight-engine`
-- **Roadmap scope:** Milestone-based — each phase delivers a usable capability increment (Phase 0 → Phase 16)
+- **Roadmap scope:** Milestone-based — each phase delivers a usable capability increment (Phase 0 → Phase 18)
 - **Delivery model:** Copilot skill system built incrementally; each phase is independently usable
 
 ---
@@ -348,6 +348,44 @@ ROOT_CAUSES:
 
 ---
 
+## Phase 18 — State Effectiveness & Artifact Reuse
+
+**Goal:** Make session state a two-way communication channel instead of an append-only log. Pipeline currently writes state but rarely reads it back. Intermediate artifacts (`tmp/*`) generated during search, gather, and compose steps carry high value but are discarded at synthesis time — only the final file is used. Phase 18 adds an artifact registry, mandatory read-back protocol, multi-artifact synthesis, and state-filesystem integrity validation.
+
+> **Origin:** Real-world pipeline observation — the pipeline produces many valuable intermediate files (search results, gathered content, draft outputs) but only the last-generated file feeds into compose/gen-* steps. Previous artifacts are neither registered in state nor consulted during synthesis. State is effectively write-only: skills append to it but never read back to inform decisions or cross-check requirements.
+
+### Root Cause Analysis
+
+```yaml
+ROOT_CAUSES:
+  RC1_write_only_state:
+    problem: "State is append-only — no skill reads state before deciding what to do"
+    effect: "Skills re-do work that was already completed; audit cannot trace which step produced which artifact"
+    
+  RC2_unregistered_artifacts:
+    problem: "tmp/ files are not indexed in state — compose only sees the final file"
+    effect: "Valuable intermediate artifacts (search results, gathered data, draft content) are silently lost at synthesis time"
+    
+  RC3_no_integrity_check:
+    problem: "No validation that state registry matches actual filesystem"
+    effect: "Orphan files accumulate in tmp/ without being discoverable; registry entries can reference deleted files"
+    
+  RC4_single_source_synthesis:
+    problem: "Auditor evaluates final output but cannot trace back to intermediate steps"
+    effect: "When output quality is low, auditor cannot identify which intermediate step was the weak link"
+```
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 18.1 — Artifact Registry Protocol** | Extend session state schema to v4 with `step_states[].artifacts[]` per step. Each artifact entry includes: path, source step, content type, one-line summary, quality score, retention flag (keep/transient). Add `save_state.py` commands: `register-artifact`, `list-artifacts`, `read-context`. |
+| **Epic 18.2 — Mandatory State Read-Back Gate** | Add RULE-13 to `RULE.md`: every skill MUST call `save_state.py read-context <step>` before execution to receive the current artifact bundle and requirements context. Orchestrator injects artifact bundle into compose/gen-* input. No skill may proceed without reading state first. |
+| **Epic 18.3 — Multi-Artifact Synthesis** | compose receives `--artifact-bundle` (list of intermediate files + summaries) instead of a single final file. gen-* skills check artifact registry for evidence/citations from intermediate steps. Auditor adds test case "Intermediate Artifact Utilization ≥80%" to 100-point scoring — verifying that high-value artifacts are actually used. |
+| **Epic 18.4 — State-Filesystem Integrity Validator** | Create `scripts/validate_state_integrity.py` — runs at the start of every step. Compares actual `tmp/` files against artifact registry. Detects orphan files (not registered) and orphan entries (file deleted). Auto-registers orphan files with metadata; warns on orphan entries. Pipeline gate: step cannot start if integrity check fails. |
+
+---
+
 ## Skill Map theo Phase
 
 ```
@@ -367,6 +405,7 @@ Phase 12: orchestrator (fire-and-forget mode + jargon shield + signal detection)
 Phase 13: orchestrator + auditor (requirement anchor + per-step audit)  synthesize (child soft-workflow)  all output skills (template-first output protocol)
 Phase 14: gather (source discovery + accessibility test + verified plan)  orchestrator (verify-retry collection loop)
 Phase 17: orchestrator (exclusive user channel + pre-question consultation gate)  auditor (template-first hard gate for all gen-*)  RULE.md (RULE-10/11/12)  scripts (validate_script_placement.py)  .gitignore (one-time script isolation)
+Phase 18: save_state.py (artifact registry + read-context)  compose/gen-* (artifact bundle input)  auditor (artifact utilization test)  RULE.md (RULE-13)  scripts (validate_state_integrity.py)
 ```
 
 > Note: Phase 0-9 Skill Map shows English names for readability. Actual rename happens in Phase 10.

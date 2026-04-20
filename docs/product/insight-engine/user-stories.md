@@ -3,8 +3,8 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Scope:** Phase 0 → Phase 17 (all phases)
-> **Total User Stories:** 150 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10 + 6 Phase 11 + 8 Phase 12 + 9 Phase 13 + 6 Phase 14 + 12 Phase 15 + 9 Phase 16 + 9 Phase 17)
+> **Scope:** Phase 0 → Phase 18 (all phases)
+> **Total User Stories:** 159 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10 + 6 Phase 11 + 8 Phase 12 + 9 Phase 13 + 6 Phase 14 + 12 Phase 15 + 9 Phase 16 + 9 Phase 17 + 9 Phase 18)
 
 ---
 
@@ -2646,7 +2646,115 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
 
 ---
 
-## Phase 17: Delivery Channel Lockdown & Compliance Enforcement
+## Phase 18: State Effectiveness & Artifact Reuse
+
+> **Origin:** Real-world pipeline observation — state is write-only, intermediate tmp artifacts are discarded at synthesis time, compose only uses the last file. No integrity check between state and filesystem. **9 stories PLANNED.**
+
+---
+
+### Epic 18.1: Artifact Registry Protocol
+
+**US-18.1.1: Extend session state schema v4 with artifacts[] per step**
+- Description: As the pipeline, I want every intermediate file generated during a step to be registered in the session state with metadata, so downstream steps can discover and reuse them instead of only seeing the final output.
+- Acceptance Criteria:
+  - AC1: `tmp/.session-state.json` schema version incremented to 4
+  - AC2: Each `step_states[]` entry gains an `artifacts[]` array
+  - AC3: Each artifact entry contains: `path` (string), `source_step` (string), `content_type` (enum: search_result | gathered_content | draft_output | chart | data | other), `summary` (string, max 100 chars), `quality_score` (number 0-100 or null), `retention` (enum: keep | transient)
+  - AC4: Schema v4 is backward-compatible — existing v3 state files load without error (missing `artifacts[]` defaults to `[]`)
+  - AC5: `scripts/save_state.py` updated to handle schema v4 with migration logic
+- Blocked By: None
+
+**US-18.1.2: save_state.py register-artifact, list-artifacts, and read-context commands**
+- Description: As a skill, I want CLI commands to register artifacts, list available artifacts, and read the full context (requirements + artifacts) for my step, so I can participate in the artifact registry without manual JSON manipulation.
+- Acceptance Criteria:
+  - AC1: `save_state.py register-artifact --step <name> --path <path> --type <type> --summary "<text>" [--score <n>] [--retention keep|transient]` registers an artifact under the given step
+  - AC2: `save_state.py list-artifacts [--step <name>] [--type <type>]` returns JSON array of matching artifacts
+  - AC3: `save_state.py read-context <step>` returns JSON object with: `structured_requirements`, `relevant_artifacts[]` (filtered by step dependencies), `previous_step_summaries[]`, `audit_test_cases[]`
+  - AC4: All commands print valid JSON to stdout for easy pipeline consumption
+  - AC5: Commands handle missing state file gracefully (empty results, not crash)
+- Blocked By: `US-18.1.1`
+
+---
+
+### Epic 18.2: Mandatory State Read-Back Gate
+
+**US-18.2.1: Add RULE-13 — mandatory state read-back before every step**
+- Description: As the system, I want `RULE.md` to enforce that every skill reads the current state context before execution, so the pipeline uses state as a two-way communication channel instead of an append-only log.
+- Acceptance Criteria:
+  - AC1: `.github/RULE.md` includes new `RULE-13: State Read-Back Protocol` section
+  - AC2: Rule states: every skill MUST call `save_state.py read-context <step>` as its FIRST action before any processing
+  - AC3: Rule states: compose and gen-* skills MUST check `relevant_artifacts[]` from read-context and use them as input alongside the primary content
+  - AC4: Rule states: if read-context returns artifacts with `retention: keep` and `quality_score >= 60`, the skill MUST NOT discard them without explicit justification logged to state
+  - AC5: Rule placed at priority level alongside RULE-10..12
+- Blocked By: `US-18.1.2`
+
+**US-18.2.2: Refactor skills to call read-context and register-artifact**
+- Description: As a developer, I want all substantive skills (gather, search, compose, gen-word, gen-excel, gen-slide, gen-pdf, gen-html, design) updated to call `read-context` before execution and `register-artifact` after producing any file, so the artifact registry is populated and consumed in practice.
+- Acceptance Criteria:
+  - AC1: Each skill's SKILL.md updated with explicit step: "Call `save_state.py read-context <step>` as first action"
+  - AC2: Each skill's SKILL.md updated with explicit step: "Call `save_state.py register-artifact` for every file created in `tmp/` or `output/`"
+  - AC3: gather and search skills register their fetched content files as artifacts with type `gathered_content` or `search_result`
+  - AC4: compose skill reads `relevant_artifacts[]` and uses them as input sources (not just the last generated file)
+  - AC5: Grep audit: every SKILL.md for substantive skills contains both `read-context` and `register-artifact` references
+- Blocked By: `US-18.2.1`
+
+---
+
+### Epic 18.3: Multi-Artifact Synthesis
+
+**US-18.3.1: Compose skill accepts artifact bundle input**
+- Description: As the compose skill, I want to receive a bundle of intermediate artifacts (with summaries and quality scores) as input rather than just the final file, so synthesis draws from all valuable pipeline outputs.
+- Acceptance Criteria:
+  - AC1: compose SKILL.md updated to accept `--artifact-bundle` or equivalent mechanism (list of artifact paths + summaries from read-context)
+  - AC2: Compose merges content from multiple artifacts, not just the last-generated file
+  - AC3: Compose outputs a synthesis that references/cites intermediate artifacts where relevant
+  - AC4: If artifact bundle is empty or single-file, compose falls back to current behavior (no regression)
+  - AC5: Compose logs which artifacts it used vs skipped to state for audit visibility
+- Blocked By: `US-18.2.2`
+
+**US-18.3.2: gen-* skills inject artifact evidence into output**
+- Description: As a gen-* skill, I want to check the artifact registry for relevant evidence and citations from intermediate steps, so output documents include supporting data from the full pipeline, not just the final compose step.
+- Acceptance Criteria:
+  - AC1: gen-word, gen-excel, gen-slide, gen-pdf, gen-html skills read `relevant_artifacts[]` from read-context
+  - AC2: Skills inject artifact evidence where appropriate (e.g., data tables from gathered Excel, charts from gen-image, source citations from search)
+  - AC3: Injection is additive — does not replace compose output, only enriches it
+  - AC4: Skills log artifact usage to state for auditor verification
+- Blocked By: `US-18.2.2`
+
+**US-18.3.3: Auditor test case — Intermediate Artifact Utilization**
+- Description: As the auditor, I want a new test case in the 100-point scoring system that checks whether high-value intermediate artifacts were actually utilized during synthesis, so the pipeline is penalized for discarding valuable work.
+- Acceptance Criteria:
+  - AC1: Auditor adds dynamic test case "Intermediate Artifact Utilization" (5-10 points depending on artifact count)
+  - AC2: Test case checks: of all artifacts with `retention: keep` and `quality_score >= 60`, what percentage was referenced by compose or gen-* steps
+  - AC3: Score: 100% utilization = full points; <80% utilization = proportional deduction; 0% utilization = 0 points
+  - AC4: Test case only applies when artifact registry contains ≥2 keep-retention artifacts (skip for simple single-source pipelines)
+  - AC5: Auditor report includes list of utilized vs unused artifacts for transparency
+- Blocked By: `US-18.3.1`
+
+---
+
+### Epic 18.4: State-Filesystem Integrity Validator
+
+**US-18.4.1: validate_state_integrity.py script**
+- Description: As the pipeline, I want a validator script that compares actual `tmp/` files against the artifact registry, detecting orphan files and orphan registry entries, so state always reflects reality.
+- Acceptance Criteria:
+  - AC1: `scripts/validate_state_integrity.py` exists and runs with `python3 scripts/validate_state_integrity.py`
+  - AC2: Scans all files in `tmp/` (excluding `.session-state.json` and `archives/`) and compares against registered artifacts in state
+  - AC3: Reports orphan files (in filesystem but not in registry) with recommendation to auto-register
+  - AC4: Reports orphan entries (in registry but file missing) with recommendation to mark as `deleted`
+  - AC5: Supports `--auto-fix` flag: auto-registers orphan files with type `other` and summary `auto-registered`; marks orphan entries as deleted
+  - AC6: Exits 0 if clean or auto-fixed; exits 1 if violations found and `--auto-fix` not set
+- Blocked By: `US-18.1.1`
+
+**US-18.4.2: Pipeline gate — integrity check before each step**
+- Description: As the orchestrator, I want the state integrity validator to run automatically before each pipeline step, so no step proceeds with a stale or inconsistent state.
+- Acceptance Criteria:
+  - AC1: Orchestrator invokes `validate_state_integrity.py --auto-fix` before each substantive step
+  - AC2: If auto-fix succeeds, pipeline proceeds normally
+  - AC3: If auto-fix fails (unexpected condition), orchestrator logs warning to state and proceeds with caution flag
+  - AC4: Integrity check results logged to `step_states[].integrity_check` in session state
+  - AC5: Auditor can reference integrity check results when scoring output quality
+- Blocked By: `US-18.4.1`, `US-18.2.1`
 
 > **Origin:** Real-world post-Phase-16 testing — three persistent compliance failures: (1) one-time scripts placed in `/scripts/` and pushed to git, (2) skills shipping single-attempt unaudited results with fabricated URLs, (3) user questions asked without prior agent consultation, (4) template-first protocol from Phase 13 bypassed. **9 stories PLANNED.**
 

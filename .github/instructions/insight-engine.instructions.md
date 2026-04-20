@@ -27,7 +27,7 @@ applyTo: "**"
 | Charts | `matplotlib` + `seaborn` (Agg backend) |
 | Images | `diffusers` + `torch/MPS` (Apple Silicon, optional) |
 | Visual design | `reportlab` Canvas + `Pillow` (80+ bundled fonts) |
-| Web search | `vscode-websearchforcopilot_webSearch` (built-in) |
+| Web search | Playwright browser + httpx (primary); `vscode-websearchforcopilot_webSearch` (last resort) |
 | URL fetch | Copilot `fetch_webpage` (built-in) |
 
 ---
@@ -64,7 +64,7 @@ applyTo: "**"
 ```
 .github/skills/
   synthesize/      # 🔑 Main pipeline — analyze prompt → expand dimensions → route → orchestrate + auto-review loop
-  search/          # Web search via vscode-websearchforcopilot_webSearch + 3-tier URL fetch (fetch_webpage → httpx → Playwright)
+  search/          # Web search via Playwright browser + httpx (primary) + vscode mini browser; vscode-websearchforcopilot last resort
   gather/          # Read local files (markitdown + format-specific fallbacks) and fetch explicit user-provided URLs
   compose/         # Synthesize content comprehensive (default) + self-review loop + translation
   gen-word/        # Export Word (.docx) + thin content guard

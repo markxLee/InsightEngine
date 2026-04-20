@@ -128,8 +128,10 @@ def main():
             status = "✅" if found else "⚪"
             print(f"  {status} {pip_name:20s} ({purpose}) [optional]")
 
-    # Playwright browser
-    pw_browsers = Path.home() / ".cache" / "ms-playwright"
+    # Playwright browser — check both Linux (~/.cache) and macOS (~/Library/Caches)
+    pw_browsers_linux = Path.home() / ".cache" / "ms-playwright"
+    pw_browsers_macos = Path.home() / "Library" / "Caches" / "ms-playwright"
+    pw_browsers = pw_browsers_macos if pw_browsers_macos.exists() else pw_browsers_linux
     pw_ok = pw_browsers.exists() and any(pw_browsers.iterdir()) if pw_browsers.exists() else False
     if not as_json:
         print()

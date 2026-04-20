@@ -55,7 +55,7 @@ Excel, Word, PDF, charts, images — route to orchestrator. Always.
 | Skill | Purpose | Key Triggers |
 |-------|---------|-------------|
 | synthesize | Content pipeline: search/gather → compose → gen-[format] | tổng hợp, báo cáo, synthesize |
-| search | Internet search, platform discovery, data collection | tìm kiếm, search, danh sách |
+| search | Internet search via Playwright/browser + httpx; data collection | tìm kiếm, search, danh sách |
 | gather | Read local files + fetch explicit URLs | đọc file, fetch URL |
 | compose | Merge multi-source content, translate Vi↔En | tổng hợp, dịch, biên soạn |
 | gen-word | Word (.docx) — 3 templates | tạo word, xuất docx |

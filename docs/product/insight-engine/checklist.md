@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 150 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 DONE + 8 Phase 12 DONE + 9 Phase 13 DONE + 6 Phase 14 DONE + 12 Phase 15 DONE + 9 Phase 16 DONE + 9 Phase 17 PLANNED)  
+> **Total User Stories:** 159 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 DONE + 8 Phase 12 DONE + 9 Phase 13 DONE + 6 Phase 14 DONE + 12 Phase 15 DONE + 9 Phase 16 DONE + 9 Phase 17 PLANNED + 9 Phase 18 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -1309,6 +1309,84 @@ Wave 63 (parallel): US-17.1.1 + US-17.3.1
 Wave 64 (parallel after 17.1.1): US-17.1.2 + US-17.1.3 + US-17.2.1 + US-17.4.1
 Wave 65 (sequential): US-17.2.2 (after 17.2.1) + US-17.3.2 (after 17.3.1) + US-17.3.3 (after 17.3.2)
 --- Phase 17 PLANNED (0/9) ---
+```
+
+---
+
+## Phase 18: State Effectiveness & Artifact Reuse
+
+> **Origin:** Real-world pipeline observation — state is write-only, intermediate tmp artifacts are discarded at synthesis time, compose only uses the last file. No integrity check between state and filesystem. **9 stories PLANNED.**
+
+### Epic 18.1: Artifact Registry Protocol
+
+- [ ] **US-18.1.1** — Extend session state schema v4 with artifacts[] per step
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-18.1.1`
+  - Blocked By: None
+
+- [ ] **US-18.1.2** — save_state.py register-artifact, list-artifacts, and read-context commands
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-18.1.2`
+  - Blocked By: US-18.1.1
+
+### Epic 18.2: Mandatory State Read-Back Gate
+
+- [ ] **US-18.2.1** — Add RULE-13 — mandatory state read-back before every step
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-18.2.1`
+  - Blocked By: US-18.1.2
+
+- [ ] **US-18.2.2** — Refactor skills to call read-context and register-artifact
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-18.2.2`
+  - Blocked By: US-18.2.1
+
+### Epic 18.3: Multi-Artifact Synthesis
+
+- [ ] **US-18.3.1** — Compose skill accepts artifact bundle input
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-18.3.1`
+  - Blocked By: US-18.2.2
+
+- [ ] **US-18.3.2** — gen-* skills inject artifact evidence into output
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-18.3.2`
+  - Blocked By: US-18.2.2
+
+- [ ] **US-18.3.3** — Auditor test case — Intermediate Artifact Utilization
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-18.3.3`
+  - Blocked By: US-18.3.1
+
+### Epic 18.4: State-Filesystem Integrity Validator
+
+- [ ] **US-18.4.1** — validate_state_integrity.py script
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-18.4.1`
+  - Blocked By: US-18.1.1
+
+- [ ] **US-18.4.2** — Pipeline gate — integrity check before each step
+  - Status: PLANNED
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-18.4.2`
+  - Blocked By: US-18.4.1, US-18.2.1
+
+```
+Wave 66 (parallel): US-18.1.1
+Wave 67 (parallel after 18.1.1): US-18.1.2 + US-18.4.1
+Wave 68 (sequential): US-18.2.1 (after 18.1.2)
+Wave 69 (parallel): US-18.2.2 + US-18.4.2 (after 18.2.1 + 18.4.1)
+Wave 70 (parallel): US-18.3.1 + US-18.3.2 (after 18.2.2)
+Wave 71 (sequential): US-18.3.3 (after 18.3.1)
+--- Phase 18 PLANNED (0/9) ---
 ```
 
 ---

@@ -2,8 +2,9 @@
 name: search
 description: |
   Search the internet for information, discover platforms, and collect structured data.
-  Web search via vscode-websearchforcopilot_webSearch. 3-tier URL fetching for results:
-  fetch_webpage → httpx → Playwright stealth mode (for bot-protected sites).
+  Primary search: Playwright browser → DuckDuckGo/Google HTML scraping.
+  Fallback: httpx zero-auth → DuckDuckGo HTML. Last resort: vscode-websearchforcopilot_webSearch.
+  3-tier URL fetching for results: fetch_webpage → httpx → Playwright stealth mode.
   Three modes: standard search (single topic), deep research (multi-dimension exhaustive),
   and data collection (structured items with direct URLs from specific platforms).
   Auto-reviews search quality and expands queries if content is insufficient.
@@ -12,16 +13,17 @@ description: |
   "danh sách việc làm", "so sánh các nền tảng", or when the pipeline needs web content.
   Do NOT use for reading local files or fetching explicit user-provided URLs → use gather.
 argument-hint: "[search query or topic]"
-version: 1.1
+version: 1.2
 compatibility:
   requires:
     - Python >= 3.10
-    - httpx, beautifulsoup4 (URL fallback)
-    - playwright (bot-protected URL fallback)
+    - httpx, beautifulsoup4 (URL fallback + HTTP search)
+    - playwright (primary search + bot-protected URL fallback)
   tools:
     - run_in_terminal
     - fetch_webpage (fetching search result URLs)
-    - vscode-websearchforcopilot_webSearch (primary search, probed for availability)
+    - open_browser_page, read_page, click_element (VS Code mini browser — Tier 0)
+    - vscode-websearchforcopilot_webSearch (last-resort fallback, often unavailable)
 ---
 
 # Tìm Kiếm — Internet Search & Discovery Skill
@@ -80,82 +82,76 @@ data_collection:
 
 ---
 
-## Step 2.5: Tool Availability Probe (Hard Gate Before Step 3)
+## Step 2.5: Search Engine Selection (Priority Cascade)
 
-Before invoking the primary search tool, run the **availability probe** documented in
-`references/tool-availability-probe.md`. The probe is a Copilot-level decision
-procedure (not a Python script) that returns one of two verdicts:
+The search skill uses a **4-tier cascade** — try each tier in order, move to next on failure.
+Playwright browser and httpx are the primary engines. `vscode-websearchforcopilot_webSearch`
+is last resort only (often requires Tavily auth that users don't configure).
 
-- `AVAILABLE` → primary tool is safe to invoke; proceed to Step 3 unchanged.
-- `UNAVAILABLE` → primary tool MUST be skipped; route to the **fallback tier** (see
-  contract below). NO Tavily/auth/configuration text is ever shown to the user.
+```yaml
+SEARCH_CASCADE:
+  tier_0_browser:
+    tool: open_browser_page + read_page + click_element (VS Code mini browser)
+    engine: Google / DuckDuckGo in real browser
+    when: Always try first — most reliable, real browser context
+    how: |
+      1. open_browser_page("https://www.google.com/search?q={url_encoded_query}")
+      2. read_page() to extract search results (titles, URLs, snippets)
+      3. If Google blocks: try DuckDuckGo ("https://duckduckgo.com/?q={query}")
+      4. click_element on result links to navigate and read_page for content
+    on_success: Use results, skip lower tiers
+    on_failure: Proceed to Tier 1
 
-**Probe summary:**
+  tier_1_playwright:
+    tool: python3 .github/skills/search/scripts/playwright_search.py "<query>" --limit 8
+    engine: DuckDuckGo HTML via headless Playwright
+    when: Tier 0 fails or insufficient results
+    how: Returns JSON {query, results: [{url, title, snippet}]}
+    on_success: Use results
+    on_failure: Proceed to Tier 2
 
-1. If a session-scoped `primary_unavailable` flag is already set → return UNAVAILABLE.
-2. If the user has previously declined a Tavily auth prompt this session, or any
-   prior search call surfaced a Tavily/auth/config error → set the flag, return
-   UNAVAILABLE.
-3. Otherwise, attempt `vscode-websearchforcopilot_webSearch`. If it returns results
-   without surfacing auth/config UI → cache AVAILABLE. If it surfaces an auth popup,
-   missing-key error, extension-absent error, or any exception → silently set the
-   `primary_unavailable` flag, append a single internal diagnostic line to
-   `docs/runs/<branch-slug>/diagnostics/search-probe.log`, and return UNAVAILABLE.
+  tier_2_http:
+    tool: python3 .github/skills/search/scripts/http_search.py "<query>" --limit 8
+    engine: DuckDuckGo HTML via httpx (no browser needed)
+    when: Tier 1 fails or Playwright unavailable
+    how: Returns same JSON shape as Tier 1
+    on_success: Use results
+    on_failure: Proceed to Tier 3
 
-**Fallback cascade:**
+  tier_3_websearch:
+    tool: vscode-websearchforcopilot_webSearch
+    engine: Tavily API (requires auth — often unavailable)
+    when: ALL above tiers failed
+    priority: LOWEST — only as absolute last resort
+    how: Standard tool call with query
+    on_auth_error: |
+      Silently skip. Do NOT show Tavily/auth/config text to user.
+      Set session flag primary_unavailable.
+      Log to diagnostics. Continue pipeline with empty results.
+    on_success: Use results
 
-When the probe returns UNAVAILABLE, route through this cascade. NO Tavily/auth/configuration
-text is ever shown to the user. The user only sees `🔍 Đang tìm kiếm...` (AC3 of US-16.1.2).
+  all_tiers_exhausted:
+    action: |
+      Log diagnostic. Skip search step.
+      Emit: "Không tìm thấy kết quả tìm kiếm cho yêu cầu này."
+      Continue pipeline with empty search results — never block on search failure.
+```
 
-1. **Tier 2 — Playwright stealth → DuckDuckGo HTML** (US-16.1.2)
-   - For each query in Step 2, run:
-     ```bash
-     python3 .github/skills/search/scripts/playwright_search.py "<query>" --limit 8
-     ```
-   - Stdout JSON shape matches the primary tool: `{"query","results":[{url,title,snippet}]}`
-   - Exit `0` → use results, continue to Step 3 URL fetching unchanged
-   - Exit `1` (no results) → continue to next query; if all queries empty → escalate to Tier 3
-   - Exit `2` (error) → log diagnostic, treat that query as no results
-   - Full contract: `references/playwright-search-fallback.md`
-
-2. **Tier 3 — HTTP zero-auth → DuckDuckGo HTML** (US-16.1.3)
-   - For each query that Tier 2 returned empty (or when Playwright itself is unavailable):
-     ```bash
-     python3 .github/skills/search/scripts/http_search.py "<query>" --limit 8
-     ```
-   - Stdout JSON shape matches the primary tool: `{"query","results":[{url,title,snippet}]}`
-   - Exit `0` → use results, continue to Step 3 URL fetching unchanged
-   - Exit `1` (no results) → continue to next query
-   - Exit `2` (error) → log diagnostic, treat that query as no results
-   - Uses only `httpx` + `beautifulsoup4` (already in `requirements.txt`); no API
-     key, no headless browser, no auth UI. Safe for restricted CI environments.
-   - If ALL queries return empty across all three tiers:
-     - Log a single diagnostic note to `docs/runs/<branch-slug>/diagnostics/search-probe.log`.
-     - Skip Step 3 entirely.
-     - Emit a single friendly Vietnamese message:
-       `"Không tìm thấy kết quả tìm kiếm cho yêu cầu này."`
-     - Continue the synthesize pipeline with empty search results.
-   - Full contract: `references/http-search-fallback.md`
-
-**Default:** If no unavailability signal exists, the probe returns AVAILABLE. The
-goal is to avoid regressing fully-configured installations.
-
-Full algorithm, rationale, and rollback notes: see
-`references/tool-availability-probe.md`.
+**Session caching:** Once a tier succeeds, prefer that tier for subsequent queries in the
+same session. If a tier fails, mark it `unavailable` for the session — don't retry.
 
 ---
 
 ## Step 3: Execute Search & Fetch
 
-*(Skip this step if Step 2.5 returned UNAVAILABLE.)*
-
 For each query:
-1. Run `vscode-websearchforcopilot_webSearch` with the query
+1. Run search using the cascade from Step 2.5 (tier 0 → 1 → 2 → 3)
 2. Select 2–3 most relevant result URLs (prefer authoritative sources)
-3. Fetch each URL using 3-tier fallback:
+3. Fetch each URL using 3-tier content fallback:
    - **fetch_webpage** (default) → if content ≥ 50 chars: done
    - **httpx + BeautifulSoup** → if Tier 1 fails
    - **Playwright stealth** → if bot-detection signals (403, Cloudflare, empty JS content)
+   - **VS Code browser** → open_browser_page + read_page as ultimate fallback
 4. After each fetch: read first 200–500 chars. Reject error pages, login walls, empty stubs.
 5. Tag content with source URL and dimension
 
