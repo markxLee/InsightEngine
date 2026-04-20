@@ -15,19 +15,19 @@ Commands:
 
 State file: tmp/.session-state.json  (hidden file — use: ls -la tmp/)
 
-Enhanced Schema (v3 — Phase 13 update):
+Enhanced Schema (v4 — Phase 18 update):
     raw_prompt: str             # Original user request — saved FIRST before any processing
     intent_classification: str  # synthesis | creation | research | design | data_collection | mixed
     structured_requirements: dict  # Parsed from raw_prompt: output_files[], fields_required, filters, grouping, format_constraints
     analyzed_requirements: dict # Expanded dimensions from analysis
     generated_plan: dict        # Workflow plan from strategist
-    step_states: list           # Per-step: {name, status, input_summary, output_summary, started_at, completed_at}
+    step_states: list           # Per-step: {name, status, input_summary, output_summary, started_at, completed_at, artifacts[]}
     audit_test_cases: list      # Dynamic test cases from auditor
     score_history: list         # [{attempt, score, failing_tests}]
     created_skills: list        # Runtime-created skills/agents
     output_files: list          # [{path, hash, format, size}]
     status: str                 # IN_PROGRESS | COMPLETED | FAILED
-    schema_version: int         # 3
+    schema_version: int         # 4
     # Mode tracking (Phase 12 — persists across resume)
     session_mode: str           # guided | standard | silent  (default: guided)
     autonomy_mode: bool         # true after user approves plan
@@ -37,6 +37,10 @@ Enhanced Schema (v3 — Phase 13 update):
     question_budget: dict       # {max: 2, used: 0, log: [{question, timestamp, consultation_log}]}
     user_emissions: list        # [{type, timestamp, reason, ?consultation_log}]
     template_validations: list  # [{skill, template, timestamp, result}]
+    # Artifact registry (Phase 18) — each step_states[] entry gains artifacts[]
+    # Each artifact: {path, source_step, content_type, summary, quality_score, retention}
+    # content_type: search_result | gathered_content | draft_output | chart | data | other
+    # retention: keep | transient
 """
 
 import hashlib
@@ -61,7 +65,13 @@ def ensure_dirs():
 def load_state() -> Optional[dict]:
     if STATE_FILE.exists():
         try:
-            return json.loads(STATE_FILE.read_text(encoding="utf-8"))
+            state = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+            # Migrate v3 → v4: ensure artifacts[] on each step_states entry
+            if state and state.get("schema_version", 1) < 4:
+                state["schema_version"] = 4
+                for step in state.get("step_states", []):
+                    step.setdefault("artifacts", [])
+            return state
         except (json.JSONDecodeError, OSError):
             return None
     return None
@@ -83,7 +93,7 @@ def cmd_init(prompt: str, intent: str = "unknown"):
         shutil.copy2(STATE_FILE, archive_path)
 
     state = {
-        "schema_version": 3,
+        "schema_version": 4,
         "raw_prompt": prompt,
         "intent_classification": intent,
         "status": "IN_PROGRESS",
@@ -245,7 +255,7 @@ def cmd_save(data_arg: str):
     # Auto-set schema_version if not present
     if "schema_version" not in data:
         if "step_states" in data or "raw_prompt" in data:
-            data["schema_version"] = 3
+            data["schema_version"] = 4
         else:
             data["schema_version"] = 1
 
@@ -460,6 +470,7 @@ def cmd_update(args: list):
             "status": status,
             "started_at": datetime.now().isoformat() if status == "in_progress" else None,
             "completed_at": datetime.now().isoformat() if status == "completed" else None,
+            "artifacts": [],
         }
         if audit_score is not None:
             new_step["audit_score"] = audit_score

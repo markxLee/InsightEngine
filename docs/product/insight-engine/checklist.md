@@ -1320,7 +1320,7 @@ Wave 65 (sequential): US-17.2.2 (after 17.2.1) + US-17.3.2 (after 17.3.1) + US-1
 ### Epic 18.1: Artifact Registry Protocol
 
 - [ ] **US-18.1.1** — Extend session state schema v4 with artifacts[] per step
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-18.1.1`
   - Blocked By: None
