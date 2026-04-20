@@ -87,6 +87,7 @@ applyTo: "**"
 .github/agents/
   orchestrator.agent.md   # User-invocable. Central request handler — classify intent → route
   strategist.agent.md     # Subagent. Workflow generation (initial_plan / replan / child_workflow)
+  execution.agent.md      # Subagent. Task execution — tool selection, cascade, quality signal
   auditor.agent.md        # User-invocable. 100-point weighted quality verification
   advisory.agent.md       # Subagent. Multi-perspective decision support
 ```
