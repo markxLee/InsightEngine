@@ -1173,21 +1173,17 @@ Wave 58 (sequential): US-15.1.3 ✅ + US-15.3.2 ✅ + US-15.3.3 ✅ + US-15.4.2 
 
 ### Epic 16.2: Execution Agent
 
-- [ ] **US-16.2.1** — Create execution.agent.md
-  - Status: IN_PROGRESS
+- [x] **US-16.2.1** — Create execution.agent.md
+  - Status: DONE
   - Assignee: copilot
-  - Device: Trucs-MacBook-Air-2.local
-  - AI: copilot
   - Branch: feature/insight-engine-us-16.2.1
-  - Locked: 2026-04-20T03:06:48Z
-  - StateFile: docs/runs/insight-engine-us-16.2.1/.workflow-state.yaml
   - Blocked By: None
 
 - [ ] **US-16.2.2** — Execution Agent child soft-flow request
   - Status: PLANNED
   - Assignee: copilot
   - Branch: feature/insight-engine-us-16.2.2
-  - Blocked By: US-16.2.1
+  - Blocked By: ~~US-16.2.1~~ ✅
 
 ### Epic 16.3: Hard-Flow Protocol in RULE.md
 
@@ -1195,7 +1191,7 @@ Wave 58 (sequential): US-15.1.3 ✅ + US-15.3.2 ✅ + US-15.3.3 ✅ + US-15.4.2 
   - Status: PLANNED
   - Assignee: copilot
   - Branch: feature/insight-engine-us-16.3.1
-  - Blocked By: US-16.2.1
+  - Blocked By: ~~US-16.2.1~~ ✅
 
 ### Epic 16.4: Adaptive Re-planning on Failure
 
@@ -1203,7 +1199,7 @@ Wave 58 (sequential): US-15.1.3 ✅ + US-15.3.2 ✅ + US-15.3.3 ✅ + US-15.4.2 
   - Status: PLANNED
   - Assignee: copilot
   - Branch: feature/insight-engine-us-16.4.1
-  - Blocked By: US-16.2.1
+  - Blocked By: ~~US-16.2.1~~ ✅
 
 ### Epic 16.5: Experience Template Accumulation
 

@@ -5,25 +5,18 @@ meta:
   product_slug: insight-engine
   checklist_path: docs/product/insight-engine/checklist.md
   created_at: 2026-04-20T03:06:48Z
-  last_updated: 2026-04-20T03:06:48Z
+  last_updated: 2026-04-20T03:08:00Z
   updated_by: copilot
-  docs_root: .
-session:
-  last_agent: copilot
-  last_device: Trucs-MacBook-Air-2.local
-  last_checkpoint: 2026-04-20T03:06:48Z
-handoff_context:
-  what_was_done: "Story locked on main, branch about to be created"
-  what_is_next: "Execute governed-workflow Phases 0-5"
-  key_decisions: []
-  files_changed:
-    - docs/product/insight-engine/checklist.md
-    - docs/runs/insight-engine-us-16.2.1/.workflow-state.yaml
-  open_questions: []
-  warnings: []
 status:
-  current_phase: 0
-  phase_name: analysis
-  phase_status: not-started
-  last_action: "Story locked and state initialized"
-  next_action: "Run Phase 0 analysis"
+  current_phase: 5
+  phase_name: done
+  phase_status: completed
+  last_action: "execution.agent.md created, ACs verified, checklist marked DONE"
+  next_action: "Merge to main"
+deliverables:
+  - .github/agents/execution.agent.md
+acceptance_criteria_status:
+  AC1: PASS
+  AC2: PASS
+  AC3: PASS
+  AC4: PASS
