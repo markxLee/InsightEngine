@@ -1244,8 +1244,8 @@ Wave 62 (sequential): US-16.5.2 (after 16.5.1)
 
 ### Epic 17.1: Orchestrator-Exclusive Delivery Channel
 
-- [ ] **US-17.1.1** — Add RULE-10 — orchestrator-only user channel
-  - Status: IN_PROGRESS
+- [x] **US-17.1.1** — Add RULE-10 — orchestrator-only user channel
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-17.1.1`
   - Blocked By: None
@@ -1254,13 +1254,13 @@ Wave 62 (sequential): US-16.5.2 (after 16.5.1)
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: `US-17.1.1`
+  - Blocked By: ~~US-17.1.1~~ ✅
 
 - [ ] **US-17.1.3** — Orchestrator agent — gatekeeper for user-facing output
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: `US-17.1.1`
+  - Blocked By: ~~US-17.1.1~~ ✅
 
 ### Epic 17.2: Mandatory Pre-Question Consultation Protocol
 
@@ -1268,7 +1268,7 @@ Wave 62 (sequential): US-16.5.2 (after 16.5.1)
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: `US-17.1.1`
+  - Blocked By: ~~US-17.1.1~~ ✅
 
 - [ ] **US-17.2.2** — Question budget tracker in session state
   - Status: PLANNED
@@ -1302,7 +1302,7 @@ Wave 62 (sequential): US-16.5.2 (after 16.5.1)
   - Status: PLANNED
   - Assignee: —
   - Branch: —
-  - Blocked By: `US-17.1.1`
+  - Blocked By: ~~US-17.1.1~~ ✅
 
 ```
 Wave 63 (parallel): US-17.1.1 + US-17.3.1
