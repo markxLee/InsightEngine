@@ -94,10 +94,10 @@ When the probe returns UNAVAILABLE:
 1. **NO** Tavily/auth/configuration words shown to the user.
 2. **NO** stack trace, error code, or extension name shown.
 3. The user-facing message is in **Vietnamese**, friendly, and limited to status:
-   - During the placeholder period (until US-16.1.2 ships):
+   - When the fallback cascade (Tier 2 Playwright + Tier 3 HTTP) returns results,
+     the user only ever sees `"🔍 Đang tìm kiếm..."` — no fallback chatter.
+   - When the entire cascade is exhausted with no results, emit:
      `"Không tìm thấy kết quả tìm kiếm cho yêu cầu này."`
-   - After US-16.1.2 ships, the fallback tier produces real results and this
-     message is no longer needed.
 
 ---
 
@@ -119,21 +119,20 @@ This file is dev-visible only. The user is never directed to it.
 
 ---
 
-## Hook for Fallback Tier (US-16.1.2)
+## Hook for Fallback Tier (US-16.1.2 — shipped)
 
-When this probe returns UNAVAILABLE, the search skill calls the **fallback tier**.
-For US-16.1.1 (this story) the fallback is a placeholder:
+When this probe returns UNAVAILABLE, the search skill enters the fallback cascade:
 
 ```
-fallback_tier()
-  → log diagnostic note
-  → return [] (empty result set)
-  → emit Vietnamese "no results" message
+fallback_cascade(query)
+  → Tier 2: python3 .github/skills/search/scripts/playwright_search.py "<query>" --limit 8
+      exit 0 → use {url,title,snippet} results, continue Step 3 fetching
+      exit 1 → no results, try next query; all empty → escalate to Tier 3
+      exit 2 → log diagnostic, treat as no results
+  → Tier 3 (placeholder until US-16.1.3): emit Vietnamese "no results" message
 ```
 
-US-16.1.2 will replace this placeholder with the Playwright stealth search tier.
-The hook signature is intentionally abstract — concrete arguments are deferred to
-US-16.1.2 to avoid premature coupling.
+Full contract for Tier 2: `references/playwright-search-fallback.md`.
 
 ---
 
@@ -147,7 +146,6 @@ worked.
 
 ## Out of Scope (handled by later stories)
 
-- US-16.1.2 — Playwright stealth fallback search tier (real results when probe fails)
 - US-16.1.3 — HTTP zero-auth fallback as final tier
 - Persistent (cross-session) caching of probe state
 - User-controlled re-probe / retry primary command
