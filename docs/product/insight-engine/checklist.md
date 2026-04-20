@@ -3,7 +3,7 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Total User Stories:** 141 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 DONE + 8 Phase 12 DONE + 9 Phase 13 DONE + 6 Phase 14 DONE + 12 Phase 15 PLANNED + 9 Phase 16 PLANNED)  
+> **Total User Stories:** 150 (21 Phase 0-3 DONE + 15 Phase 4 DONE + 4 Phase 5 DONE + 14 Phase 6 DONE + 5 Phase 7 DONE + 6 Phase 8 DONE + 12 Phase 9 DONE + 13 Phase 10 DONE + 1 Phase 10 PLANNED + 6 Phase 11 DONE + 8 Phase 12 DONE + 9 Phase 13 DONE + 6 Phase 14 DONE + 12 Phase 15 DONE + 9 Phase 16 DONE + 9 Phase 17 PLANNED)  
 > **Purpose:** Single source of execution state — track progress, enforce dependencies, enable safe parallel work
 
 ---
@@ -1235,6 +1235,81 @@ Wave 62 (sequential): US-16.5.2 (after 16.5.1)
 > **2026-04-20 update:** Phase 16 fully shipped (9/9). All stories merged to
 > `main`. See `docs/runs/insight-engine-us-16.*/README.md` for per-story
 > artifacts.
+
+---
+
+## Phase 17: Delivery Channel Lockdown & Compliance Enforcement
+
+> **Origin:** Real-world post-Phase-16 testing — three persistent compliance failures: (1) one-time scripts polluting `/scripts/` and pushed to git, (2) skills shipping single-attempt unaudited results with fabricated URLs, (3) user questions asked without prior agent consultation, (4) template-first protocol from Phase 13 bypassed. **9 stories PLANNED.**
+
+### Epic 17.1: Orchestrator-Exclusive Delivery Channel
+
+- [ ] **US-17.1.1** — Add RULE-10 — orchestrator-only user channel
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: None
+
+- [ ] **US-17.1.2** — Refactor non-orchestrator skills/agents to internal-return only
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: `US-17.1.1`
+
+- [ ] **US-17.1.3** — Orchestrator agent — gatekeeper for user-facing output
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: `US-17.1.1`
+
+### Epic 17.2: Mandatory Pre-Question Consultation Protocol
+
+- [ ] **US-17.2.1** — Add RULE-11 — pre-question consultation required
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: `US-17.1.1`
+
+- [ ] **US-17.2.2** — Question budget tracker in session state
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: `US-17.2.1`
+
+### Epic 17.3: One-Time Script Isolation
+
+- [ ] **US-17.3.1** — Add RULE-12 — one-time script placement
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: None
+
+- [ ] **US-17.3.2** — Runtime validator + pipeline gate
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: `US-17.3.1`
+
+- [ ] **US-17.3.3** — Update .gitignore + pre-commit check
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: `US-17.3.2`
+
+### Epic 17.4: Template-First Hard Gate
+
+- [ ] **US-17.4.1** — Auditor blocks gen-* without validated template
+  - Status: PLANNED
+  - Assignee: —
+  - Branch: —
+  - Blocked By: `US-17.1.1`
+
+```
+Wave 63 (parallel): US-17.1.1 + US-17.3.1
+Wave 64 (parallel after 17.1.1): US-17.1.2 + US-17.1.3 + US-17.2.1 + US-17.4.1
+Wave 65 (sequential): US-17.2.2 (after 17.2.1) + US-17.3.2 (after 17.3.1) + US-17.3.3 (after 17.3.2)
+--- Phase 17 PLANNED (0/9) ---
+```
 
 ---
 

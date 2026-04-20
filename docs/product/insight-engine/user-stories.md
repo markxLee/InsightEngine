@@ -3,8 +3,8 @@
 > **Product:** InsightEngine  
 > **Product Slug:** insight-engine  
 > **Created:** 2026-04-16  
-> **Scope:** Phase 0 → Phase 15 (all phases)
-> **Total User Stories:** 132 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10 + 6 Phase 11 + 8 Phase 12 + 9 Phase 13 + 6 Phase 14 + 12 Phase 15)
+> **Scope:** Phase 0 → Phase 17 (all phases)
+> **Total User Stories:** 150 (21 Phase 0-3 + 15 Phase 4 + 4 Phase 5 + 14 Phase 6 + 5 Phase 7 + 6 Phase 8 + 12 Phase 9 + 14 Phase 10 + 6 Phase 11 + 8 Phase 12 + 9 Phase 13 + 6 Phase 14 + 12 Phase 15 + 9 Phase 16 + 9 Phase 17)
 
 ---
 
@@ -2543,3 +2543,203 @@ US-0.3.1 + US-2.5.1 → US-3.4.1                                   │
   - AC3: If no match: proceed normally with no degradation
   - AC4: Template match is by request_type tag, not semantic similarity
 - Blocked By: `US-16.5.1`
+
+---
+
+## Phase 17: Delivery Channel Lockdown & Compliance Enforcement
+
+> **Origin:** Real-world post-Phase-16 testing — three persistent compliance failures: (1) one-time scripts placed in `/scripts/` and pushed to git, (2) skills shipping single-attempt unaudited results with fabricated URLs, (3) user questions asked without prior agent consultation, (4) template-first protocol from Phase 13 bypassed. **9 stories PLANNED.**
+
+### Epic 17.1: Orchestrator-Exclusive Delivery Channel
+
+**US-17.1.1: Add RULE-10 — orchestrator-only user channel**
+- Description: As the system, I want `RULE.md` to declare that only the `orchestrator` agent may emit user-facing messages or questions, so single-attempt unaudited results from skills can never reach the user directly.
+- Acceptance Criteria:
+  - AC1: `.github/RULE.md` includes new `RULE-10: Orchestrator-Exclusive User Channel` section
+  - AC2: Rule states: only `orchestrator` agent may emit user-facing output (results, questions, status updates)
+  - AC3: Rule states: all skills and agents (strategist, execution, auditor, advisory) MUST return output internally to orchestrator — never to user
+  - AC4: Rule includes explicit MUST_NOT list: skills MUST NOT print final results, MUST NOT ask user questions, MUST NOT emit delivery summaries
+  - AC5: Rule placed at maximum priority alongside existing RULE-1..RULE-9
+- Blocked By: None
+
+**US-17.1.2: Refactor non-orchestrator skills/agents to internal-return only**
+- Description: As a developer, I want all skills and non-orchestrator agents refactored so they return output internally to the orchestrator, never directly to the user.
+- Acceptance Criteria:
+  - AC1: All `SKILL.md` files updated — remove direct user-facing language ("báo cáo cho user", "trả lời user", "deliver to user"); replace with "return to orchestrator"
+  - AC2: All non-orchestrator `.agent.md` files (strategist, execution, auditor, advisory) updated with same refactor
+  - AC3: Each refactored file includes explicit note: "This skill/agent MUST return output to orchestrator, NOT to user (RULE-10)"
+  - AC4: Grep audit: no non-orchestrator file contains direct user-delivery phrasing
+- Blocked By: `US-17.1.1`
+
+**US-17.1.3: Orchestrator agent — gatekeeper for user-facing output**
+- Description: As the orchestrator agent, I want explicit gatekeeper logic for all user-facing emissions, so every message to the user is intentional and traceable.
+- Acceptance Criteria:
+  - AC1: `.github/agents/orchestrator.agent.md` adds "User Channel Gatekeeper" section
+  - AC2: Section defines 3 emission types: `result_delivery`, `user_question`, `status_update`
+  - AC3: Each emission type has documented preconditions (e.g., result_delivery requires auditor PASS)
+  - AC4: Orchestrator logs every user-facing emission to `tmp/session_state.json` under `user_emissions[]` with type + timestamp + reason
+- Blocked By: `US-17.1.1`
+
+### Epic 17.2: Mandatory Pre-Question Consultation Protocol
+
+**US-17.2.1: Add RULE-11 — pre-question consultation required**
+- Description: As the system, I want `RULE.md` to require the orchestrator to consult advisory + strategist before asking any user question, so questions are last-resort, not first-response.
+- Acceptance Criteria:
+  - AC1: `.github/RULE.md` includes new `RULE-11: Pre-Question Consultation Protocol` section
+  - AC2: Rule states: before any `user_question` emission, orchestrator MUST consult `advisory` AND `strategist`
+  - AC3: Rule states: orchestrator may ask user ONLY when both consultations conclude no autonomous solution exists
+  - AC4: Rule documents consultation evidence requirement: `tmp/session_state.json.user_emissions[].consultation_log` records advisory + strategist responses
+  - AC5: Rule includes per-pipeline question budget: default max 2; budget exhaustion = orchestrator must decide autonomously
+- Blocked By: `US-17.1.1`
+
+**US-17.2.2: Question budget tracker in session state**
+- Description: As the orchestrator, I want a question budget tracker in session state, so the pipeline cannot exceed the per-run user-question limit.
+- Acceptance Criteria:
+  - AC1: `tmp/session_state.json` schema adds `question_budget: {max: 2, used: 0, log: []}`
+  - AC2: Each user question increments `used` and appends to `log` with consultation evidence
+  - AC3: Orchestrator refuses to ask if `used >= max` and proceeds autonomously
+  - AC4: `scripts/save_state.py` updated to handle the new field with backward compatibility
+- Blocked By: `US-17.2.1`
+
+### Epic 17.3: One-Time Script Isolation
+
+**US-17.3.1: Add RULE-12 — one-time script placement**
+- Description: As the system, I want `RULE.md` to enforce that one-time scripts live in `/tmp/scripts/` and only reusable utilities live in `/scripts/`, so single-use scripts never pollute the repo.
+- Acceptance Criteria:
+  - AC1: `.github/RULE.md` includes new `RULE-12: Script Placement Discipline` section
+  - AC2: Rule defines: one-time script = created for a single pipeline run; reusable script = invoked by 2+ pipeline runs or 2+ skills
+  - AC3: Rule states: one-time scripts MUST live in `/tmp/scripts/`; reusable scripts MUST live in `/scripts/`
+  - AC4: Rule states: any skill creating a script MUST classify it (one-time vs reusable) and place accordingly
+  - AC5: Rule references `scripts/validate_script_placement.py` as runtime enforcer
+- Blocked By: None
+
+**US-17.3.2: Runtime validator + pipeline gate**
+- Description: As the pipeline, I want a runtime validator that detects misplaced one-time scripts and relocates them, so RULE-12 violations cannot reach a commit.
+- Acceptance Criteria:
+  - AC1: `scripts/validate_script_placement.py` exists and is invoked by orchestrator at pipeline start AND after every step
+  - AC2: Validator scans `/scripts/` for files created during the current session (mtime within session window)
+  - AC3: Validator inspects file content for one-time markers (e.g., session_id reference, hardcoded paths from current run, single-use logic) and flags candidates
+  - AC4: Validator MOVES flagged files to `/tmp/scripts/` and logs the move to session state
+  - AC5: Validator exits non-zero if it cannot resolve a violation; orchestrator stops pipeline and reports
+- Blocked By: `US-17.3.1`
+
+**US-17.3.3: Update .gitignore + pre-commit check**
+- Description: As a developer, I want `.gitignore` and a pre-commit check to prevent one-time scripts from ever being committed.
+- Acceptance Criteria:
+  - AC1: `.gitignore` confirms `/tmp/` (and `/tmp/scripts/`) is excluded; add comment referencing RULE-12
+  - AC2: `scripts/check_no_onetime_in_scripts.py` (or shell equivalent) runs in pre-commit hook context
+  - AC3: Pre-commit check fails if `git diff --staged` contains files under `/scripts/` matching one-time markers
+  - AC4: Setup skill documents how to enable the pre-commit hook (manual install acceptable)
+- Blocked By: `US-17.3.2`
+
+### Epic 17.4: Template-First Hard Gate
+
+**US-17.4.1: Auditor blocks gen-* without validated template**
+- Description: As the auditor, I want to refuse scoring any `gen-*` skill output that bypassed the Phase 13 template-first protocol, so structural validation is non-skippable.
+- Acceptance Criteria:
+  - AC1: `.github/agents/auditor.agent.md` updated with "Template-First Hard Gate" section
+  - AC2: Auditor pre-execution check: for any audit request from `gen-word`, `gen-excel`, `gen-slide`, `gen-pdf`, `gen-html`, verify a template file exists at the expected path AND has a prior PASS audit recorded in `tmp/session_state.json.template_validations[]`
+  - AC3: If template missing OR not pre-validated: auditor returns `BLOCKED` (not FAIL) with message instructing orchestrator to invoke template-creation step before retry
+  - AC4: Orchestrator handles `BLOCKED` by routing back to template creation, not by counting against retry budget
+  - AC5: Session state schema adds `template_validations: [{output_format, template_path, validated_at, requirements_score}]`
+- Blocked By: `US-17.1.1`
+
+---
+
+## Phase 17: Delivery Channel Lockdown & Compliance Enforcement
+
+> **Origin:** Real-world post-Phase-16 testing — three persistent compliance failures: (1) one-time scripts placed in `/scripts/` and pushed to git, (2) skills shipping single-attempt unaudited results with fabricated URLs, (3) user questions asked without prior agent consultation, (4) template-first protocol from Phase 13 bypassed. **9 stories PLANNED.**
+
+### Epic 17.1: Orchestrator-Exclusive Delivery Channel
+
+**US-17.1.1: Add RULE-10 — orchestrator-only user channel**
+- Description: As the system, I want `RULE.md` to declare that only the `orchestrator` agent may emit user-facing messages or questions, so single-attempt unaudited results from skills can never reach the user directly.
+- Acceptance Criteria:
+  - AC1: `.github/RULE.md` includes new `RULE-10: Orchestrator-Exclusive User Channel` section
+  - AC2: Rule states: only `orchestrator` agent may emit user-facing output (results, questions, status updates)
+  - AC3: Rule states: all skills and agents (strategist, execution, auditor, advisory) MUST return output internally to orchestrator — never to user
+  - AC4: Rule includes explicit MUST_NOT list: skills MUST NOT print final results, MUST NOT ask user questions, MUST NOT emit delivery summaries
+  - AC5: Rule placed at maximum priority alongside existing RULE-1..RULE-9
+- Blocked By: None
+
+**US-17.1.2: Refactor non-orchestrator skills/agents to internal-return only**
+- Description: As a developer, I want all skills and non-orchestrator agents refactored so they return output internally to the orchestrator, never directly to the user.
+- Acceptance Criteria:
+  - AC1: All `SKILL.md` files updated — remove direct user-facing language ("báo cáo cho user", "trả lời user", "deliver to user"); replace with "return to orchestrator"
+  - AC2: All non-orchestrator `.agent.md` files (strategist, execution, auditor, advisory) updated with same refactor
+  - AC3: Each refactored file includes explicit note: "This skill/agent MUST return output to orchestrator, NOT to user (RULE-10)"
+  - AC4: Grep audit: no non-orchestrator file contains direct user-delivery phrasing
+- Blocked By: `US-17.1.1`
+
+**US-17.1.3: Orchestrator agent — gatekeeper for user-facing output**
+- Description: As the orchestrator agent, I want explicit gatekeeper logic for all user-facing emissions, so every message to the user is intentional and traceable.
+- Acceptance Criteria:
+  - AC1: `.github/agents/orchestrator.agent.md` adds "User Channel Gatekeeper" section
+  - AC2: Section defines 3 emission types: `result_delivery`, `user_question`, `status_update`
+  - AC3: Each emission type has documented preconditions (e.g., result_delivery requires auditor PASS)
+  - AC4: Orchestrator logs every user-facing emission to `tmp/session_state.json` under `user_emissions[]` with type + timestamp + reason
+- Blocked By: `US-17.1.1`
+
+### Epic 17.2: Mandatory Pre-Question Consultation Protocol
+
+**US-17.2.1: Add RULE-11 — pre-question consultation required**
+- Description: As the system, I want `RULE.md` to require the orchestrator to consult advisory + strategist before asking any user question, so questions are last-resort, not first-response.
+- Acceptance Criteria:
+  - AC1: `.github/RULE.md` includes new `RULE-11: Pre-Question Consultation Protocol` section
+  - AC2: Rule states: before any `user_question` emission, orchestrator MUST consult `advisory` AND `strategist`
+  - AC3: Rule states: orchestrator may ask user ONLY when both consultations conclude no autonomous solution exists
+  - AC4: Rule documents consultation evidence requirement: `tmp/session_state.json.user_emissions[].consultation_log` records advisory + strategist responses
+  - AC5: Rule includes per-pipeline question budget: default max 2; budget exhaustion = orchestrator must decide autonomously
+- Blocked By: `US-17.1.1`
+
+**US-17.2.2: Question budget tracker in session state**
+- Description: As the orchestrator, I want a question budget tracker in session state, so the pipeline cannot exceed the per-run user-question limit.
+- Acceptance Criteria:
+  - AC1: `tmp/session_state.json` schema adds `question_budget: {max: 2, used: 0, log: []}`
+  - AC2: Each user question increments `used` and appends to `log` with consultation evidence
+  - AC3: Orchestrator refuses to ask if `used >= max` and proceeds autonomously
+  - AC4: `scripts/save_state.py` updated to handle the new field with backward compatibility
+- Blocked By: `US-17.2.1`
+
+### Epic 17.3: One-Time Script Isolation
+
+**US-17.3.1: Add RULE-12 — one-time script placement**
+- Description: As the system, I want `RULE.md` to enforce that one-time scripts live in `/tmp/scripts/` and only reusable utilities live in `/scripts/`, so single-use scripts never pollute the repo.
+- Acceptance Criteria:
+  - AC1: `.github/RULE.md` includes new `RULE-12: Script Placement Discipline` section
+  - AC2: Rule defines: one-time script = created for a single pipeline run; reusable script = invoked by 2+ pipeline runs or 2+ skills
+  - AC3: Rule states: one-time scripts MUST live in `/tmp/scripts/`; reusable scripts MUST live in `/scripts/`
+  - AC4: Rule states: any skill creating a script MUST classify it (one-time vs reusable) and place accordingly
+  - AC5: Rule references `scripts/validate_script_placement.py` as runtime enforcer
+- Blocked By: None
+
+**US-17.3.2: Runtime validator + pipeline gate**
+- Description: As the pipeline, I want a runtime validator that detects misplaced one-time scripts and relocates them, so RULE-12 violations cannot reach a commit.
+- Acceptance Criteria:
+  - AC1: `scripts/validate_script_placement.py` exists and is invoked by orchestrator at pipeline start AND after every step
+  - AC2: Validator scans `/scripts/` for files created during the current session (mtime within session window)
+  - AC3: Validator inspects file content for one-time markers (e.g., session_id reference, hardcoded paths from current run, single-use logic) and flags candidates
+  - AC4: Validator MOVES flagged files to `/tmp/scripts/` and logs the move to session state
+  - AC5: Validator exits non-zero if it cannot resolve a violation; orchestrator stops pipeline and reports
+- Blocked By: `US-17.3.1`
+
+**US-17.3.3: Update .gitignore + pre-commit check**
+- Description: As a developer, I want `.gitignore` and a pre-commit check to prevent one-time scripts from ever being committed.
+- Acceptance Criteria:
+  - AC1: `.gitignore` confirms `/tmp/` (and `/tmp/scripts/`) is excluded; add comment referencing RULE-12
+  - AC2: `scripts/check_no_onetime_in_scripts.py` (or shell equivalent) runs in pre-commit hook context
+  - AC3: Pre-commit check fails if `git diff --staged` contains files under `/scripts/` matching one-time markers
+  - AC4: Setup skill documents how to enable the pre-commit hook (manual install acceptable)
+- Blocked By: `US-17.3.2`
+
+### Epic 17.4: Template-First Hard Gate
+
+**US-17.4.1: Auditor blocks gen-* without validated template**
+- Description: As the auditor, I want to refuse scoring any `gen-*` skill output that bypassed the Phase 13 template-first protocol, so structural validation is non-skippable.
+- Acceptance Criteria:
+  - AC1: `.github/agents/auditor.agent.md` updated with "Template-First Hard Gate" section
+  - AC2: Auditor pre-execution check: for any audit request from `gen-word`, `gen-excel`, `gen-slide`, `gen-pdf`, `gen-html`, verify a template file exists at the expected path AND has a prior PASS audit recorded in `tmp/session_state.json.template_validations[]`
+  - AC3: If template missing OR not pre-validated: auditor returns `BLOCKED` (not FAIL) with message instructing orchestrator to invoke template-creation step before retry
+  - AC4: Orchestrator handles `BLOCKED` by routing back to template creation, not by counting against retry budget
+  - AC5: Session state schema adds `template_validations: [{output_format, template_path, validated_at, requirements_score}]`
+- Blocked By: `US-17.1.1`

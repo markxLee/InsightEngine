@@ -331,6 +331,23 @@ ROOT_CAUSES:
 
 ---
 
+## Phase 17 — Delivery Channel Lockdown & Compliance Enforcement
+
+**Goal:** Eliminate three persistent compliance failures observed after Phase 13–16 shipped: (1) one-time scripts polluting `/scripts/` and being pushed to git, (2) skills shipping single-attempt unaudited results directly to the user with fabricated URLs, (3) user questions being asked without prior agent consultation. Phase 17 enforces orchestrator-exclusive user channel, mandatory pre-question consultation, hard one-time script isolation, and a template-first hard gate for all `gen-*` skills.
+
+> **Origin:** Real-world post-Phase-16 testing — Copilot continued to: (a) place one-time scripts under `/scripts/` (committed to git); (b) fabricate non-existent URLs and ship results in a single attempt without auditor verification; (c) ask user questions before consulting advisory/strategist; (d) skip the Phase 13 template-first protocol when generating output. The architecture is correct; enforcement is the gap.
+
+### Epics
+
+| Epic | Description |
+|------|-------------|
+| **Epic 17.1 — Orchestrator-Exclusive Delivery Channel** | Add RULE-10 to `RULE.md`: only `orchestrator` agent may emit user-facing messages or questions. All skills and other agents (strategist, execution, auditor, advisory) MUST return output internally to the orchestrator — never directly to the user. Refactor SKILL.md and `.agent.md` files to remove direct user-facing language from non-orchestrator components. Orchestrator becomes the sole gatekeeper for delivery and questions. |
+| **Epic 17.2 — Mandatory Pre-Question Consultation** | Add RULE-11 to `RULE.md`: before any user question, orchestrator MUST consult `advisory` AND `strategist` to determine if an autonomous decision is possible. Question-asking is last-resort. Track per-pipeline question budget (default max 2) in `tmp/session_state.json`. If consultation concludes autonomous resolution exists, orchestrator decides and proceeds without asking. |
+| **Epic 17.3 — One-Time Script Isolation** | Add RULE-12 to `RULE.md`: scripts created for a single pipeline run MUST live in `/tmp/scripts/`. Only reusable utility scripts may live in `/scripts/`. Create `scripts/validate_script_placement.py` validator + invoke at pipeline start and after each step. Update `.gitignore` to ensure `/tmp/` (including `/tmp/scripts/`) is excluded. Document one-time vs reusable distinction in setup skill. |
+| **Epic 17.4 — Template-First Hard Gate** | Auditor enforces template-first protocol from Phase 13 as a hard pre-execution gate. No `gen-*` skill may execute content generation until: (1) a structural template file exists for the requested output, AND (2) auditor has validated the template against the requirements anchor. Auditor refuses to score generations that bypass this gate. Eliminates direct content generation that skips structure validation. |
+
+---
+
 ## Skill Map theo Phase
 
 ```
@@ -349,6 +366,7 @@ Phase 11: gather (per-step search planner + DOM explorer + detail URL extractor 
 Phase 12: orchestrator (fire-and-forget mode + jargon shield + signal detection)  gather (batch progress model)
 Phase 13: orchestrator + auditor (requirement anchor + per-step audit)  synthesize (child soft-workflow)  all output skills (template-first output protocol)
 Phase 14: gather (source discovery + accessibility test + verified plan)  orchestrator (verify-retry collection loop)
+Phase 17: orchestrator (exclusive user channel + pre-question consultation gate)  auditor (template-first hard gate for all gen-*)  RULE.md (RULE-10/11/12)  scripts (validate_script_placement.py)  .gitignore (one-time script isolation)
 ```
 
 > Note: Phase 0-9 Skill Map shows English names for readability. Actual rename happens in Phase 10.
