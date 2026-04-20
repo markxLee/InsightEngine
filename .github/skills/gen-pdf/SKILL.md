@@ -46,6 +46,30 @@ Call `save_state.py read-context gen-pdf` as FIRST action before any processing.
 
 ---
 
+## Step 0.5: Artifact Evidence Injection (US-18.3.2)
+
+After read-context, check `relevant_artifacts[]` for evidence to enrich the output document.
+This is ADDITIVE — it does not replace compose output, only enriches it with supporting material.
+
+```yaml
+EVIDENCE_INJECTION:
+  1. Parse `relevant_artifacts[]` from read-context
+  2. For each artifact with `retention: keep` AND `quality_score >= 60`:
+     - type `chart` or `image` → embed or reference in document where topically relevant
+     - type `data_table` or `excel_data` → extract key rows/figures for inline tables
+     - type `search_results` → use as source citations
+     - type `gathered_content` → extract supporting quotes or data points
+  3. Injection rules:
+     - Place evidence NEAR the section it supports (not in a separate appendix)
+     - Add brief caption or attribution: "(Nguồn: {artifact_summary})"
+     - Do NOT inject if it would disrupt document flow — quality over completeness
+  4. Log usage to state for auditor verification:
+     python3 scripts/save_state.py update --step gen-pdf --status completed \
+       --data '{"artifacts_injected": ["path1"], "artifacts_available_but_skipped": ["path2"]}'
+```
+
+---
+
 ## Step 1: Pre-flight Check
 
 1. Check: `python3 -c "from reportlab.platypus import SimpleDocTemplate"` → if fail: "pip install --user reportlab"
