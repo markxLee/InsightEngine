@@ -1208,8 +1208,10 @@ Wave 58 (sequential): US-15.1.3 ✅ + US-15.3.2 ✅ + US-15.3.3 ✅ + US-15.4.2 
 ### Epic 16.5: Experience Template Accumulation
 
 - [ ] **US-16.5.1** — Save experience template after successful pipeline run
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - Device: Trucs-MacBook-Air-2
+  - AI: copilot
   - Branch: feature/insight-engine-us-16.5.1
   - Blocked By: ~~US-16.4.1~~ ✅
 
