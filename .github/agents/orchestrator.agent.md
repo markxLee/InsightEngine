@@ -510,6 +510,42 @@ All user emissions are logged to `tmp/session_state.json` under `user_emissions[
 }
 ```
 
+### Question Budget Enforcement (US-17.2.2)
+
+The orchestrator enforces a hard question budget per pipeline run (default: max 2 questions).
+This prevents excessive user interruptions and forces autonomous decision-making.
+
+```yaml
+QUESTION_BUDGET_PROTOCOL:
+  init:
+    # question_budget is initialized by save_state.py init:
+    # {max: 2, used: 0, log: []}
+
+  before_asking_user:
+    1. CHECK budget: python3 scripts/save_state.py log-emission \
+         --type user_question \
+         --reason "<the question>" \
+         --consultation '<json evidence from advisory+strategist>'
+       # This command will EXIT 1 if budget exhausted → orchestrator MUST NOT ask
+    2. IF exit code 1 (BUDGET_EXHAUSTED):
+       → Make autonomous decision using available context
+       → Log decision rationale to step_states
+       → Continue pipeline without user input
+    3. IF exit code 0 (QUESTION_LOGGED):
+       → Proceed to ask user (budget decremented automatically)
+
+  budget_exhausted_fallback:
+    - Use advisory agent for ambiguous decisions
+    - Use strategist agent for workflow alternatives
+    - Apply reasonable defaults documented in skill instructions
+    - Log "autonomous_decision" in step notes with rationale
+
+  budget_reset:
+    - Budget resets on new pipeline run (save_state.py init)
+    - Budget does NOT reset mid-pipeline
+    - Budget is per-session, not per-step
+```
+
 ---
 
 ## Frustration Signal Detection

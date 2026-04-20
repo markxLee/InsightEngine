@@ -11,6 +11,7 @@ Commands:
     python3 scripts/save_state.py update --step <name> [--output-file <path>]  # Update step status
     python3 scripts/save_state.py complete      # Mark pipeline as completed
     python3 scripts/save_state.py set-mode <guided|standard|silent>  # Update session mode
+    python3 scripts/save_state.py log-emission --type <type> --reason "<reason>" [--consultation '<json>']  # Log user emission
 
 State file: tmp/.session-state.json  (hidden file — use: ls -la tmp/)
 
@@ -32,6 +33,10 @@ Enhanced Schema (v3 — Phase 13 update):
     autonomy_mode: bool         # true after user approves plan
     consecutive_approvals: int  # reset on modification
     frustration_detected: bool
+    # Delivery channel tracking (Phase 17)
+    question_budget: dict       # {max: 2, used: 0, log: [{question, timestamp, consultation_log}]}
+    user_emissions: list        # [{type, timestamp, reason, ?consultation_log}]
+    template_validations: list  # [{skill, template, timestamp, result}]
 """
 
 import hashlib
@@ -95,6 +100,9 @@ def cmd_init(prompt: str, intent: str = "unknown"):
         "score_history": [],
         "created_skills": [],
         "output_files": [],
+        "question_budget": {"max": 2, "used": 0, "log": []},
+        "user_emissions": [],
+        "template_validations": [],
         "started_at": datetime.now().isoformat(),
         "updated_at": datetime.now().isoformat(),
     }
@@ -295,6 +303,81 @@ def cmd_resume_plan():
             "content_depth": state.get("content_depth", "comprehensive"),
         }
     print(json.dumps(plan, indent=2, ensure_ascii=False))
+
+
+def cmd_log_emission(args: list):
+    """Log a user-facing emission to session state (US-17.1.3 / US-17.2.2).
+    Usage: save_state.py log-emission --type <result_delivery|user_question|status_update>
+                                      --reason "<reason>"
+                                      [--consultation '<json>']
+    For user_question type: increments question_budget.used and logs consultation evidence.
+    """
+    state = load_state()
+    if state is None:
+        print("Error: NO_STATE — run init first")
+        sys.exit(1)
+
+    emission_type = None
+    reason = ""
+    consultation = None
+    timestamp = datetime.now().isoformat()
+
+    i = 0
+    while i < len(args):
+        if args[i] == "--type" and i + 1 < len(args):
+            emission_type = args[i + 1]; i += 2
+        elif args[i] == "--reason" and i + 1 < len(args):
+            reason = args[i + 1]; i += 2
+        elif args[i] == "--consultation" and i + 1 < len(args):
+            try:
+                consultation = json.loads(args[i + 1])
+            except json.JSONDecodeError:
+                consultation = {"raw": args[i + 1]}
+            i += 2
+        elif args[i] == "--timestamp" and i + 1 < len(args):
+            timestamp = args[i + 1]; i += 2
+        else:
+            i += 1
+
+    if not emission_type:
+        print("Error: --type is required (result_delivery|user_question|status_update)")
+        sys.exit(1)
+
+    # Ensure backward compatibility — add fields if missing
+    if "user_emissions" not in state:
+        state["user_emissions"] = []
+    if "question_budget" not in state:
+        state["question_budget"] = {"max": 2, "used": 0, "log": []}
+    if "template_validations" not in state:
+        state["template_validations"] = []
+
+    emission = {
+        "type": emission_type,
+        "timestamp": timestamp,
+        "reason": reason,
+    }
+
+    # For user_question: enforce budget and log consultation
+    if emission_type == "user_question":
+        budget = state["question_budget"]
+        if budget["used"] >= budget["max"]:
+            print(f"BUDGET_EXHAUSTED: question budget {budget['used']}/{budget['max']} — cannot ask user")
+            sys.exit(1)
+        budget["used"] += 1
+        log_entry = {
+            "question": reason,
+            "timestamp": timestamp,
+        }
+        if consultation:
+            log_entry["consultation_log"] = consultation
+            emission["consultation_log"] = consultation
+        budget["log"].append(log_entry)
+        print(f"QUESTION_LOGGED: {budget['used']}/{budget['max']} used")
+
+    state["user_emissions"].append(emission)
+    state["updated_at"] = datetime.now().isoformat()
+    STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"EMISSION_LOGGED: type={emission_type}, reason={reason[:80]}")
 
 
 def file_hash(filepath: str) -> str:
@@ -657,6 +740,8 @@ def main():
         cmd_complete()
     elif command == "archive":
         cmd_archive()
+    elif command == "log-emission":
+        cmd_log_emission(sys.argv[2:])
     else:
         print(f"Unknown command: {command}")
         sys.exit(1)
