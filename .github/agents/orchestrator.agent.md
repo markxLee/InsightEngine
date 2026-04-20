@@ -209,7 +209,16 @@ FLOW:
      - Apply jargon-shield before sending
      - Template: see synthesize/SKILL.md → Step 5 Final Delivery
      - Rule: NO partial delivery messages before this step (unless progress updates)
-  9. SAVE session state for resume capability
+  9. SAVE session state for resume capability AND save experience template (US-16.5.1):
+     ```bash
+     python3 scripts/save_state.py complete
+     # US-16.5.1: persist a successful-run snapshot for future planning hints.
+     # Best-effort: exit 1 (criteria not met) is non-fatal and must NOT abort delivery.
+     python3 scripts/experience.py save --state-file tmp/.session-state.json || true
+     ```
+     Save criteria: final audit score >= 80 AND intent classified. Failed runs
+     are deliberately NOT saved (storage is for replay-worthy exemplars only).
+     Storage layout and schema: `docs/experiences/README.md`.
 
 BUDGET_ENFORCEMENT:
   strategist:
