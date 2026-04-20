@@ -172,3 +172,20 @@ Output: Confirm with user → pip install torch diffusers transformers accelerat
 - Does NOT install packages globally (uses --user flag)
 - Does NOT install optional Apple Silicon deps unless asked
 - Does NOT proceed silently — always reports to user in Vietnamese
+
+---
+
+## Optional: RULE-12 Pre-Commit Hook
+
+To prevent one-time scripts from being committed to `/scripts/`:
+
+```bash
+# Create the hook
+cat > .git/hooks/pre-commit << 'EOF'
+#!/bin/sh
+python3 scripts/check_no_onetime_in_scripts.py
+EOF
+chmod +x .git/hooks/pre-commit
+```
+
+This runs `scripts/check_no_onetime_in_scripts.py` on every `git commit`, blocking commits that include one-time scripts in `/scripts/` (RULE-12 enforcement).

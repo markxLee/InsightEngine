@@ -1,4 +1,7 @@
 input/
 output/
 node_modules/
+
+# RULE-12: One-time/session scripts go in /tmp/scripts/, never in /scripts/
+# /tmp/ is excluded so one-time scripts cannot be committed
 tmp/
