@@ -1265,9 +1265,9 @@ Wave 62 (sequential): US-16.5.2 (after 16.5.1)
 ### Epic 17.2: Mandatory Pre-Question Consultation Protocol
 
 - [ ] **US-17.2.1** — Add RULE-11 — pre-question consultation required
-  - Status: PLANNED
-  - Assignee: —
-  - Branch: —
+  - Status: IN_PROGRESS
+  - Assignee: copilot
+  - Branch: `feature/insight-engine-us-17.2.1`
   - Blocked By: ~~US-17.1.1~~ ✅
 
 - [ ] **US-17.2.2** — Question budget tracker in session state
