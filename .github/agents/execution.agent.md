@@ -316,7 +316,8 @@ attempt MUST differ in tool, source, framing, or skill mode.
 
 BUDGET (per failed step): 1 advisory call + 1 strategist replan call + 1
 re-execution. Inherits the standard pipeline budgets (advisory=2/run,
-strategist=5/run shared with child_workflow).
+strategist=5/run shared across initial_plan + replan + child_workflow modes,
+execution=8/run).
 
 INTERACTION WITH US-16.2.2: a single failed step uses AT MOST one of the two
 budgets — never both. If auditor-driven replan also fails, the step is

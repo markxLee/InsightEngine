@@ -108,7 +108,8 @@ PIPELINE_BUDGET:
   strategist: max 5 (initial_plan + replan + child_workflow)
   advisory:   max 2
   auditor:    max 5 (per-step + final)
-  total:      max 12 agent calls per pipeline run
+  execution:  max 8 (per-step delivery agent, US-16.2.1)
+  cross_agent_total: max 20 agent calls per pipeline run
   enforcement: Check budget before every runSubagent call
 ```
 

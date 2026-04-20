@@ -152,6 +152,13 @@ OPTIONAL:
     multilingual: string
   expanded_dimensions: object
   required_fields: string[]
+  prior_experience:        # US-16.5.2 — non-binding hint from orchestrator step 2d
+    plan_summary: string   # condensed STEPS: from a past similar successful run
+    output_formats: string[]
+    final_audit_score: integer
+    match_score: number    # 0.0..1.0 Jaccard similarity to current request
+    # Strategist MAY adapt the prior plan, MUST NOT blindly copy.
+    # Discard if match_score < 0.3 OR prior plan conflicts with current request_type.
 ```
 
 ---
