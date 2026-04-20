@@ -1,0 +1,27 @@
+meta:
+  branch_slug: insight-engine-us-16.1.1
+  feature_name: "Tool availability probe before search execution"
+  user_story_id: US-16.1.1
+  product_slug: insight-engine
+  checklist_path: docs/product/insight-engine/checklist.md
+  docs_root: /Users/trucle/Desktop/project/InsightEngine
+  created_at: 2026-04-20T03:30:00Z
+  last_updated: 2026-04-20T03:30:00Z
+  updated_by: copilot
+session:
+  last_agent: copilot
+  last_device: trucles-MacBook-Pro
+  last_checkpoint: 2026-04-20T03:30:00Z
+handoff_context:
+  what_was_done: "Story locked on main, workflow initialized"
+  what_is_next: "Run work intake (Phase 0 analysis)"
+  key_decisions: []
+  files_changed: []
+  open_questions: []
+  warnings: []
+status:
+  current_phase: 0
+  phase_name: analysis
+  phase_status: not-started
+  last_action: "Story locked and state initialized"
+  next_action: "Run work intake"
