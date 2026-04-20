@@ -26,7 +26,7 @@ compatibility:
 
 # Tìm Kiếm — Internet Search & Discovery Skill
 
-**References:** `references/tool-availability-probe.md` | `references/web-search-enrichment.md` | `references/deep-research.md` | `references/playwright-stealth.md` | `references/data-collection.md` | `references/dom-exploration.md` | `references/adaptive-flow.md`
+**References:** `references/tool-availability-probe.md` | `references/playwright-search-fallback.md` | `references/web-search-enrichment.md` | `references/deep-research.md` | `references/playwright-stealth.md` | `references/data-collection.md` | `references/dom-exploration.md` | `references/adaptive-flow.md`
 
 **Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
 
@@ -102,13 +102,28 @@ procedure (not a Python script) that returns one of two verdicts:
    `primary_unavailable` flag, append a single internal diagnostic line to
    `docs/runs/<branch-slug>/diagnostics/search-probe.log`, and return UNAVAILABLE.
 
-**Fallback tier (placeholder until US-16.1.2 ships):**
+**Fallback cascade:**
 
-- Log the diagnostic note as above.
-- Skip Step 3 entirely.
-- Emit a single friendly Vietnamese message to the user:
-  `"Không tìm thấy kết quả tìm kiếm cho yêu cầu này."`
-- Continue the synthesize pipeline with empty search results (caller decides next).
+When the probe returns UNAVAILABLE, route through this cascade. NO Tavily/auth/configuration
+text is ever shown to the user. The user only sees `🔍 Đang tìm kiếm...` (AC3 of US-16.1.2).
+
+1. **Tier 2 — Playwright stealth → DuckDuckGo HTML** (US-16.1.2)
+   - For each query in Step 2, run:
+     ```bash
+     python3 .github/skills/search/scripts/playwright_search.py "<query>" --limit 8
+     ```
+   - Stdout JSON shape matches the primary tool: `{"query","results":[{url,title,snippet}]}`
+   - Exit `0` → use results, continue to Step 3 URL fetching unchanged
+   - Exit `1` (no results) → continue to next query; if all queries empty → escalate to Tier 3
+   - Exit `2` (error) → log diagnostic, treat that query as no results
+   - Full contract: `references/playwright-search-fallback.md`
+
+2. **Tier 3 — HTTP zero-auth** (placeholder until US-16.1.3 ships)
+   - Log a single diagnostic note to `docs/runs/<branch-slug>/diagnostics/search-probe.log`.
+   - Skip Step 3 entirely.
+   - Emit a single friendly Vietnamese message to the user:
+     `"Không tìm thấy kết quả tìm kiếm cho yêu cầu này."`
+   - Continue the synthesize pipeline with empty search results (caller decides next).
 
 **Default:** If no unavailability signal exists, the probe returns AVAILABLE. The
 goal is to avoid regressing fully-configured installations.
