@@ -1373,8 +1373,8 @@ Wave 65 (sequential): US-17.2.2 (after 17.2.1) + US-17.3.2 (after 17.3.1) + US-1
   - Branch: `feature/insight-engine-us-18.4.1`
   - Blocked By: ~~US-18.1.1~~ ✅
 
-- [ ] **US-18.4.2** — Pipeline gate — integrity check before each step
-  - Status: PLANNED
+- [x] **US-18.4.2** — Pipeline gate — integrity check before each step
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-18.4.2`
   - Blocked By: ~~US-18.4.1~~ ✅, ~~US-18.2.1~~ ✅

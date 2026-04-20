@@ -156,6 +156,14 @@ FLOW:
           ```bash
           python3 scripts/save_state.py update --step <name> --status in_progress
           ```
+       a2. INTEGRITY GATE (US-18.4.2) — MANDATORY before every substantive step:
+          ```bash
+          python3 scripts/validate_state_integrity.py --auto-fix
+          ```
+          - Exit 0 → proceed (may have auto-registered orphan tmp/ files)
+          - Exit 1 → log warning but do NOT abort pipeline (best-effort gate)
+          - This ensures artifact registry stays in sync with filesystem
+          - Catches: orphan files not registered, missing files still in registry
        b. COMPLEXITY CHECK — before executing, check if step needs child workflow (US-13.3.1):
           Triggers: > 5 requirement items for this step | step instructions contain
           "multiple sources", "per [category]", "multiple sheets" | step previously failed 2×
