@@ -1196,8 +1196,10 @@ Wave 58 (sequential): US-15.1.3 ✅ + US-15.3.2 ✅ + US-15.3.3 ✅ + US-15.4.2 
 ### Epic 16.4: Adaptive Re-planning on Failure
 
 - [ ] **US-16.4.1** — Failure triggers Advisory/Strategist re-planning, not same-method retry
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
+  - Device: Trucs-MacBook-Air-2
+  - AI: copilot
   - Branch: feature/insight-engine-us-16.4.1
   - Blocked By: ~~US-16.2.1~~ ✅
 
