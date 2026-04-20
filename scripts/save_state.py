@@ -12,6 +12,9 @@ Commands:
     python3 scripts/save_state.py complete      # Mark pipeline as completed
     python3 scripts/save_state.py set-mode <guided|standard|silent>  # Update session mode
     python3 scripts/save_state.py log-emission --type <type> --reason "<reason>" [--consultation '<json>']  # Log user emission
+    python3 scripts/save_state.py register-artifact --step <name> --path <path> --type <type> --summary "<text>" [--score <n>] [--retention keep|transient]  # Register artifact
+    python3 scripts/save_state.py list-artifacts [--step <name>] [--type <type>]  # List artifacts as JSON
+    python3 scripts/save_state.py read-context <step>  # Read full context for a step (requirements + artifacts + summaries)
 
 State file: tmp/.session-state.json  (hidden file — use: ls -la tmp/)
 
@@ -524,6 +527,177 @@ def cmd_complete():
     print(f"PIPELINE_COMPLETED at {state['completed_at']}")
 
 
+def cmd_register_artifact(args: list):
+    """Register an artifact under a specific step in the state file.
+    Usage: save_state.py register-artifact --step <name> --path <path>
+                                           --type <search_result|gathered_content|draft_output|chart|data|other>
+                                           --summary "<text>"
+                                           [--score <0-100>]
+                                           [--retention keep|transient]
+    """
+    state = load_state()
+    if state is None:
+        print("Error: NO_STATE — run init first")
+        sys.exit(1)
+
+    step_name = None
+    artifact_path = None
+    content_type = None
+    summary = ""
+    quality_score = None
+    retention = "keep"
+
+    valid_types = ("search_result", "gathered_content", "draft_output", "chart", "data", "other")
+    valid_retention = ("keep", "transient")
+
+    i = 0
+    while i < len(args):
+        if args[i] == "--step" and i + 1 < len(args):
+            step_name = args[i + 1]; i += 2
+        elif args[i] == "--path" and i + 1 < len(args):
+            artifact_path = args[i + 1]; i += 2
+        elif args[i] == "--type" and i + 1 < len(args):
+            content_type = args[i + 1]; i += 2
+        elif args[i] == "--summary" and i + 1 < len(args):
+            summary = args[i + 1][:100]; i += 2
+        elif args[i] == "--score" and i + 1 < len(args):
+            try:
+                quality_score = max(0, min(100, int(args[i + 1])))
+            except ValueError:
+                pass
+            i += 2
+        elif args[i] == "--retention" and i + 1 < len(args):
+            retention = args[i + 1]; i += 2
+        else:
+            i += 1
+
+    if not step_name:
+        print("Error: --step is required"); sys.exit(1)
+    if not artifact_path:
+        print("Error: --path is required"); sys.exit(1)
+    if content_type not in valid_types:
+        print(f"Error: --type must be one of {valid_types}"); sys.exit(1)
+    if retention not in valid_retention:
+        retention = "keep"
+
+    artifact = {
+        "path": artifact_path,
+        "source_step": step_name,
+        "content_type": content_type,
+        "summary": summary,
+        "quality_score": quality_score,
+        "retention": retention,
+        "registered_at": datetime.now().isoformat(),
+    }
+
+    # Find or create the step entry
+    steps = state.get("step_states", [])
+    found = False
+    for step in steps:
+        if step["name"] == step_name:
+            step.setdefault("artifacts", [])
+            step["artifacts"].append(artifact)
+            found = True
+            break
+
+    if not found:
+        steps.append({
+            "name": step_name,
+            "status": "in_progress",
+            "started_at": datetime.now().isoformat(),
+            "completed_at": None,
+            "artifacts": [artifact],
+        })
+        state["step_states"] = steps
+
+    state["updated_at"] = datetime.now().isoformat()
+    STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"ARTIFACT_REGISTERED: {artifact_path} → step={step_name}, type={content_type}, retention={retention}")
+
+
+def cmd_list_artifacts(args: list):
+    """List artifacts from the state file.
+    Usage: save_state.py list-artifacts [--step <name>] [--type <type>]
+    Returns JSON array of matching artifacts.
+    """
+    state = load_state()
+    if state is None:
+        print(json.dumps([], ensure_ascii=False))
+        return
+
+    filter_step = None
+    filter_type = None
+
+    i = 0
+    while i < len(args):
+        if args[i] == "--step" and i + 1 < len(args):
+            filter_step = args[i + 1]; i += 2
+        elif args[i] == "--type" and i + 1 < len(args):
+            filter_type = args[i + 1]; i += 2
+        else:
+            i += 1
+
+    all_artifacts = []
+    for step in state.get("step_states", []):
+        for art in step.get("artifacts", []):
+            if filter_step and art.get("source_step") != filter_step:
+                continue
+            if filter_type and art.get("content_type") != filter_type:
+                continue
+            all_artifacts.append(art)
+
+    print(json.dumps(all_artifacts, indent=2, ensure_ascii=False))
+
+
+def cmd_read_context(args: list):
+    """Read full context for a step: requirements + relevant artifacts + step summaries + audit test cases.
+    Usage: save_state.py read-context <step_name>
+    Returns JSON object for pipeline consumption.
+    """
+    state = load_state()
+    if state is None:
+        print(json.dumps({"error": "NO_STATE"}, ensure_ascii=False))
+        sys.exit(1)
+
+    step_name = args[0] if args else None
+    if not step_name:
+        print("Error: step name is required")
+        sys.exit(1)
+
+    # Collect all artifacts from all steps (for cross-step reference)
+    all_artifacts = []
+    for step in state.get("step_states", []):
+        for art in step.get("artifacts", []):
+            all_artifacts.append(art)
+
+    # Filter relevant artifacts: keep-retention with quality_score >= 60, or all from prior steps
+    relevant = [a for a in all_artifacts if a.get("retention") == "keep"]
+
+    # Collect previous step summaries
+    step_summaries = []
+    for step in state.get("step_states", []):
+        if step["name"] == step_name:
+            break
+        step_summaries.append({
+            "name": step["name"],
+            "status": step.get("status"),
+            "output_summary": step.get("output_summary", ""),
+            "artifact_count": len(step.get("artifacts", [])),
+        })
+
+    context = {
+        "step_name": step_name,
+        "structured_requirements": state.get("structured_requirements", {}),
+        "relevant_artifacts": relevant,
+        "previous_step_summaries": step_summaries,
+        "audit_test_cases": state.get("audit_test_cases", []),
+        "raw_prompt": state.get("raw_prompt", ""),
+        "intent_classification": state.get("intent_classification", ""),
+    }
+
+    print(json.dumps(context, indent=2, ensure_ascii=False))
+
+
 def cmd_archive():
     state = load_state()
     if state is None:
@@ -540,7 +714,7 @@ def cmd_archive():
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: save_state.py <init|extract-requirements|check|save|resume-plan|update|set-mode|complete|archive> [data]")
+        print("Usage: save_state.py <init|extract-requirements|check|save|resume-plan|update|set-mode|complete|archive|register-artifact|list-artifacts|read-context> [data]")
         sys.exit(1)
 
     command = sys.argv[1]
@@ -753,6 +927,12 @@ def main():
         cmd_archive()
     elif command == "log-emission":
         cmd_log_emission(sys.argv[2:])
+    elif command == "register-artifact":
+        cmd_register_artifact(sys.argv[2:])
+    elif command == "list-artifacts":
+        cmd_list_artifacts(sys.argv[2:])
+    elif command == "read-context":
+        cmd_read_context(sys.argv[2:])
     else:
         print(f"Unknown command: {command}")
         sys.exit(1)
