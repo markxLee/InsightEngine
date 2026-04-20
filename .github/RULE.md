@@ -343,7 +343,68 @@ If a non-orchestrator skill/agent attempts to emit user-facing output:
 
 ---
 
-## RULE-11: (Reserved — see US-17.2.1)
+## RULE-11: Pre-Question Consultation Protocol (US-17.2.1)
+
+Before ANY `user_question` emission, the orchestrator MUST consult advisory AND strategist.
+Questions to the user are a last resort, not a first response.
+
+### Consultation Sequence
+
+```
+Orchestrator identifies need for user input
+  │
+  ▼
+1. CONSULT advisory agent:
+   "Can this be resolved autonomously? Suggest alternatives."
+  │
+  ▼
+2. CONSULT strategist agent:
+   "Given this gap, can we proceed with reasonable defaults?"
+  │
+  ▼
+3. EVALUATE both responses:
+   IF either agent provides an autonomous solution → USE IT, do NOT ask user
+   IF both conclude no autonomous solution → PROCEED to ask user
+  │
+  ▼
+4. ASK user (only if step 3 allows) + LOG consultation evidence
+```
+
+### MUST
+
+- Orchestrator MUST consult advisory AND strategist before any user question
+- Orchestrator MUST log consultation evidence to `tmp/session_state.json` under
+  `user_emissions[].consultation_log` with both agents' responses
+- Orchestrator MUST respect the question budget (default max 2 per pipeline run)
+- If budget exhausted (`used >= max`): orchestrator MUST decide autonomously — no more questions
+
+### MUST_NOT
+
+- Orchestrator MUST NOT ask user without prior consultation (even for "simple" questions)
+- Orchestrator MUST NOT exceed question budget under any circumstances
+- Orchestrator MUST NOT reset question budget mid-pipeline
+
+### Question Budget
+
+```yaml
+QUESTION_BUDGET:
+  default_max: 2          # per pipeline run
+  tracked_in: tmp/session_state.json → question_budget
+  schema:
+    max: 2
+    used: 0
+    log:
+      - question: "<what was asked>"
+        timestamp: "<ISO-8601>"
+        consultation_log:
+          advisory_response: "<summary>"
+          strategist_response: "<summary>"
+        user_answer: "<what user said>"
+  
+  on_budget_exhaustion:
+    action: Proceed autonomously with best available defaults
+    log: "Question budget exhausted — proceeding with autonomous decision"
+```
 
 ---
 
