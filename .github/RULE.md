@@ -462,3 +462,69 @@ Skill creates script
 ---
 
 *These rules are loaded at maximum priority. SKILL.md files and agent instructions operate within these constraints.*
+
+---
+
+## RULE-13: State Read-Back Protocol (US-18.2.1)
+
+Every skill MUST read the current state context before execution.
+State is a **two-way communication channel**, not an append-only log.
+
+### MUST
+
+- Every substantive skill (gather, search, compose, gen-word, gen-excel, gen-slide, gen-pdf, gen-html, design)
+  MUST call `save_state.py read-context <step>` as its **FIRST action** before any processing
+- compose and gen-* skills MUST check `relevant_artifacts[]` from read-context and use them as
+  input alongside the primary content
+- If read-context returns artifacts with `retention: keep` and `quality_score >= 60`, the skill
+  MUST NOT discard them without explicit justification logged to state
+- Every skill that produces a file in `tmp/` or `output/` MUST call
+  `save_state.py register-artifact --step <name> --path <path> --type <type> --summary "<text>"`
+  after creating that file
+
+### MUST_NOT
+
+- Skills MUST NOT proceed without reading state context first
+- Skills MUST NOT produce files without registering them as artifacts
+- Skills MUST NOT silently discard high-quality intermediate artifacts (score >= 60, retention: keep)
+
+### Read-Context Flow
+
+```
+Skill receives execution request
+  │
+  ▼
+1. CALL: save_state.py read-context <step_name>
+   → Returns: structured_requirements, relevant_artifacts[], previous_step_summaries[]
+  │
+  ▼
+2. PROCESS: use relevant_artifacts as additional input
+   → compose: merge content from multiple artifacts
+   → gen-*: inject evidence/citations from artifacts
+  │
+  ▼
+3. EXECUTE: produce output file(s)
+  │
+  ▼
+4. REGISTER: save_state.py register-artifact --step <name> --path <path> --type <type> --summary "<text>"
+   → Every produced file gets registered with metadata
+```
+
+### Artifact Retention Policy
+
+```yaml
+RETENTION_RULES:
+  keep:
+    definition: Artifact has lasting value for downstream steps
+    examples: search results, gathered documents, data files, charts
+    discard_rule: MUST NOT discard if quality_score >= 60 without justification
+    
+  transient:
+    definition: Temporary file with no downstream value
+    examples: intermediate processing files, debug dumps
+    discard_rule: May be ignored by downstream steps
+
+  deleted:
+    definition: File was registered but no longer exists on disk
+    action: Marked by validate_state_integrity.py auto-fix
+```

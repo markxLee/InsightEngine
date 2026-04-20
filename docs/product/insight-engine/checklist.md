@@ -1334,7 +1334,7 @@ Wave 65 (sequential): US-17.2.2 (after 17.2.1) + US-17.3.2 (after 17.3.1) + US-1
 ### Epic 18.2: Mandatory State Read-Back Gate
 
 - [ ] **US-18.2.1** — Add RULE-13 — mandatory state read-back before every step
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-18.2.1`
   - Blocked By: ~~US-18.1.2~~ ✅
