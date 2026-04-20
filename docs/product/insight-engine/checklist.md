@@ -1187,11 +1187,9 @@ Wave 58 (sequential): US-15.1.3 ✅ + US-15.3.2 ✅ + US-15.3.3 ✅ + US-15.4.2 
 
 ### Epic 16.3: Hard-Flow Protocol in RULE.md
 
-- [ ] **US-16.3.1** — Formalize Hard-Flow execution order in RULE.md
-  - Status: IN_PROGRESS
+- [x] **US-16.3.1** — Formalize Hard-Flow execution order in RULE.md
+  - Status: DONE
   - Assignee: copilot
-  - Device: Trucs-MacBook-Air-2
-  - AI: copilot
   - Branch: feature/insight-engine-us-16.3.1
   - Blocked By: ~~US-16.2.1~~ ✅
 

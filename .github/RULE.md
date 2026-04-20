@@ -176,4 +176,126 @@ When something fails:
 
 ---
 
+## RULE-9: Agent-Centric Hard-Flow (US-16.3.1)
+
+The canonical agent-level execution order for every pipeline run is **non-negotiable
+law**. Every session MUST follow this exact sequence — no skipping, no reordering,
+no optional steps:
+
+```
+Orchestrator
+   │ MUST classify intent and route
+   ▼
+State + Checklist update (immediate)
+   │ MUST persist raw_prompt, intent, requirements before any other agent runs
+   ▼
+Strategist
+   │ MUST produce a workflow plan (initial_plan mode) before execution begins
+   ▼
+Execution Agent
+   │ MUST own tool selection, probe availability, run the cascade per step
+   ▼
+Auditor
+   │ MUST score the output against requirements (>80/100 to pass)
+   │
+   ├─ PASS  ───► Notify user (deliver result)
+   │
+   └─ FAIL  ───► Advisory  ──► new plan ──► Execution Agent retry
+                  │                              │
+                  │                              ▼
+                  └────────────────────► Auditor (re-score)
+```
+
+### Per-Step MUST Statements
+
+```yaml
+ORCHESTRATOR:
+  MUST: classify intent (synthesis | creation | research | design | data_collection | mixed | unknown)
+  MUST: route to the appropriate skill cluster
+  MUST: invoke State + Checklist update IMMEDIATELY after classification
+  MUST_NOT: invoke any execution skill before Strategist returns a plan
+
+STATE_AND_CHECKLIST_UPDATE:
+  MUST: write raw_prompt, intent, structured requirements to tmp/session_state.json (RULE-5)
+  MUST: occur BEFORE Strategist is called
+  MUST_NOT: be skipped under any pivot or recovery path
+
+STRATEGIST:
+  MUST: produce a workflow plan in initial_plan mode for new sessions
+  MUST: produce a workflow plan in replan mode after auditor FAIL + advisory output
+  MUST: produce a child_workflow plan when called by Execution Agent (US-16.2.2)
+  MUST_NOT: execute steps itself — planning only
+
+EXECUTION_AGENT:
+  MUST: own tool selection per step, probe availability, run cascade in order
+  MUST: emit quality_signal (confidence + suggested_audit) with every result
+  MUST: escalate to Strategist (CHILD_WORKFLOW) or Advisory per US-16.2.2 thresholds
+  MUST_NOT: retry the same tool with the same args after failure
+  MUST_NOT: skip the Auditor handoff when suggested_audit=true
+
+AUDITOR:
+  MUST: score every delivery step against the requirements anchor (RULE-6)
+  MUST: return PASS only when score > 80/100
+  MUST: emit explicit gap report on FAIL (which requirements unmet, with evidence)
+  MUST_NOT: be bypassed by any skill or other agent
+
+ADVISORY (only invoked on Auditor FAIL or wrong-angle suspicion):
+  MUST: return 2–3 alternative approaches with rationale and confidence
+  MUST: respect the 2-call session budget
+  MUST_NOT: re-suggest an approach already attempted in this session
+
+RETRY_AFTER_ADVISORY:
+  MUST: feed Advisory's recommendation back to Strategist (replan mode) before retry
+  MUST: NOT retry the same approach that just failed
+  MUST: re-enter the loop at Execution Agent with the new plan
+  MUST: respect max_retries = 2 (per RULE-2 pivot budget)
+```
+
+### Child Soft-Flow Trigger (Hard Rule)
+
+A **child soft-flow** is the ONLY mechanism by which a single parent step may
+spawn sub-steps mid-execution. It is triggered exclusively by the Execution
+Agent under the conditions specified in `.github/agents/references/child-soft-flow.md`:
+
+```yaml
+TRIGGER (any one suffices):
+  - Execution Agent's tool cascade is exhausted (>=3 tools tried, no success)
+  - 2+ consecutive attempts returned quality_signal.confidence = "low"
+  - parent_context.complexity_hint == "high" AND first attempt failed
+
+INVOCATION:
+  MUST: call Strategist in CHILD_WORKFLOW_MODE (decompose) OR Advisory (re-angle)
+  MUST: pick at most ONE escalation path per parent step
+  MUST: keep child state isolated (in-memory only — never written to state file)
+  MUST: limit recursion to one level (a child step that fails escalates upward)
+  MUST_NOT: be triggered proactively by any agent other than Execution
+
+REPORTING:
+  MUST: return only the consolidated child result to the parent step
+  MUST: set quality_signal.suggested_audit = true (Auditor verifies child output)
+```
+
+### Failure Handling (Hard Rule)
+
+```yaml
+ON_AUDITOR_FAIL:
+  step_1: MUST call Advisory with the failure context
+  step_2: MUST feed Advisory's recommendation to Strategist (replan mode)
+  step_3: MUST re-execute via Execution Agent with the NEW plan
+  step_4: MUST re-score via Auditor
+
+  budget: MUST NOT exceed 2 replan cycles per delivery step (RULE-2)
+  on_budget_exhaustion: MUST deliver partial result with explicit gap report (RULE-8)
+  MUST_NOT: retry with the same approach that just failed (RULE-2 pivot rule)
+```
+
+### What This Rule Replaces
+
+This rule does NOT remove or modify RULE-1 through RULE-8. It adds the
+**agent-level** hard-flow on top of the **skill-level** hard-flow already
+declared in RULE-4. Where the two interact: RULE-4 governs which skills run in
+what order; RULE-9 governs which agents own each transition between skills.
+
+---
+
 *These rules are loaded at maximum priority. SKILL.md files and agent instructions operate within these constraints.*
