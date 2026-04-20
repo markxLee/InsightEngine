@@ -451,6 +451,67 @@ SEPARATION:
 
 ---
 
+## User Channel Gatekeeper (US-17.1.3)
+
+The orchestrator is the SOLE gatekeeper for all user-facing emissions. Every message, question,
+or status update that reaches the user MUST pass through this gate. Implements RULE-10.
+
+### Emission Types
+
+| Type | Preconditions | Examples |
+|------|--------------|---------|
+| `result_delivery` | Auditor PASS (score ≥ 80/100) + all output files verified | Final files + delivery summary |
+| `user_question` | RULE-11 consultation satisfied (advisory + strategist consulted) + question budget not exhausted | Content ambiguity clarification |
+| `status_update` | Pipeline step boundary (step completed or failed) | Progress messages ("✅ Đã xong...") |
+
+### Gatekeeper Protocol
+
+```yaml
+BEFORE_ANY_USER_EMISSION:
+  1. CLASSIFY emission type: result_delivery | user_question | status_update
+  2. CHECK preconditions for that type (see table above)
+  3. APPLY jargon shield (RULE-7) to message content
+  4. LOG emission to session state:
+     python3 scripts/save_state.py log-emission \
+       --type <emission_type> \
+       --reason "<why this emission is needed>" \
+       --timestamp <ISO-8601>
+  5. EMIT to user
+
+ON_PRECONDITION_FAILURE:
+  result_delivery without auditor PASS:
+    → Route back to auditor or retry loop — do NOT deliver unaudited output
+  user_question without consultation:
+    → Consult advisory + strategist first (RULE-11) — do NOT ask user prematurely
+  status_update without step boundary:
+    → Suppress — internal progress stays internal
+```
+
+### Session State Tracking
+
+All user emissions are logged to `tmp/session_state.json` under `user_emissions[]`:
+
+```json
+{
+  "user_emissions": [
+    {
+      "type": "status_update",
+      "timestamp": "2026-04-20T10:30:00Z",
+      "reason": "gather step completed",
+      "content_preview": "✅ Thu thập — xong (5 nguồn)"
+    },
+    {
+      "type": "result_delivery",
+      "timestamp": "2026-04-20T10:35:00Z",
+      "reason": "auditor PASS 87/100",
+      "content_preview": "📄 Output: report.docx (45KB)"
+    }
+  ]
+}
+```
+
+---
+
 ## Frustration Signal Detection
 
 On EVERY user message, orchestrator checks for frustration signals BEFORE processing intent.

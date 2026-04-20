@@ -1256,8 +1256,8 @@ Wave 62 (sequential): US-16.5.2 (after 16.5.1)
   - Branch: `feature/insight-engine-us-17.1.2`
   - Blocked By: ~~US-17.1.1~~ ✅
 
-- [ ] **US-17.1.3** — Orchestrator agent — gatekeeper for user-facing output
-  - Status: IN_PROGRESS
+- [x] **US-17.1.3** — Orchestrator agent — gatekeeper for user-facing output
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-17.1.3`
   - Blocked By: ~~US-17.1.1~~ ✅
