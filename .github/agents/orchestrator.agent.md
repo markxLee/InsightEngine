@@ -125,6 +125,22 @@ FLOW:
 
      **Why parallel:** Template decisions depend on intent + requirements (already known),
      NOT on strategist's workflow plan. Running them simultaneously saves one round-trip.
+  2d. LOAD MATCHING EXPERIENCE TEMPLATES (US-16.5.2) — best-effort, BEFORE strategist:
+     ```bash
+     python3 scripts/experience.py match \
+       --intent <intent_classification> \
+       --prompt "<raw_user_prompt>" \
+       --limit 3 --min-score 0.15
+     ```
+     Parse stdout JSON. If `matches` is non-empty:
+       - Pass the top match's `plan_summary` + `output_formats` + `final_audit_score`
+         to the strategist as a `prior_experience` hint in step 3.
+       - Strategist treats it as a non-binding suggestion (it MAY adapt or discard).
+     If empty (`reason=no_experiences_for_intent` OR no match >= min_score):
+       - Proceed without hint. Pipeline behaves identically to pre-US-16.5.2.
+     Best-effort: any error (missing dir, JSON parse, exit 1) is non-fatal and must NOT
+     block the pipeline. Hint is purely additive.
+     Reference: `docs/experiences/README.md`.
   3. CALL strategist agent → get workflow plan
   4. PRESENT plan to user in Vietnamese → wait for approval (guided mode only)
      EXCEPTION: session_mode=silent → skip presentation and proceed immediately

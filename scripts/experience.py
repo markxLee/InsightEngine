@@ -5,16 +5,21 @@ Experience template management (US-16.5.1 save / US-16.5.2 load).
 An "experience template" is a JSON snapshot of a successful pipeline run
 that captures the intent, the executed plan, per-step outcomes, total
 budget used, and the final audit score. Future pipeline runs with similar
-intent can load matching templates as a planning hint (handled by US-16.5.2).
+intent can load matching templates as a planning hint.
 
 Storage: docs/experiences/<intent>/<YYYYMMDD-HHMMSS>-<short_hash>.json
 (persistent — survives `tmp/` cleanup so templates accumulate across runs).
 
-US-16.5.1 ships ONLY the `save` subcommand. US-16.5.2 ships `find`.
+Subcommands:
+    save    Persist a successful run (US-16.5.1).
+    find    List recent saves for an intent (raw listing).
+    match   Score saved templates against a new prompt and return best matches
+            (US-16.5.2 — used by orchestrator at pipeline start).
 
 Usage:
     experience.py save --state-file tmp/.session-state.json
-    experience.py find --intent <intent> [--limit N]   # US-16.5.2
+    experience.py find --intent <intent> [--limit N]
+    experience.py match --intent <intent> --prompt "<raw_user_prompt>" [--limit N] [--min-score F]
 """
 from __future__ import annotations
 
@@ -22,6 +27,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -133,9 +139,6 @@ def cmd_save(args: argparse.Namespace) -> int:
 
 
 def cmd_find(args: argparse.Namespace) -> int:
-    # US-16.5.2 will implement matching logic. For US-16.5.1 we only
-    # provide a stub that lists by intent so the storage layout is
-    # exercisable end-to-end.
     intent_dir = EXPERIENCE_ROOT / args.intent
     if not intent_dir.is_dir():
         sys.stderr.write(f"No experiences saved for intent: {args.intent}\n")
@@ -143,6 +146,69 @@ def cmd_find(args: argparse.Namespace) -> int:
     files = sorted(intent_dir.glob("*.json"), reverse=True)[: args.limit]
     sys.stdout.write(json.dumps([str(f) for f in files], ensure_ascii=False) + "\n")
     return 0
+
+
+# ---------- US-16.5.2 — match ----------
+
+_TOKEN_RE = re.compile(r"[\w\u00C0-\u024F\u1E00-\u1EFF]+", re.UNICODE)
+_STOPWORDS = {
+    # English
+    "the", "a", "an", "and", "or", "of", "to", "for", "in", "on", "at", "from",
+    "with", "by", "is", "are", "be", "this", "that", "it", "as", "i", "we",
+    # Vietnamese (high-frequency)
+    "và", "hoặc", "của", "cho", "với", "là", "tôi", "bạn", "một", "các",
+    "những", "này", "đó", "có", "không", "được", "để", "trong", "từ", "về",
+}
+
+
+def _tokenize(text: str) -> set[str]:
+    return {
+        token.lower()
+        for token in _TOKEN_RE.findall(text or "")
+        if len(token) > 1 and token.lower() not in _STOPWORDS
+    }
+
+
+def _jaccard(a: set[str], b: set[str]) -> float:
+    if not a or not b:
+        return 0.0
+    inter = len(a & b)
+    union = len(a | b)
+    return inter / union if union else 0.0
+
+
+def cmd_match(args: argparse.Namespace) -> int:
+    intent_dir = EXPERIENCE_ROOT / args.intent
+    if not intent_dir.is_dir():
+        sys.stdout.write(json.dumps({"matches": [], "reason": "no_experiences_for_intent"}) + "\n")
+        return 1
+
+    prompt_tokens = _tokenize(args.prompt)
+    if not prompt_tokens:
+        sys.stdout.write(json.dumps({"matches": [], "reason": "empty_prompt_after_tokenize"}) + "\n")
+        return 1
+
+    scored: list[dict] = []
+    for path in intent_dir.glob("*.json"):
+        try:
+            template = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        score = _jaccard(prompt_tokens, _tokenize(template.get("raw_prompt", "")))
+        if score >= args.min_score:
+            scored.append({
+                "path": str(path),
+                "score": round(score, 3),
+                "saved_at": template.get("saved_at"),
+                "final_audit_score": template.get("final_audit_score"),
+                "output_formats": template.get("output_formats", []),
+                "plan_summary": template.get("plan_summary", []),
+            })
+
+    scored.sort(key=lambda x: (x["score"], x["final_audit_score"] or 0), reverse=True)
+    matches = scored[: args.limit]
+    sys.stdout.write(json.dumps({"matches": matches, "reason": "ok"}, ensure_ascii=False) + "\n")
+    return 0 if matches else 1
 
 
 def main() -> int:
@@ -153,10 +219,18 @@ def main() -> int:
     save.add_argument("--state-file", default="tmp/.session-state.json")
     save.set_defaults(func=cmd_save)
 
-    find = sub.add_parser("find", help="List saved experiences for an intent (US-16.5.2 stub)")
+    find = sub.add_parser("find", help="List recent experiences for an intent")
     find.add_argument("--intent", required=True)
     find.add_argument("--limit", type=int, default=5)
     find.set_defaults(func=cmd_find)
+
+    match = sub.add_parser("match", help="Find best-matching experience templates (US-16.5.2)")
+    match.add_argument("--intent", required=True)
+    match.add_argument("--prompt", required=True, help="Raw user prompt to match against")
+    match.add_argument("--limit", type=int, default=3)
+    match.add_argument("--min-score", type=float, default=0.15,
+                       help="Minimum Jaccard similarity to include (default 0.15)")
+    match.set_defaults(func=cmd_match)
 
     args = parser.parse_args()
     return args.func(args)

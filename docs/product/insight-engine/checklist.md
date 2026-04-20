@@ -1215,8 +1215,8 @@ Wave 58 (sequential): US-15.1.3 ✅ + US-15.3.2 ✅ + US-15.3.3 ✅ + US-15.4.2 
   - Branch: feature/insight-engine-us-16.5.1
   - Blocked By: ~~US-16.4.1~~ ✅
 
-- [ ] **US-16.5.2** — Load matching experience template at pipeline start
-  - Status: IN_PROGRESS
+- [x] **US-16.5.2** — Load matching experience template at pipeline start
+  - Status: DONE
   - Assignee: copilot
   - Device: Trucs-MacBook-Air-2
   - AI: copilot
@@ -1231,6 +1231,10 @@ Wave 61 (sequential): US-16.1.3 (after 16.1.2) + US-16.5.1 (after 16.4.1)
 Wave 62 (sequential): US-16.5.2 (after 16.5.1)
 --- Phase 16 PLANNED (0/9) ---
 ```
+
+> **2026-04-20 update:** Phase 16 fully shipped (9/9). All stories merged to
+> `main`. See `docs/runs/insight-engine-us-16.*/README.md` for per-story
+> artifacts.
 
 ---
 
