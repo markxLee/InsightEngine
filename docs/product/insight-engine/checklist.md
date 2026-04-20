@@ -1368,7 +1368,7 @@ Wave 65 (sequential): US-17.2.2 (after 17.2.1) + US-17.3.2 (after 17.3.1) + US-1
 ### Epic 18.4: State-Filesystem Integrity Validator
 
 - [ ] **US-18.4.1** — validate_state_integrity.py script
-  - Status: PLANNED
+  - Status: IN_PROGRESS
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-18.4.1`
   - Blocked By: ~~US-18.1.1~~ ✅
