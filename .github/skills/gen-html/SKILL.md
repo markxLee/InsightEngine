@@ -250,13 +250,14 @@ Output: academic .html, embedded charts, semantic headings, print-friendly, 80 K
 AUDITOR_GATE:
   when: After HTML generation and verification
   how:
-    1. READ .github/skills/shared-agents/auditor.md
+    1. READ .github/agents/auditor.agent.md
     2. BUILD prompt with:
        user_request: original user request
        output_content: HTML content (read the .html file)
        output_format: "html"
        required_fields: sections/topics user asked for
-    3. CALL runSubagent(prompt=<built_prompt>, description="Audit HTML output")
+       structured_requirements: from `python3 scripts/save_state.py check-requirements` (if available)
+    3. CALL runSubagent(agentName="auditor", prompt=<built_prompt>, description="Audit HTML output")
     4. PARSE response:
        IF VERDICT == PASS → deliver to user
        IF VERDICT == FAIL → re-generate with IMPROVEMENTS guidance (max 2 retries)

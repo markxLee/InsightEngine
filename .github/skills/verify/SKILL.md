@@ -202,6 +202,6 @@ Fix instructions must be specific:
 ## What This Skill Does NOT Do
 
 - Does NOT evaluate writing style or content depth (compose handles that)
-- Does NOT check formatting/layout (tao-format quality gates handle that)
+- Does NOT check formatting/layout (gen-format quality gates handle that)
 - Does NOT run validate_urls.py as primary method — script is supplementary only
 - Does NOT generate content — only audits and verifies existing output

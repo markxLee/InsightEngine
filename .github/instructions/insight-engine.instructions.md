@@ -64,7 +64,8 @@ applyTo: "**"
 ```
 .github/skills/
   synthesize/      # 🔑 Main pipeline — analyze prompt → expand dimensions → route → orchestrate + auto-review loop
-  gather/          # Collect from web (search + fetch) and read local files + auto quality check + data collection mode
+  search/          # Web search via vscode-websearchforcopilot_webSearch + 3-tier URL fetch (fetch_webpage → httpx → Playwright)
+  gather/          # Read local files (markitdown + format-specific fallbacks) and fetch explicit user-provided URLs
   compose/         # Synthesize content comprehensive (default) + self-review loop + translation
   gen-word/        # Export Word (.docx) + thin content guard
   gen-excel/       # Export Excel (.xlsx)
@@ -75,8 +76,19 @@ applyTo: "**"
   design/          # Visual design (poster, cover, certificate, banner)
   verify/          # Audit output vs user requirements (Step 4.7 in pipeline + standalone)
   improve/         # Session retrospective + continuous improvement
+  setup/           # Install dependencies + create utility scripts
   skill-creator/   # Create, improve, test, benchmark skills
   skill-forge/     # Advanced auto-review loop — grade 6 criteria (A/B/C/D), iterate until all A
+```
+
+## Agent System
+
+```
+.github/agents/
+  orchestrator.agent.md   # User-invocable. Central request handler — classify intent → route
+  strategist.agent.md     # Subagent. Workflow generation (initial_plan / replan / child_workflow)
+  auditor.agent.md        # User-invocable. 100-point weighted quality verification
+  advisory.agent.md       # Subagent. Multi-perspective decision support
 ```
 
 Full stack documentation: `docs/tech-stack/insight-engine/instructions.md`

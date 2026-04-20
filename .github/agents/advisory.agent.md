@@ -12,7 +12,7 @@ user-invocable: false
 # Advisory Agent — Multi-Perspective Decision Support
 
 > Standalone Copilot agent for decision analysis.
-> Replaces the previous `shared-agents/advisory.md` runSubagent pattern.
+> Replaces the previous inline advisory stub at `synthesize/agents/advisory.md` (deleted in Phase 10).
 > Now follows VS Code custom agent standard (`.github/agents/`).
 
 ---

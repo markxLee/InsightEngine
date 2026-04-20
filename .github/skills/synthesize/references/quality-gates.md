@@ -146,7 +146,7 @@ OUTPUT_QUALITY_CRITERIA:
 
 ```yaml
 OUTPUT_AUDIT:
-  trigger: ALWAYS — after all tao-<format> steps complete, before final report
+  trigger: ALWAYS — after all gen-<format> steps complete, before final report
   sub_skill: verify (see .github/skills/verify/SKILL.md)
   
   inputs:

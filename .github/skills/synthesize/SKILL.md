@@ -3,7 +3,7 @@ name: synthesize
 description: |
   Content synthesis skill for InsightEngine — gathers, merges, and structures multi-source content
   into coherent documents. Called by the orchestrator orchestrator agent or directly via synthesize.
-  Handles the core content pipeline: gather → compose → tao-[format] with auto quality review.
+  Handles the core content pipeline: gather → compose → gen-[format] with auto quality review.
   Default content depth is COMPREHENSIVE (expert-level, rich content).
   Supports session resume via save_state.py and chained outputs (e.g., Excel data → chart → slide).
   NOTE: Orchestration (intent classification, routing) is handled by orchestrator agent.
@@ -83,9 +83,9 @@ If state already IN_PROGRESS with matching prompt → skip init, proceed to Step
 4. Detect **style**: corporate | academic | minimal | dark-modern | creative (see `references/pipeline-ux.md`)
 5. Detect if request implies **chained outputs** (see `references/output-chaining.md`)
 6. **Detect REQUEST_TYPE** (details: `references/request-analysis.md`):
-   - **research**: "tổng hợp về", "báo cáo", topic understanding → gather → compose → tao-\<format\>
+   - **research**: "tổng hợp về", "báo cáo", topic understanding → gather → compose → gen-\<format\>
    - **data_collection**: "tìm tất cả", "liệt kê", specific fields/entities → gather (platform) → gen-excel
-   - **mixed**: both collection + analysis → gather → gen-excel → compose → tao-\<format\>
+   - **mixed**: both collection + analysis → gather → gen-excel → compose → gen-\<format\>
 7. **Extract REQUIRED_FIELDS** (data_collection/mixed): scan prompt for fields, auto-add `direct_url` + `source_platform`.
 8. **Visual design routing**: poster/cover/cert/banner → design | charts → gen-image | both possible.
 9. **Research depth**: deep if 3+ dimensions, temporal range, comparison, exhaustive data; else standard.
@@ -117,12 +117,17 @@ and present the analysis to the user. DO NOT proceed to Step 2 without completin
 ║  Do NOT skip this step. Do NOT summarize and continue.      ║
 ║  SHOW the analysis below. WAIT for user response.           ║
 ║                                                              ║
-║  EXCEPTION — skip gate if ANY of these are true:            ║
-║  • session_mode = silent (frustration signal was detected)  ║
-║  • This is a RESUMED pipeline (autonomy_mode already true)  ║
-║  • Called via orchestrator + user already approved workflow  ║
-║    plan at FLOW step 4 (autonomy_mode set by orchestrator)  ║
-║  → In these cases: proceed with best assumptions silently.  ║
+║  AUTO-BYPASS — skip gate AUTOMATICALLY when ANY is true:    ║
+║  • session_mode = silent (frustration signal detected)      ║
+║  • Pipeline is RESUMED (autonomy_mode already true)         ║
+║  • Called via orchestrator agent AND orchestrator already   ║
+║    presented + got user approval at FLOW step 4              ║
+║    (autonomy_mode set by orchestrator before delegating)     ║
+║                                                              ║
+║  CHECK BEFORE STOPPING: read `autonomy_mode` from            ║
+║    tmp/.session-state.json. If true → SKIP this gate.        ║
+║  → In bypass cases: proceed silently with best assumptions. ║
+║  → In gate-active cases: STOP and wait for user response.   ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
 
@@ -214,13 +219,13 @@ Present the plan in Vietnamese with sources, processing, output format, and step
 
 ```yaml
 ROUTING: # Choose based on Step 1 parse results
-  single_output:    gather → compose → tao-<format>
+  single_output:    gather → compose → gen-<format>
   translation_only: gather → compose (translation mode)
   chained_output:   gather → compose → gen-excel → gen-image → gen-slide
-  search_and_out:   gather (web search) → compose → tao-<format>
+  search_and_out:   gather (web search) → compose → gen-<format>
   design:           gather → compose → design (poster/cover/certificate/banner)
   data_collection:  gather (platform-specific) → extract → gen-excel → verify
-  mixed_collection: gather → extract → gen-excel → compose → tao-<format> → verify
+  mixed_collection: gather → extract → gen-excel → compose → gen-<format> → verify
 
 APPROVAL_GATE:
   guided_mode: Present plan → WAIT for user approval before Step 4
@@ -363,14 +368,14 @@ URL_VALIDATION_GATE:
   7. Flag remaining invalid URLs with ⚠️ in Excel output
 ```
 
-### 4.4: tao-\<format\> (with quality gate)
+### 4.4: gen-\<format\> (with quality gate)
 
 **Execute:**
 - Mapping: word → gen-word | excel → gen-excel | slides → gen-slide | pdf → gen-pdf | html → gen-html
 - Input: synthesized content from compose
 - Output: final file
 - Report: "✅ Xuất file hoàn tất — {path} ({size})"
-- Save state: `python3 scripts/save_state.py update --step tao-<format> --output-file "<path>"`
+- Save state: `python3 scripts/save_state.py update --step gen-<format> --output-file "<path>"`
 
 **⚠️ VERIFY (mandatory):** `read_file` the output file. For Excel: are rows populated with real
 data? Open 2 URLs — do pages match? For Word: ≥1000 words? For Slides: ≥8 slides with content?

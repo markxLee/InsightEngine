@@ -357,13 +357,14 @@ Output: .xlsx with conditional formulas, percentage format, auto-filter, 15 KB
 AUDITOR_GATE:
   when: After formula recalc and verification
   how:
-    1. READ .github/skills/shared-agents/auditor.md
+    1. READ .github/agents/auditor.agent.md
     2. BUILD prompt with:
        user_request: original user request
        output_content: column headers + sample rows + formula summary from .xlsx
        output_format: "excel"
        required_fields: data fields user specified
-    3. CALL runSubagent(prompt=<built_prompt>, description="Audit Excel output")
+       structured_requirements: from `python3 scripts/save_state.py check-requirements` (if available)
+    3. CALL runSubagent(agentName="auditor", prompt=<built_prompt>, description="Audit Excel output")
     4. PARSE response:
        IF VERDICT == PASS → deliver to user
        IF VERDICT == FAIL → fix data/formulas with IMPROVEMENTS guidance (max 2 retries)

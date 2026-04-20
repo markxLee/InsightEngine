@@ -194,13 +194,14 @@ Output: PDF with inline images, captions, proper page breaks, 250 KB
 AUDITOR_GATE:
   when: After PDF generation and verification
   how:
-    1. READ .github/skills/shared-agents/auditor.md
+    1. READ .github/agents/auditor.agent.md
     2. BUILD prompt with:
        user_request: original user request
        output_content: text content from generated PDF (via markitdown or source text)
        output_format: "pdf"
        required_fields: sections/topics user asked for
-    3. CALL runSubagent(prompt=<built_prompt>, description="Audit PDF output")
+       structured_requirements: from `python3 scripts/save_state.py check-requirements` (if available)
+    3. CALL runSubagent(agentName="auditor", prompt=<built_prompt>, description="Audit PDF output")
     4. PARSE response:
        IF VERDICT == PASS → deliver to user
        IF VERDICT == FAIL → re-generate with IMPROVEMENTS guidance (max 2 retries)

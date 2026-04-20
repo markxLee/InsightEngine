@@ -12,7 +12,7 @@ user-invocable: false
 # Strategist Agent — Workflow Generation
 
 > Standalone Copilot agent for workflow planning.
-> Replaces the previous `shared-agents/strategist.md` runSubagent pattern.
+> Replaces the previous inline strategist stub at `synthesize/agents/strategist.md` (deleted in Phase 10).
 > Now follows VS Code custom agent standard (`.github/agents/`).
 
 ---

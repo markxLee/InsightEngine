@@ -331,13 +331,14 @@ Output: academic-serif .pptx, 25 slides (long sections split across 2-3 slides),
 AUDITOR_GATE:
   when: After slide generation and verification
   how:
-    1. READ .github/skills/shared-agents/auditor.md
+    1. READ .github/agents/auditor.agent.md
     2. BUILD prompt with:
        user_request: original user request
        output_content: slide titles + content summaries from .pptx
        output_format: "slides"
        required_fields: topics/sections user wanted
-    3. CALL runSubagent(prompt=<built_prompt>, description="Audit Slide output")
+       structured_requirements: from `python3 scripts/save_state.py check-requirements` (if available)
+    3. CALL runSubagent(agentName="auditor", prompt=<built_prompt>, description="Audit Slide output")
     4. PARSE response:
        IF VERDICT == PASS → deliver to user
        IF VERDICT == FAIL → re-generate slides with IMPROVEMENTS guidance (max 2 retries)
@@ -351,6 +352,6 @@ AUDITOR_GATE:
 
 - Does NOT read input files — that's gather
 - Does NOT synthesize content — that's compose
-- Does NOT generate Word/PDF/HTML — use respective tao-* skills
+- Does NOT generate Word/PDF/HTML — use respective gen-* skills
 - Does NOT install dependencies — redirects to setup
 - Does NOT generate chart images — that's gen-image (receives chart PNGs as input)

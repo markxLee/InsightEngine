@@ -43,17 +43,17 @@ INTENT_CATEGORIES:
   synthesis:
     description: Merge/combine content from multiple sources into a document
     signals: ["tổng hợp", "gộp", "merge", "báo cáo từ", "compile from"]
-    route: synthesize skill (primary) → tao-[format]
+    route: synthesize skill (primary) → gen-[format]
 
   creation:
     description: Create original content (not from existing sources)
     signals: ["viết", "tạo nội dung", "soạn", "write", "draft", "compose"]
-    route: compose skill → tao-[format]
+    route: compose skill → gen-[format]
 
   research:
     description: Search and analyze a topic, then produce output
     signals: ["tìm hiểu", "nghiên cứu", "search about", "phân tích"]
-    route: search → compose → tao-[format]
+    route: search → compose → gen-[format]
 
   design:
     description: Create visual assets (poster, cover, certificate, banner)
@@ -68,7 +68,7 @@ INTENT_CATEGORIES:
   mixed:
     description: Combination of data collection + analysis/presentation
     signals: ["tìm và phân tích", "collect then analyze", "data + report"]
-    route: search → gen-excel → compose → tao-[format]
+    route: search → gen-excel → compose → gen-[format]
 
   unknown:
     description: Cannot classify — ask user for clarification

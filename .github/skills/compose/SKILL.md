@@ -418,6 +418,6 @@ Output: English translation preserving structure, headings, and formatting
 ## What This Skill Does NOT Do
 
 - Does NOT read files — that's gather
-- Does NOT generate output files — that's tao-* skills
+- Does NOT generate output files — that's gen-* skills
 - Does NOT install dependencies — redirects to setup
 - Does NOT search the web — delegates to gather

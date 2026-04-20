@@ -237,13 +237,14 @@ Output: minimal .docx, clean layout, 4 pages, no TOC (< 3 headings), 12 KB
 AUDITOR_GATE:
   when: After Step 4.5 verification passes
   how:
-    1. READ .github/skills/shared-agents/auditor.md
+    1. READ .github/agents/auditor.agent.md
     2. BUILD prompt with:
        user_request: original user request (from pipeline context or conversation)
        output_content: content read from generated .docx (markitdown or text)
        output_format: "word"
        required_fields: sections/topics user asked for
-    3. CALL runSubagent(prompt=<built_prompt>, description="Audit Word output")
+       structured_requirements: from `python3 scripts/save_state.py check-requirements` (if available)
+    3. CALL runSubagent(agentName="auditor", prompt=<built_prompt>, description="Audit Word output")
     4. PARSE response:
        IF VERDICT == PASS → deliver to user
        IF VERDICT == FAIL → re-generate with IMPROVEMENTS as guidance (max 2 retries)
@@ -257,5 +258,5 @@ AUDITOR_GATE:
 
 - Does NOT read input files — that's gather
 - Does NOT synthesize content — that's compose
-- Does NOT generate PDF/HTML/PPT — use respective tao-* skills
+- Does NOT generate PDF/HTML/PPT — use respective gen-* skills
 - Does NOT install dependencies — redirects to setup

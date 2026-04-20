@@ -121,7 +121,7 @@ DIAGNOSIS_PROTOCOL:
         reason: Content wasn't synthesized with all dimensions
         
       format_compliance_low:
-        likely_cause: tao-<format> (output step)
+        likely_cause: gen-<format> (output step)
         reason: Output generation had formatting issues
         
       content_depth_low:
@@ -257,7 +257,7 @@ INTEGRATION:
   called_by: synthesize orchestrator (Step 4.7 — final quality gate)
   
   in_pipeline_flow:
-    ... → tao-<format> → FINAL AUDIT → deliver
+    ... → gen-<format> → FINAL AUDIT → deliver
                               ↓ (if fail)
                          diagnose → rollback → re-execute → re-audit
                               ↓ (if still fail, budget OK)
