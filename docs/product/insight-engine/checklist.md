@@ -1290,8 +1290,8 @@ Wave 62 (sequential): US-16.5.2 (after 16.5.1)
   - Branch: `feature/insight-engine-us-17.3.2`
   - Blocked By: ~~US-17.3.1~~ ✅
 
-- [ ] **US-17.3.3** — Update .gitignore + pre-commit check
-  - Status: IN_PROGRESS
+- [x] **US-17.3.3** — Update .gitignore + pre-commit check
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-17.3.3`
   - Blocked By: ~~US-17.3.2~~ ✅
