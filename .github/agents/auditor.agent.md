@@ -256,6 +256,48 @@ PER_REQUIREMENT_SCORING:
 
 6. **Score and verdict** (Step 2-3 above)
 
+7. **Intermediate Artifact Utilization** (US-18.3.3 — conditional, 5-10 points)
+   Only applies when the artifact registry (from `save_state.py list-artifacts`) contains
+   ≥2 artifacts with `retention: keep` AND `quality_score >= 60`. For simple single-source
+   pipelines, this test case is SKIPPED (0 weight, not counted against score).
+
+   ```yaml
+   ARTIFACT_UTILIZATION_TEST:
+     name: "Intermediate Artifact Utilization"
+     category: completeness
+     weight: 5-10  # 5 if 2-3 keep-artifacts, 10 if 4+ keep-artifacts
+     
+     scoring:
+       # Of all artifacts with retention:keep AND quality_score >= 60,
+       # what percentage was referenced by compose or gen-* steps?
+       # Check: compose step's artifacts_used[] + gen-* step's artifacts_injected[]
+       
+       utilization_ratio: used_count / total_keep_artifacts
+       
+       score_mapping:
+         100%: full weight (5 or 10 points)
+         80-99%: proportional (e.g., 90% of 10 = 9 points)
+         50-79%: half weight
+         1-49%: quarter weight
+         0%: 0 points
+     
+     evidence_check:
+       1. Run: python3 scripts/save_state.py list-artifacts --retention keep
+       2. Count total keep-retention artifacts with quality_score >= 60
+       3. Read compose step state → check artifacts_used[]
+       4. Read gen-* step state → check artifacts_injected[]
+       5. Compute utilization_ratio = unique(used + injected) / total
+     
+     skip_condition: total keep-retention artifacts < 2
+     
+     reweight:
+       # When this test case is active, its weight is taken proportionally
+       # from the completeness category budget (~15%), not added on top.
+       # This ensures total always sums to 100.
+       when_active: completeness category gives 5-10 pts to this test, reducing
+                    other completeness tests proportionally
+   ```
+
 ### Verdict Handling
 
 ```yaml

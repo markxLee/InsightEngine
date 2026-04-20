@@ -1359,8 +1359,8 @@ Wave 65 (sequential): US-17.2.2 (after 17.2.1) + US-17.3.2 (after 17.3.1) + US-1
   - Branch: `feature/insight-engine-us-18.3.2`
   - Blocked By: ~~US-18.2.2~~ ✅
 
-- [ ] **US-18.3.3** — Auditor test case — Intermediate Artifact Utilization
-  - Status: PLANNED
+- [x] **US-18.3.3** — Auditor test case — Intermediate Artifact Utilization
+  - Status: DONE
   - Assignee: copilot
   - Branch: `feature/insight-engine-us-18.3.3`
   - Blocked By: ~~US-18.3.1~~ ✅
