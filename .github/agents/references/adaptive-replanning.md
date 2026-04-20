@@ -128,8 +128,9 @@ TOTAL_CYCLE: 1 + 1 + 1 = 3 sub-calls per failed step
 PER_PIPELINE_RUN:
   Inherits the standard budgets:
     - advisory: 2 calls total (RULE-9, advisory.agent.md)
-    - strategist: 5 calls total in replan + child_workflow modes
+    - strategist: 5 calls total shared across initial_plan + replan + child_workflow modes
                   (strategist.agent.md "5-call shared budget" note)
+    - execution: 8 calls total (execution.agent.md)
   When the per-pipeline budget is exhausted before the per-step budget:
     MUST: deliver partial result with explicit gap report (RULE-8)
     MUST NOT: bypass budgets to make additional calls
