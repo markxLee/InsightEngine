@@ -380,3 +380,65 @@ RETRY_LOOP:
     - Per retry: 1 re-generation + 1 re-audit = 2 calls
     - Max 3 attempts = 1 + 2 + 2 = 5 auditor calls (fits 5-call budget)
 ```
+
+---
+
+## Template-First Hard Gate (US-17.4.1)
+
+For any audit request from `gen-word`, `gen-excel`, `gen-slide`, `gen-pdf`, or `gen-html`,
+the auditor MUST verify that the Phase 13 template-first protocol was followed BEFORE scoring content.
+
+### Pre-Execution Check
+
+```yaml
+TEMPLATE_FIRST_GATE:
+  applies_to: [gen-word, gen-excel, gen-slide, gen-pdf, gen-html]
+  
+  check_sequence:
+    1. IDENTIFY output format from audit request
+    2. LOOK UP template_validations[] in tmp/session_state.json
+    3. VERIFY:
+       a. A template file exists at the expected output path
+       b. template_validations[] contains an entry for this output_format
+       c. That entry has a prior PASS audit (requirements_score >= 80)
+    
+  on_template_validated:
+    action: Proceed with normal content audit (Steps 1-3 above)
+    
+  on_template_missing_or_unvalidated:
+    action: Return BLOCKED verdict (NOT FAIL)
+    verdict:
+      score: 0
+      verdict: BLOCKED
+      reason: "Template-first protocol not followed — no validated template found"
+      instruction: "Orchestrator must invoke template creation step (create_placeholder.py) before retrying audit"
+      blocked_format: "<output_format>"
+```
+
+### BLOCKED vs FAIL
+
+| Verdict | Meaning | Orchestrator Action |
+|---------|---------|-------------------|
+| `BLOCKED` | Template-first gate not satisfied | Route back to template creation — does NOT count against retry budget |
+| `FAIL` | Content quality below threshold | Normal retry loop with fix instructions — counts against retry budget |
+
+### Session State Schema Addition
+
+```json
+{
+  "template_validations": [
+    {
+      "output_format": "excel",
+      "template_path": "output/report.xlsx",
+      "validated_at": "2026-04-20T10:25:00Z",
+      "requirements_score": 95
+    }
+  ]
+}
+```
+
+### Enforcement
+
+- Auditor MUST check template_validations BEFORE scoring any gen-* output
+- If orchestrator calls auditor without template validation: auditor returns BLOCKED immediately
+- BLOCKED verdicts do NOT decrement the auditor call budget (they are gatekeeping, not scoring)
