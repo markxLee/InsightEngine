@@ -10,6 +10,7 @@ tools:
   - read_file
   - fetch_webpage
   - run_in_terminal
+  - grep_search
 user-invocable: true
 ---
 
@@ -52,8 +53,14 @@ CATEGORY_WEIGHTS:
   format_compliance: ~20%      # Does format match spec (sections, styling)?
   completeness: ~15%           # Are all parts present and substantive?
 
-  # Weights are approximate — auditor adjusts based on request type
-  # e.g., data_collection request → data_quality gets 40%, requirement_coverage 30%
+  # Weight adjustment rules per request type:
+  WEIGHT_ADJUSTMENTS:
+    data_collection: { requirement_coverage: 30, data_quality: 40, format_compliance: 15, completeness: 15 }
+    research:        { requirement_coverage: 35, data_quality: 30, format_compliance: 15, completeness: 20 }
+    design:          { requirement_coverage: 35, data_quality: 10, format_compliance: 40, completeness: 15 }
+    creation:        { requirement_coverage: 40, data_quality: 15, format_compliance: 25, completeness: 20 }
+    synthesis:       { requirement_coverage: 40, data_quality: 25, format_compliance: 20, completeness: 15 }
+    # Default (mixed/unknown) uses the base ~40/25/20/15 split
 ```
 
 ### Step 2: Score Each Test Case
@@ -119,7 +126,7 @@ OPTIONAL:
   required_fields: string[]  # Specific fields user requested
   previous_score: number     # Score from previous attempt (for retry tracking)
   attempt_number: number     # Which retry attempt this is
-  audit_mode: string         # full (default) | structural (US-13.4.2 — structure-only before fill)
+  audit_mode: string         # full (default) | structural (US-13.4.2) | deep_verify (spot-check URLs/data)
   
   # Phase 13: Structured requirements (preferred over free-text user_request)
   structured_requirements: object  # From save_state.py check-requirements
@@ -180,6 +187,58 @@ python3 scripts/create_placeholder.py excel output/report.xlsx --sheets "HN,HCM"
 
 # 3. If structural PASS → proceed to fill (US-13.4.3)
 # 3. If structural FAIL → regenerate placeholder with corrected structure
+```
+
+### Deep Verify Mode
+
+When `audit_mode: deep_verify`, the auditor actively verifies data accuracy by fetching
+external sources. Use for outputs containing URLs, statistics, or factual claims.
+
+```yaml
+DEEP_VERIFY_CHECKS:
+  trigger: audit_mode == "deep_verify"
+  
+  protocol:
+    1. SAMPLE 2-3 URLs from output (random selection from different sections)
+    2. FETCH each URL using fetch_webpage
+    3. VERIFY:
+       - URL is reachable (not 404/403)
+       - Page content matches claimed data (title, company name, key facts)
+       - Numerical values are plausible (salary ranges, dates, counts)
+    4. SPOT-CHECK 2-3 factual claims against fetched sources
+
+  scoring_impact:
+    all_verified: +0 (no bonus — accuracy is expected)
+    1_mismatch: -10 from data_quality score
+    2+_mismatches: -20 from data_quality score + flag as BLOCKING_FAILURE
+    url_unreachable: -5 per dead URL (may be transient — note but don't block)
+
+  budget: Max 5 fetch_webpage calls per deep_verify audit
+  when_to_use:
+    - data_collection outputs (job listings, product catalogs, research data)
+    - Research outputs with specific statistics or cited sources
+    - Any output where user explicitly says "kiểm tra", "verify URLs"
+```
+
+### Retry Budget Clarification
+
+```yaml
+RETRY_BUDGET:
+  # Auditor retry loop (max 3 attempts) is a SUBSET of RULE-2 pivot budget (max 3).
+  # They are the SAME budget, not additive.
+  # 
+  # Example: gen-excel step fails audit →
+  #   Attempt 1: original execution (1 auditor call)
+  #   Attempt 2: retry targeting BLOCKING_FAILURES (1 re-gen + 1 audit = 2 calls)
+  #   Attempt 3: retry with different approach (1 re-gen + 1 audit = 2 calls)
+  #   Total: 5 auditor calls maximum (fits the 5-call budget)
+  #
+  # The pivot strategies from RULE-2 (different template, different structure, etc.)
+  # MUST be used between retry attempts. Same-approach retry is FORBIDDEN.
+  
+  auditor_calls_per_step: max 3 (original + 2 retries)
+  total_auditor_calls: max 5 per pipeline run (shared across all steps)
+  relationship_to_rule2: "Auditor retries consume RULE-2 pivot budget — same counter"
 ```
 
 ### Per-Requirement Scoring (Phase 13)

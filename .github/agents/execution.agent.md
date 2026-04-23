@@ -17,6 +17,7 @@ tools:
   - file_search
   - replace_string_in_file
   - create_file
+  - vscode-websearchforcopilot_webSearch
 user-invocable: false
 ---
 
@@ -57,6 +58,86 @@ PEER_LEVEL:
 
 Max **8 execution calls** per pipeline run (covers multi-step workflows where each
 soft-flow step delegates to one Execution Agent invocation).
+
+---
+
+## Default Tool Cascades
+
+When the caller does not provide `available_tools`, or the provided list conflicts
+with known skill cascades, use these defaults. The Execution Agent SHOULD validate
+caller-provided cascades against these defaults and WARN if mismatched.
+
+```yaml
+DEFAULT_CASCADES:
+  search:
+    # Web search for information discovery
+    cascade: [vscode-websearchforcopilot_webSearch, fetch_webpage, run_in_terminal_httpx, run_in_terminal_playwright]
+    notes: "Playwright is last resort — requires browser setup"
+
+  gather_url:
+    # Fetch content from explicit URLs
+    cascade: [fetch_webpage, run_in_terminal_httpx, run_in_terminal_playwright_stealth]
+    notes: "Playwright stealth for bot-protected sites"
+
+  gather_file:
+    # Read local files
+    cascade: [run_in_terminal_markitdown, run_in_terminal_format_specific]
+    notes: "markitdown first; if garbled → python-docx/openpyxl/pdfplumber"
+
+  gen_excel:
+    cascade: [run_in_terminal_openpyxl_pandas]
+    notes: "Single tool — pivot on template/structure if failing"
+
+  gen_word:
+    cascade: [run_in_terminal_python_docx]
+    notes: "Single tool — pivot on style template if failing"
+
+  gen_slide:
+    cascade: [run_in_terminal_pptxgenjs, run_in_terminal_ppt_master]
+    notes: "pptxgenjs for quick mode; ppt-master for pro/consulting-grade"
+
+  gen_pdf:
+    cascade: [run_in_terminal_reportlab_platypus, run_in_terminal_reportlab_canvas]
+    notes: "Platypus for complex layouts; Canvas for single-page"
+
+  gen_html:
+    cascade: [run_in_terminal_jinja2]
+    notes: "Single tool — pivot on style theme if failing"
+
+  gen_image_chart:
+    cascade: [run_in_terminal_matplotlib]
+    notes: "Always use Agg backend"
+
+  design:
+    cascade: [run_in_terminal_reportlab_canvas_pillow]
+    notes: "reportlab Canvas + Pillow for visual design"
+
+CASCADE_VALIDATION:
+  when: caller provides available_tools
+  action: |
+    Compare caller list against DEFAULT_CASCADES for the step type.
+    If mismatch (wrong order, missing key tool, unknown tool):
+      - WARN in quality_signal.notes: "Caller cascade diverges from default"
+      - Use caller's cascade (caller knows context) but log the divergence
+      - If cascade fails → fall back to DEFAULT_CASCADES order
+```
+
+---
+
+## Tool Timeout
+
+```yaml
+TOOL_TIMEOUT:
+  default: 60s per tool attempt
+  fetch_webpage: 30s (fast fail for unreachable URLs)
+  run_in_terminal: 120s (scripts may take longer)
+  vscode-websearchforcopilot_webSearch: 15s
+  
+  on_timeout:
+    - Mark attempt as failed with reason: "timeout"
+    - Move to next tool in cascade
+    - Log timeout in quality_signal.notes
+```
 
 ---
 

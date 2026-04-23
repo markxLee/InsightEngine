@@ -7,6 +7,7 @@ description: |
   Output returned to orchestrator, NOT to user (RULE-10).
 tools:
   - read_file
+  - run_in_terminal
 user-invocable: false
 ---
 
@@ -99,6 +100,33 @@ STEPS:
 
 MERGE_STEP: [yes/no — whether a final merge step is needed]
 MERGE_INSTRUCTIONS: [how to combine sub-results if yes]
+```
+
+### Merge Templates
+
+When `MERGE_STEP: yes`, use one of these merge strategies:
+
+```yaml
+MERGE_TEMPLATES:
+  concat:
+    description: Concatenate child outputs in order
+    use_when: Outputs are sequential sections of the same document
+    example: "Merge gathered content from source A + B + C into one markdown"
+
+  dedupe_merge:
+    description: Combine outputs and remove duplicate entries
+    use_when: Child steps may produce overlapping data (e.g., search from multiple queries)
+    example: "Merge search results, deduplicate by URL, keep richest version"
+
+  tabular_merge:
+    description: Merge rows/sheets from multiple child steps into one spreadsheet
+    use_when: gen-excel child steps each produce a sheet or row set
+    example: "Merge sheet 'HN' from child-1, sheet 'HCM' from child-2 into one workbook"
+
+  selective_merge:
+    description: Pick best result from children, discard weaker alternatives
+    use_when: Children tried different approaches to the same task
+    example: "Use child-1 result (score 85) over child-2 (score 62)"
 ```
 
 ### Orchestrator Usage
@@ -213,6 +241,18 @@ PARSE_RESPONSE:
     - Each step references a valid skill
     - Total estimated calls ≤ 30
     - If invalid: use default WF-01 (standard) as fallback
+
+  CALL_ESTIMATION_FORMULA:
+    # Use this to estimate total agent calls for a plan:
+    # calls = (steps × 2)  [execute + audit per step]
+    #       + 1             [strategist initial_plan]
+    #       + 1             [final_audit if enabled]
+    #       + child_workflow_overhead  [0 if no complex steps]
+    #
+    # child_workflow_overhead = complex_steps × 3  [strategist + child_execute + child_audit]
+    # If estimated_calls > 30: simplify plan (merge steps, reduce audit checkpoints)
+    estimated_calls: "(steps × 2) + 2 + (complex_steps × 3)"
+    max_allowed: 30
 ```
 
 ---
@@ -232,6 +272,9 @@ REQUIRED:
   attempt_count: integer        # How many times step was retried (typically 2)
   original_user_request: string # Original raw prompt
   structured_requirements: object  # From save_state.py check-requirements
+  what_was_tried: list          # MANDATORY — approaches already attempted
+    # Format: [{skill: "gen-excel", mode: "standard", template: "corporate", outcome: "score 55/100"}]
+    # Strategist MUST NOT re-suggest any skill+mode+template combo from this list
 
 OPTIONAL:
   previous_output_summary: string  # What was generated before (for context)
