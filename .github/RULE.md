@@ -171,8 +171,10 @@ When something fails:
 - State clearly what failed and why (in user-friendly language)
 - State what was achieved despite the failure (partial results)
 - Suggest concrete next steps the user can take
-- NEVER fabricate data, URLs, or statistics to fill gaps
+- NEVER fabricate data, URLs, or statistics to fill gaps — not even to meet quantity targets
 - NEVER silently skip a failed step — always report it
+- When quantity targets cannot be met: report honest shortfall and proceed with actual data
+- For data_collection: estimate feasibility during Source Intelligence before committing to targets
 
 ---
 
@@ -237,6 +239,7 @@ AUDITOR:
   MUST: score every delivery step against the requirements anchor (RULE-6)
   MUST: return PASS only when score > 80/100
   MUST: emit explicit gap report on FAIL (which requirements unmet, with evidence)
+  MUST: when invoked as subagent, receive explicit output file paths + structured requirements in prompt (subagents have no prior context)
   MUST_NOT: be bypassed by any skill or other agent
 
 ADVISORY (only invoked on Auditor FAIL or wrong-angle suspicion):

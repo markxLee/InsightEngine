@@ -11,7 +11,7 @@ description: |
   "vẽ nhân vật", "cần ảnh minh họa", "làm slide đẹp hơn", "tạo background", "vẽ cái gì đó",
   "tạo biểu đồ", "vẽ chart", or "gen-image", even without naming a specific skill.
 argument-hint: "[mode: chart|image] [chart type: bar|line|pie|radar|scatter] [image type: character|background|landscape|slide-bg|slide-frame]"
-version: 1.1
+version: 2.0
 compatibility:
   requires:
     - Python >= 3.10
@@ -19,6 +19,7 @@ compatibility:
   optional:
     - torch >= 2.2.0, diffusers >= 0.27.0 (AI image generation)
     - Apple Silicon (MPS) or CUDA GPU recommended for image mode
+    - ~7GB disk for SDXL-Turbo model, ~7GB for SDXL quality model
   tools:
     - run_in_terminal
 ---
@@ -185,39 +186,113 @@ Return `{path, width_px, height_px, chart_type}` to calling skill when chained.
 
 See `references/image-generation.md` for full script, style presets, and example prompts.
 
-### Step 2: Configure Image
+**v2.0 — Multi-model with quality tiers.** The script now supports SDXL-Turbo (fast) and
+SDXL Base (quality) models. Character styles auto-select the quality model for better faces,
+anatomy, and prompt adherence. Use `--model turbo` to force fast mode when speed matters.
 
-Choose image type and dimensions:
+### Step 2: Choose Model Tier & Configure
+
+**Model selection — critical for character quality:**
 
 ```yaml
-character:   512×512 or 768×768 — illustrated figure, person, character
-background:  768×768 — abstract or textured background
-landscape:   768×512 — nature/urban scene, horizontal orientation
-slide-bg:    1280×720 — 16:9 widescreen, suitable as PPT/HTML slide background
-slide-frame: 1280×720 — decorative border overlay, transparent center recommended
+turbo:
+  model: SDXL-Turbo (stabilityai/sdxl-turbo)
+  steps: 4 | speed: ~6s on MPS | negative_prompt: NO
+  use_for: backgrounds, landscapes, slides, previews
+  quality: good for non-face content, weak for character faces
+
+quality:
+  model: SDXL Base 1.0 (stabilityai/stable-diffusion-xl-base-1.0)
+  steps: 25 | speed: ~60s on MPS | negative_prompt: YES
+  use_for: characters, portraits, detailed art, final assets
+  quality: much better faces, anatomy, prompt adherence
+  first_run: ~7GB model download (one-time)
+
+legacy:
+  model: SD-Turbo (stabilityai/sd-turbo)
+  steps: 4 | speed: ~6s | negative_prompt: NO
+  use_for: backward compatibility only — DO NOT use for characters
 ```
 
-Confirm prompt and style with user; suggest a style from the presets in the reference if unsure.
+**Style presets auto-select the right model:**
+- `character-anime`, `character-anime-male`, `character-anime-female`, `character-realistic` → quality
+- `landscape-*`, `background-*`, `slide-*` → turbo
 
-### Step 3: Detect GPU & Generate
+**Dimensions by type:**
 
-Run the bundled image generation script (auto-detects CUDA/MPS/CPU):
+```yaml
+character (quality):  768×1024 — portrait orientation, better anatomy
+background:           768×768  — square, abstract/textured
+landscape:            768×512  — horizontal panoramic
+slide-bg/frame:       1280×720 — 16:9 widescreen
+```
+
+**Character gender presets (ALWAYS use for characters):**
+- `character-anime-male` — includes "masculine, 1boy" keywords
+- `character-anime-female` — includes "feminine, 1girl" keywords
+- `character-anime` — gender-neutral (specify gender in prompt)
+
+### Step 3: Generate
+
+**Standard text-to-image:**
 
 ```bash
+# Quality character (auto-selects quality model + negative prompt)
 python3 .github/skills/gen-image/scripts/gen_image.py \
-  --prompt "your prompt" --style slide-bg-corporate \
-  --width 1280 --height 720 --output output/image.png
+  --prompt "warrior boy, red armor, determined expression" \
+  --style character-anime-male --output output/char.png
+
+# Fast background (auto-selects turbo)
+python3 .github/skills/gen-image/scripts/gen_image.py \
+  --prompt "fantasy forest" --style landscape-fantasy --output output/bg.png
+
+# Force turbo for speed preview
+python3 .github/skills/gen-image/scripts/gen_image.py \
+  --prompt "warrior boy" --style character-anime --model turbo --output output/preview.png
 ```
 
+**Character consistency via img2img (IMPORTANT for multi-pose sets):**
+
+When generating the SAME character in multiple poses:
+1. Generate canonical view first (front-facing, neutral pose)
+2. Use that image as `--reference` for all subsequent poses
+3. Strength 0.45-0.65: preserves identity while allowing pose changes
+
+```bash
+# Step 1: Generate canonical reference
+python3 .github/skills/gen-image/scripts/gen_image.py \
+  --prompt "warrior boy, red armor, standing front view" \
+  --style character-anime-male --seed 42 --output output/char_ref.png
+
+# Step 2: Generate other poses FROM the reference
+python3 .github/skills/gen-image/scripts/gen_image.py \
+  --prompt "same warrior boy, red armor, fighting action pose" \
+  --style character-anime-male --reference output/char_ref.png \
+  --strength 0.55 --output output/char_fight.png
+
+python3 .github/skills/gen-image/scripts/gen_image.py \
+  --prompt "same warrior boy, red armor, riding horse" \
+  --style character-anime-male --reference output/char_ref.png \
+  --strength 0.50 --output output/char_ride.png
+```
+
+**Negative prompts (auto-set for quality model):**
+
+The quality model automatically applies negative prompts to avoid common defects:
+- Characters: "ugly, bad anatomy, deformed face, wrong gender, extra limbs..."
+- General: "blurry, low quality, watermark, text..."
+
+Override with `--negative "custom negative prompt"` if needed.
+
 The script tries CUDA → MPS → CPU in order.
-On CPU: generation takes 2–10 min for 4 inference steps — inform the user before running.
-Model (~2GB) downloads automatically on first use to `~/.cache/huggingface/`.
+First run downloads models to `~/.cache/huggingface/` (turbo: ~7GB, quality: ~7GB).
 
 ### Step 4: Verify & Report
 
 1. Confirm file exists and size > 100KB (AI images should not be tiny)
-2. On CUDA/MPS OOM: lower width/height by 256px and retry
-3. Report: `✅ Saved: {path} ({size} KB, {W}×{H}px, device: {cuda|mps|cpu})`
+2. **For characters: visually check face quality, gender, and consistency**
+3. On CUDA/MPS OOM: use `--model turbo` or lower dimensions by 256px
+4. Report: `✅ Saved: {path} ({size} KB, {W}×{H}px, {elapsed}s, device: {device})`
 
 ### Step 5: Embed or Deliver
 
@@ -249,13 +324,23 @@ Output: radar chart PNG, legend, gridlines, 70 KB
 
 **Example 3 — AI slide background:**
 Input: Prompt "abstract technology pattern, blue gradient, clean"
-Output: 1280×720 PNG (slide-bg), generated via SD-Turbo on MPS, ~3 seconds, 180 KB
+Output: 1280×720 PNG (slide-bg), generated via SDXL-Turbo on MPS, ~6 seconds, 180 KB
+
+**Example 4 — Quality anime character (v2.0):**
+Input: `--prompt "warrior boy, red armor" --style character-anime-male`
+Output: 768×1024 PNG, SDXL quality model, 25 steps, negative prompts auto-applied, ~60s, 350 KB
+
+**Example 5 — Consistent character set (v2.0):**
+Input: Generate canonical front view, then 3 poses with `--reference` + `--strength 0.55`
+Output: 4 character images with consistent appearance across all poses
 
 ---
 
 ## What This Skill Does NOT Do
 
 - Does NOT display charts or images interactively (headless only — no plt.show())
-- Does NOT render text inside AI images (SD-Turbo cannot reliably render text)
-- Does NOT do face preservation or image-to-image restyling — use `gen-image` skill for that
+- Does NOT render text inside AI images (diffusion models cannot reliably render text)
+- Does NOT do fine-tuning or LoRA training — for that, user needs separate workflow
 - Does NOT install dependencies — redirects to setup
+- Does NOT guarantee pixel-perfect character consistency — img2img mode provides
+  style/color/shape consistency but not identical faces across all poses

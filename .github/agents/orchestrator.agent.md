@@ -9,6 +9,8 @@ tools:
   - run_in_terminal
   - fetch_webpage
   - vscode-websearchforcopilot_webSearch
+  - create_file
+  - replace_string_in_file
 agents:
   - strategist
   - auditor

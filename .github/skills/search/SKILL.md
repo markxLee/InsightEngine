@@ -218,6 +218,8 @@ Test each candidate with 3-tier fetch. Assess: accessible? Data present? Playwri
 - **Primary:** accessible directly + data visible
 - **Fallback:** accessible via Playwright only
 - **Skip:** login wall, paywall, or no relevant data
+- **Keyword validation:** try 2-3 keyword variants per search term — pick the variant with most results
+- **Detect JS-rendered sites** early → escalate to Playwright immediately instead of wasting fetch_webpage
 
 If no viable sources: report failure with concrete next-step options.
 

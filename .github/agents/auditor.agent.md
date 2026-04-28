@@ -11,6 +11,7 @@ tools:
   - fetch_webpage
   - run_in_terminal
   - grep_search
+  - read_file
 user-invocable: true
 ---
 

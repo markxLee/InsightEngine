@@ -1,0 +1,23 @@
+{
+  "skill_name": "comic-adaptation",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Chuyển thể truyện Thánh Gióng theo phong cách anime Nhật. Hãy phân tích nhân vật trước, rồi lập bộ nguyên mẫu nhân vật và kế hoạch page cho truyện tranh.",
+      "expected_output": "A clear story adaptation package with character analysis, character bible, prototype definitions, and a page plan.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Từ một truyện dân gian Việt Nam, tạo character bible cho 5 nhân vật và mô tả cách giữ nhất quán khi chuyển sang truyện tranh.",
+      "expected_output": "A reusable character bible with narrative role, visual identity, expressions, palette, and continuity rules.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Tôi muốn một kế hoạch 8 page cho truyện tranh, bắt đầu bằng nguyên mẫu nhân vật trước rồi mới đến từng page.",
+      "expected_output": "A prototype-first comic plan with page-by-page beats, character usage, and production notes.",
+      "files": []
+    }
+  ]
+}

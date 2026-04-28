@@ -1,0 +1,121 @@
+forge_state:
+  skill_name: "comic-adaptation"
+  mode: "update"
+  current_iteration: 2
+  max_iterations: 10
+
+  iterations:
+    - iteration: 1
+      grades:
+        skill_structure: "D"
+        instruction_clarity: "B"
+        real_world_usefulness: "C"
+        alternative_analysis: "C"
+        implementation_quality: "D"
+        description_triggering: "B"
+      lowest_grade: "D"
+      evidence: |
+        skill_structure (D):
+          - No scripts/ directory — zero executable assets
+          - No references/ directory — no reusable design knowledge
+          - SKILL.md is 130 lines of pure text instructions
+          - Auto-downgrade per rubric: "no CLI arguments on scripts" (no scripts at all)
+
+        instruction_clarity (B):
+          - Workflow is logical: analyze → bible → prototype → page plan
+          - Missing "why" explanations for anime-specific decisions
+          - No guidance on HOW to draw — just WHAT to draw
+          - Downstream handoffs mentioned but vague
+
+        real_world_usefulness (C):
+          - Session proved: user had to ask 4 times to get usable output
+          - Skill triggered correctly but couldn't produce visuals
+          - Character bible markdown is useful but not sufficient alone
+          - No self-review loop to catch quality issues early
+
+        alternative_analysis (C):
+          - Currently delegates to design/gen-image without clear protocol
+          - Should bundle its own prototype sheet generator
+          - Could leverage gen-image character-anime preset for AI illustrations
+          - Two-layer architecture needed: reportlab for sheets + gen-image for illustrations
+
+        implementation_quality (D):
+          - Zero scripts bundled
+          - Session required ad-hoc tmp/gen_thanh_giong_character_sheet.py
+          - That script works but is hardcoded to Thánh Gióng instead of being generic
+          - No CLI interface for reuse
+          - Auto-downgrade per rubric: scripts missing entirely
+
+        description_triggering (B):
+          - Good trigger phrases in both Vietnamese and English
+          - Missing: "vẽ nhân vật", "thiết kế nhân vật truyện tranh", "tạo bảng tham chiếu nhân vật"
+          - Description covers workflow but not visual production capability
+
+      changes_made: null
+
+    - iteration: 2
+      grades:
+        skill_structure: "A"
+        instruction_clarity: "A"
+        real_world_usefulness: "A"
+        alternative_analysis: "B"
+        implementation_quality: "A"
+        description_triggering: "A"
+      lowest_grade: "B"
+      evidence: |
+        skill_structure (A):
+          - SKILL.md 241 lines, well-organized with frontmatter + 7 steps
+          - scripts/ directory with gen_character_sheet.py (391 lines, CLI-driven, generic)
+          - references/ directory with anime-archetypes.md (148 lines, reusable)
+          - evals/ directory with 3 test cases
+          - comic-adaptation-workspace/ for forge state tracking
+          - All artifacts have proper separation of concerns
+
+        instruction_clarity (A):
+          - Step-by-step workflow: State Read-Back → Analyze → Map Archetypes → Generate Sheet → Page Plan → Self-Review → Delivery
+          - Each step has explicit inputs, actions, and outputs
+          - JSON schema documented for script input
+          - Exact CLI commands provided for script execution
+          - Self-review has 6 concrete checkpoints
+          - Downstream handoff table with specific skill + method
+
+        real_world_usefulness (A):
+          - Produces real visual artifact (PDF prototype sheet) — not just text
+          - Script is generic: works for any story, not hardcoded
+          - Character bible + prototype sheet + page plan = complete production package
+          - Self-review loop catches quality issues before delivery
+          - Session state integration (read-context + register-artifact)
+          - Tested end-to-end: 6 characters → 32KB PDF output verified
+
+        alternative_analysis (B):
+          - Downstream handoff table maps to gen-image, design, gen-slide
+          - Two-layer architecture implemented: reportlab sheets + gen-image for AI illustrations
+          - Could improve: no page storyboard generator script yet (future iteration)
+          - Could improve: no AI prompt generator for character illustrations
+
+        implementation_quality (A):
+          - gen_character_sheet.py: 391 lines, CLI arguments (--input, --output, --title)
+          - Supports 8 hair shapes, 5 eye styles, archetype badges, multi-page layout
+          - Automatic font resolution from design skill's canvas-fonts/
+          - Proper error handling, file size output as last line per RULE
+          - Tested successfully with 6-character Thánh Gióng dataset
+
+        description_triggering (A):
+          - 16 trigger phrases covering Vietnamese + English
+          - Includes previously missing: "vẽ nhân vật", "thiết kế nhân vật truyện tranh"
+          - Description explains visual production capability, not just text planning
+          - Covers workflow scope: analysis → design → sheet → plan
+
+      changes_made:
+        - "Rewrote SKILL.md from v1.0 (134 lines, text-only) to v2.0 (241 lines, production pipeline)"
+        - "Created scripts/gen_character_sheet.py (391 lines, generic CLI tool)"
+        - "Created references/anime-archetypes.md (148 lines, 7 archetypes + mapping protocol)"
+        - "Added 16 bilingual trigger phrases to description"
+        - "Added state integration (save_state.py read-context + register-artifact)"
+        - "Added self-review loop with 6 checkpoints"
+        - "Added downstream handoff table"
+        - "Tested end-to-end with 6-character JSON → 32KB PDF"
+
+  best_iteration: 2
+  converged: true
+  convergence_reason: "All criteria A or B. Lowest grade B (alternative_analysis — page storyboard and AI prompt generation are future enhancements, not core skill gaps). No D or C grades remaining. Skill is production-ready."
