@@ -70,6 +70,8 @@ Excel, Word, PDF, charts, images — route to orchestrator. Always.
 | setup | Install dependencies, create utility scripts | cài đặt, setup |
 | skill-creator | Create, test, benchmark skills | tạo skill, improve skill |
 | skill-forge | Advanced skill creation with auto-review loop (6 criteria) | forge skill, production-grade |
+| chrome-e2e | E2E testing via Chrome DevTools MCP — auth flows, DevTools debugging | test qua Chrome, e2e, auth flow |
+
 
 ## Agents (invoked on-demand)
 
