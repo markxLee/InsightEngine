@@ -1,41 +1,50 @@
 ---
 name: gen-image
 description: |
-  Generate charts and AI illustration images for reports, presentations, and documents.
+  Generate charts, AI illustration images, and train character LoRA for consistent generation.
   Chart mode (matplotlib): bar, line, pie, radar, scatter — from Excel/CSV/inline data, output PNG.
   Image generation mode (AI): characters (nhân vật), backgrounds, landscapes, and slide
   backgrounds/frames — auto-detects GPU (CUDA/MPS/CPU), no special hardware required.
+  LoRA training mode: train a character LoRA from reference images using SD 1.5 + IP-Adapter
+  multi-angle pipeline → dataset preparation → LoRA fine-tuning → inference test. Produces
+  a small .safetensors adapter (~6 MB) that maintains character identity across any pose/scene.
   Always use this skill when the user wants any visual asset: data charts, illustration images,
   background images for slides, characters or scenes for documents, slide frames, or anything
   visual to make content look more professional — even casual requests like "tạo hình nền",
   "vẽ nhân vật", "cần ảnh minh họa", "làm slide đẹp hơn", "tạo background", "vẽ cái gì đó",
   "tạo biểu đồ", "vẽ chart", or "gen-image", even without naming a specific skill.
-argument-hint: "[mode: chart|image] [chart type: bar|line|pie|radar|scatter] [image type: character|background|landscape|slide-bg|slide-frame]"
-version: 2.0
+  Also use for character consistency workflows: "train LoRA", "LoRA training", "giữ nhất quán
+  nhân vật", "character consistency", "IP-Adapter", "multi-angle character", "tạo dataset
+  training", "fine-tune character", "train nhân vật" — even without saying "gen-image".
+argument-hint: "[mode: chart|image|lora] [chart type: bar|line|pie|radar|scatter] [image type: character|background|landscape|slide-bg|slide-frame] [lora: train|inference]"
+version: 3.0
 compatibility:
   requires:
     - Python >= 3.10
     - matplotlib >= 3.8.0, seaborn >= 0.13.0 (charts)
   optional:
     - torch >= 2.2.0, diffusers >= 0.27.0 (AI image generation)
+    - peft >= 0.10.0, safetensors >= 0.4.0 (LoRA training/inference)
     - Apple Silicon (MPS) or CUDA GPU recommended for image mode
     - ~7GB disk for SDXL-Turbo model, ~7GB for SDXL quality model
+    - ~5GB disk for SD 1.5 model (LoRA training)
   tools:
     - run_in_terminal
 ---
 
 # Tạo Hình — Charts & AI Images
 
-**References:** `references/chart-templates.md` | `references/image-generation.md`
+**References:** `references/chart-templates.md` | `references/image-generation.md` | `references/lora-training.md`
 
 **Governance:** Read and follow `.github/RULE.md` — it overrides all instructions below.
 
 **Quality loop (RULE-2):** After generating output, self-review + auditor gate (>80/100).
 Pivot strategies: 1) different chart type/style, 2) adjust data presentation, 3) different color palette.
 
-This skill handles two distinct visual output modes:
+This skill handles three visual output modes:
 - **Charts** (matplotlib): data-driven bar, line, pie, radar, scatter charts from Excel/CSV/inline data
 - **AI images** (diffusers/torch): generated illustrations, backgrounds, and slide assets
+- **LoRA training** (peft/diffusers): train character LoRA for consistent identity across poses
 
 Chart output: PNG at dpi=160, `bbox_inches='tight'`, matplotlib Agg backend (headless).
 Image output: PNG, auto GPU detection — CUDA > MPS > CPU (works everywhere, CPU is slower).
@@ -62,6 +71,11 @@ IMAGE mode: User wants an AI-generated illustration
   → landscape: nature scene, city view, environment
   → slide-bg: 16:9 widescreen background for presentations
   → slide-frame: decorative border or frame overlay for slides
+
+LORA mode: User wants to train a character LoRA for consistent generation
+  → train: reference → IP-Adapter multi-angle → dataset → LoRA training
+  → inference: load trained LoRA weights and generate with trigger token
+  See references/lora-training.md for full pipeline details.
 ```
 
 ---
@@ -334,13 +348,69 @@ Output: 768×1024 PNG, SDXL quality model, 25 steps, negative prompts auto-appli
 Input: Generate canonical front view, then 3 poses with `--reference` + `--strength 0.55`
 Output: 4 character images with consistent appearance across all poses
 
+**Example 6 — LoRA training pipeline (v3.0):**
+Input: B&W manga character → IP-Adapter 4 angles → 5-image dataset → 500-step LoRA training
+Output: 6.2 MB LoRA adapter (.safetensors), trigger "bwmanga_boy", baseline vs LoRA comparison images
+
+**Example 7 — LoRA inference (v3.0):**
+Input: `--lora path/to/final/ --trigger "bwmanga_boy" --lora-scale 0.8`
+Output: 4 character images in different poses with consistent identity, 512×768px, ~30s each on MPS
+
+---
+
+## LoRA Training Mode — Character Consistency Pipeline
+
+See `references/lora-training.md` for the full pipeline, scripts, and MPS constraints.
+
+This mode trains a small LoRA adapter (~6 MB) that teaches SD 1.5 to generate a specific
+character consistently across any pose, scene, or composition using a trigger token.
+
+### High-Level Pipeline
+
+```
+1. REFERENCE: Generate canonical character (SD 1.5 + ControlNet OpenPose)
+2. MULTI-ANGLE: IP-Adapter generates front/side/back/three-quarter views
+3. DATASET: Prepare image + caption (.txt) pairs with trigger token
+4. TRAIN: LoRA fine-tuning (rank 8, 500 steps, ~60 min on Apple Silicon)
+5. INFERENCE: Test with trigger token, compare baseline vs LoRA output
+```
+
+### Quick Start
+
+```bash
+# Step 1-2: Generate multi-angle dataset (see references/lora-training.md for IP-Adapter setup)
+
+# Step 3: Prepare dataset — each image needs a .txt caption with trigger token
+#   dataset/image1.png + dataset/image1.txt ("mytrigger, manga, monochrome, front view")
+
+# Step 4: Train LoRA
+python3 .github/skills/gen-image/scripts/train_lora.py \
+  --dataset path/to/dataset/ \
+  --output path/to/lora/ \
+  --trigger "mytrigger" \
+  --steps 500 --rank 8 --lr 1e-4
+
+# Step 5: Test inference
+python3 .github/skills/gen-image/scripts/lora_inference.py \
+  --lora path/to/lora/final/ \
+  --trigger "mytrigger" \
+  --output path/to/inference/
+```
+
+### Key Constraints (MPS / Apple Silicon)
+
+- **fp32 only** — fp16 produces NaN on MPS
+- **EulerDiscreteScheduler** for inference — other schedulers may NaN on MPS
+- **Generator device = "cpu"** — MPS generator not reliable
+- **No attention_slicing with IP-Adapter** — they conflict, causes black images
+- **CLIP token limit = 77** — keep prompts concise
+
 ---
 
 ## What This Skill Does NOT Do
 
 - Does NOT display charts or images interactively (headless only — no plt.show())
 - Does NOT render text inside AI images (diffusion models cannot reliably render text)
-- Does NOT do fine-tuning or LoRA training — for that, user needs separate workflow
 - Does NOT install dependencies — redirects to setup
-- Does NOT guarantee pixel-perfect character consistency — img2img mode provides
-  style/color/shape consistency but not identical faces across all poses
+- Does NOT guarantee pixel-perfect identity in LoRA output — LoRA provides strong character
+  consistency but not identical pixel-level reproduction across all poses

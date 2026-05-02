@@ -73,6 +73,7 @@
 | v3 | IP-Adapter Face Lock | Face consistency good. MPS NaN bugs discovered |
 | v4/4.1 | IP-Adapter + scale tuning | Better composites. Expression sheet added |
 | v5 | 14 sheet types + CPU fallback | Full pipeline. Pose control still impossible |
+| v6 | ControlNet OpenPose + SDXL | MPS+CN=NaN. CPU fp32 works but slow. MPS fp32 untested |
 
 ### v5 Quality (Linh character, seed 42)
 - Technical quality: 8/10, Face consistency: 7/10
@@ -81,7 +82,33 @@
 
 ---
 
-## 4. Approaches That DON'T Work (Never Repeat)
+## 4. ControlNet OpenPose + SDXL (v6)
+
+### MPS Compatibility (TESTED — v6.1 diagnostic)
+- **ControlNet + MPS fp16 = 100% NaN** at ALL conditioning scales (0.8, 0.5, 0.2)
+- MPS fp16 WITHOUT ControlNet = OK ✅ (SDXL works fine alone)
+- CPU fp32 + ControlNet = works but extremely slow (~3-5min/step)
+- **Root cause:** ControlNet conditioning introduces fp16 precision overflow on MPS
+- **MPS fp32 + ControlNet:** UNTESTED — potential middle ground (less NaN risk, faster than CPU)
+
+### ControlNet Model
+- Repo: `dimitribarbot/controlnet-openpose-sdxl-1.0-safetensors` (~2.5GB safetensors)
+- **NOT** `diffusers/controlnet-openpose-sdxl-1.0` (private/401) or `r3gm/...fp16` (no weight files)
+- Load with `ControlNetModel.from_pretrained()` + `StableDiffusionXLControlNetPipeline`
+
+### OpenPose Skeleton Generation
+- Hand-drawn stick figures on black background (Pillow ImageDraw)
+- 4 poses: front, side, back, three_quarter
+- Resolution: 768x1024 (portrait, MPS-safe)
+
+### v6 Script: `tmp/test_controlnet_v6.py`
+- 3 modes: `diagnose` (5 quick tests), `full` (4 poses with NaN resilience), `cpu-only`
+- NaN resilience: Tier 1 (3 seeds) → Tier 2 (lower cn_scale) → Tier 3 (CPU fp32 fallback)
+- CLI: `--output`, `--steps`, `--seed`, `--cn-scale`, `--mode`
+
+---
+
+## 5. Approaches That DON'T Work (Never Repeat)
 
 | Approach | Why it fails |
 |----------|-------------|
@@ -94,6 +121,7 @@
 | Long prompts (>60 tokens) | CLIP truncation |
 | CPU fallback for canonical | Different gen characteristics |
 | Separate char + BG compositing | Unnatural pasting, not natural integration |
+| **ControlNet + MPS fp16** | **100% NaN at all cn_scales (0.8→0.2) — v6 tested** |
 
 ---
 

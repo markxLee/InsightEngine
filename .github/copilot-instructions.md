@@ -63,7 +63,7 @@ Excel, Word, PDF, charts, images — route to orchestrator. Always.
 | gen-slide | PowerPoint (.pptx) — Pro (ppt-master) / Quick (pptxgenjs) | tạo slide, thuyết trình |
 | gen-pdf | PDF — reportlab Platypus/Canvas | tạo pdf, xuất pdf |
 | gen-html | HTML page or reveal.js presentation — 8 styles | tạo html, trang web |
-| gen-image | Charts (matplotlib) + AI images (diffusers) | biểu đồ, chart, tạo ảnh |
+| gen-image | Charts (matplotlib) + AI images (diffusers) + LoRA training | biểu đồ, chart, tạo ảnh, train LoRA |
 | design | Visual design: posters, covers, certificates | poster, bìa, certificate |
 | verify | Audit output vs requirements — 100-point scoring | kiểm tra, audit, thiếu gì |
 | improve | Session retrospective + pipeline improvement | cải tiến, retrospective |

@@ -10,3 +10,4 @@ tmp/
 tools/tts/viterbox/modelViterboxLocal/
 # General Silero VAD binary
 tools/tts/general/silero_vad_model_local/data/*.jit
+.DS_Store

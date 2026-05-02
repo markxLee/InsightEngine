@@ -85,9 +85,41 @@ Track development history to avoid repeating past approaches.
 
 ---
 
-## v6.0 — Multi-Pass Pipeline (PLANNED)
+## v6.0 — ControlNet OpenPose Experiments (2026-04-XX)
+**Approach:** ControlNet OpenPose + SDXL for pose control (addresses v5's biggest gap)
 
-### Architecture: 5-pass generation pipeline
+### v6.0 — Initial test (ALL NaN)
+- `tmp/test_controlnet_v6_old.py` — single seed, no fallback
+- Model: `dimitribarbot/controlnet-openpose-sdxl-1.0-safetensors`
+- All 4 poses (front/side/back/three_quarter) → NaN on MPS fp16
+- No CPU fallback = no usable output
+
+### v6.1 — NaN-resilient diagnostic (CURRENT)
+- `tmp/test_controlnet_v6.py` — 3 modes (diagnose, full, cpu-only)
+- NaN resilience: 3-seed retry → lower cn_scale → CPU fp32 fallback
+- Hand-drawn OpenPose skeletons (Pillow stick figures, 768x1024)
+
+#### v6.1 Diagnostic Results
+| Test | Config | Result | Time |
+|------|--------|--------|------|
+| 1 | MPS fp16 + CN 0.8 | **NaN ❌** | 129s |
+| 2 | MPS fp16 + CN 0.5 | **NaN ❌** | 236s |
+| 3 | MPS fp16 + CN 0.2 | **NaN ❌** | 217s |
+| 4 | MPS fp16 NO ControlNet | **OK ✅** | 194s |
+| 5 | CPU fp32 + CN 0.8 | ⏳ running (~3-5min/step) | - |
+
+#### Key Finding
+- **ControlNet + MPS fp16 = fundamentally incompatible** (100% NaN at all scales)
+- SDXL alone on MPS works fine → ControlNet conditioning is the NaN source
+- Root cause: fp16 precision overflow during ControlNet residual addition in UNet
+- CPU fp32 expected to work but extremely slow
+
+### v6 — Approaches that DON'T work (avoid repeating)
+- ❌ ControlNet + MPS fp16 → 100% NaN at all conditioning scales (0.8, 0.5, 0.2)
+- ❌ `diffusers/controlnet-openpose-sdxl-1.0` → private repo (401 error)
+- ❌ `r3gm/controlnet-openpose-sdxl-1.0-fp16` → no weight files (404)
+
+### v6 — Architecture: 5-pass generation pipeline (ORIGINAL PLAN)
 
 ```
 PASS 1 — Layout (rough sketch)
