@@ -1,0 +1,10 @@
+# TTS dependencies for gen-audio skill
+# Install: pip3 install --user -r requirements-tts.txt
+# Heavy (~1.4GB) — only needed if using gen-audio skill
+
+torch
+torchaudio
+soundfile
+librosa
+pedalboard
+omnivoice

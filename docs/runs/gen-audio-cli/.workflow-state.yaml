@@ -1,0 +1,26 @@
+meta:
+  branch_slug: gen-audio-cli
+  docs_root: InsightEngine
+  base_branch: main
+  dev_mode: standard
+  feature_name: "gen-audio CLI TTS skill"
+
+status:
+  current_phase: 4
+  phase_name: testing
+  phase_status: in-progress
+  last_action: "TTS inference running on MPS, awaiting WAV output"
+
+phases:
+  phase_0_analysis:
+    status: completed
+  phase_1_spec:
+    status: completed
+  phase_2_tasks:
+    status: completed
+  phase_3_impl:
+    status: completed
+  phase_4_tests:
+    status: in-progress
+  phase_5_done:
+    status: not-started

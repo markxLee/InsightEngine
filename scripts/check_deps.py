@@ -38,6 +38,10 @@ OPTIONAL_PYTHON = [
     ("diffusers", "diffusers", "Stable Diffusion"),
     ("transformers", "transformers", "Model loading"),
     ("accelerate", "accelerate", "GPU acceleration"),
+    ("torchaudio", "torchaudio", "TTS audio processing"),
+    ("soundfile", "soundfile", "WAV file I/O"),
+    ("librosa", "librosa", "Audio analysis"),
+    ("pedalboard", "pedalboard", "Pitch shifting"),
 ]
 
 REQUIRED_NODE = [

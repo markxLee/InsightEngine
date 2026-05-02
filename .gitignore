@@ -5,3 +5,8 @@ node_modules/
 # RULE-12: One-time/session scripts go in /tmp/scripts/, never in /scripts/
 # /tmp/ is excluded so one-time scripts cannot be committed
 tmp/
+
+# Viterbox model weights (download via huggingface_hub on first run)
+tools/tts/viterbox/modelViterboxLocal/
+# General Silero VAD binary
+tools/tts/general/silero_vad_model_local/data/*.jit
